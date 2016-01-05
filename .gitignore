@@ -1,0 +1,5 @@
+deps/Readme
+Godeps/_workspace
+RPM/BUILD/
+RPM/BUILDROOT/
+releases/noarch/*

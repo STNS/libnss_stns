@@ -19,7 +19,6 @@ import (
 /*
  user
 */
-
 //export _nss_stns_getpwnam_r
 func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
 	status := getPasswd(pwd, result, "user", "name", C.GoString(name))
