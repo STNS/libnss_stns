@@ -4,7 +4,6 @@ type UserAttr struct {
 	Group_Id  int
 	Directory string
 	Shell     string
-	Password  string
 	Gecos     string
 	Keys      []string
 }

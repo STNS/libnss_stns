@@ -1,6 +1,6 @@
 # libnss_stns
 libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
-* /etc/passwd and /etc/groups resolver.
+* /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
 
 ## install
@@ -18,7 +18,7 @@ api_end_point = "http://localhost:1104"
 ```
 ~
 passwd:     stns files sss ldap
-shadow:     files sss ldap
+shadow:     stns files sss ldap
 group:      stns files sss ldap
 ~
 ```
