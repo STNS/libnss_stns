@@ -37,3 +37,9 @@ rm -rf %{buildroot}
 %{_localbindir}/ssh_stns_wrapper
 /usr/%{_lib}/%{name}.so
 %config(noreplace) %{_sysconfdir}/stns/%{name}.conf
+
+%post
+ln -s /usr/%{_lib}/%{name}.so /usr/%{_lib}/%{name}.so.2
+
+%postun
+rm -f /usr/%{_lib}/%{name}.so.2
