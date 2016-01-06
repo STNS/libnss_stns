@@ -10,6 +10,8 @@ package main
 */
 import "C"
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"unsafe"
@@ -33,10 +35,24 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 }
 
 func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
-	config := libnss_stns.LoadConfig()
+	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+		fmt.Print(err)
+		return 0
+	}
+
+	config, err := libnss_stns.LoadConfig()
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+
 	s := []string{config.Api_End_Point, "user", column, value}
 
-	attr := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
 
 	if attr != nil {
 		pwd.pw_name = C.CString(attr.Name)
@@ -64,10 +80,24 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 }
 
 func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
-	config := libnss_stns.LoadConfig()
+	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+		fmt.Print(err)
+		return 0
+	}
+
+	config, err := libnss_stns.LoadConfig()
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+
 	s := []string{config.Api_End_Point, "user", column, value}
 
-	attr := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
 
 	if attr != nil {
 		spwd.sp_namp = C.CString(attr.Name)
@@ -102,10 +132,24 @@ func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bu
 }
 
 func getGroup(grp *C.struct_group, result **C.struct_group, column string, value string) int {
-	config := libnss_stns.LoadConfig()
+	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+		fmt.Print(err)
+		return 0
+	}
+	config, err := libnss_stns.LoadConfig()
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+
 	s := []string{config.Api_End_Point, "group", column, value}
 
-	attr := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+
 	if attr != nil {
 		grp.gr_name = C.CString(attr.Name)
 		grp.gr_passwd = C.CString("!!")

@@ -8,14 +8,14 @@ type Config struct {
 	Api_End_Point string
 }
 
-func LoadConfig() *Config {
+func LoadConfig() (*Config, error) {
 	var config Config
 	defaultConfig(&config)
 	_, err := toml.DecodeFile(filePath, &config)
 	if err != nil {
-		panic(err)
+		return &config, err
 	}
-	return &config
+	return &config, nil
 }
 
 func defaultConfig(config *Config) {
