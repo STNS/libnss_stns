@@ -16,19 +16,28 @@ func main() {
 		return
 	}
 
-	config, err := libnss_stns.LoadConfig()
+	if keys := FetchKey(flag.Arg(0), "/etc/stns/libnss_stns.conf"); keys != "" {
+		fmt.Println(keys)
+	}
+}
+
+func FetchKey(name string, configFile string) string {
+	config, err := libnss_stns.LoadConfig(configFile)
 	if err != nil {
 		log.Print(err)
-		return
+		return ""
 	}
-	s := []string{config.Api_End_Point, "user", "name", flag.Arg(0)}
+
+	s := []string{config.Api_End_Point, "user", "name", name}
+
 	attr, err := libnss_stns.Request(strings.Join(s, "/"))
 	if err != nil {
 		log.Print(err)
-		return
+		return ""
 	}
 
 	if attr != nil {
-		fmt.Println(strings.Join(attr.Keys, "\n"))
+		return strings.Join(attr.Keys, "\n")
 	}
+	return ""
 }

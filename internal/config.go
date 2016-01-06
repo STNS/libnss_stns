@@ -2,14 +2,19 @@ package libnss_stns
 
 import "github.com/BurntSushi/toml"
 
-const filePath = "/etc/stns/libnss_stns.conf"
-
 type Config struct {
 	Api_End_Point string
 }
 
-func LoadConfig() (*Config, error) {
+func LoadConfig(filePath string) (*Config, error) {
 	var config Config
+
+	// is unit test
+	if filePath != "/etc/stns/libnss_stns.conf" {
+		config.Api_End_Point = filePath
+		return &config, nil
+	}
+
 	defaultConfig(&config)
 	_, err := toml.DecodeFile(filePath, &config)
 	if err != nil {

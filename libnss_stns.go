@@ -40,7 +40,7 @@ func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, va
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig()
+	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -85,7 +85,7 @@ func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig()
+	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -136,7 +136,7 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 		fmt.Print(err)
 		return 0
 	}
-	config, err := libnss_stns.LoadConfig()
+	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -165,7 +165,4 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 	} else {
 		return 0
 	}
-}
-
-func main() {
 }
