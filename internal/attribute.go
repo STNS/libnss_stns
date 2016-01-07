@@ -1,18 +1,18 @@
 package libnss_stns
 
 type UserAttr struct {
-	Group_Id  int
-	Directory string
-	Shell     string
-	Gecos     string
-	Keys      []string
+	GroupId   int      `json:"group_id"`
+	Directory string   `json:"directory"`
+	Shell     string   `json:"shell"`
+	Gecos     string   `json:"gecos"`
+	Keys      []string `json:"keys"`
 }
 type GroupAttr struct {
-	Users []string
+	Users []string `json:"users"`
 }
 type Attr struct {
-	Id   int
-	Name string
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 	*UserAttr
 	*GroupAttr
 }

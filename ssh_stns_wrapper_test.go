@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/pyama86/libnss_stns/internal"
 )
 
 type Response struct {
@@ -12,14 +15,33 @@ type Response struct {
 }
 
 func TestFetchKey(t *testing.T) {
-	//t.Errorf("Root(confing from file) should be /hoge/fuga but: %v", "a")
+	var config libnss_stns.Config
+	okhandler := getHandler(t, "example", `"test key1","test key2"`)
+	okserver := httptest.NewServer(http.HandlerFunc(okhandler))
+	config.ApiEndPoint = okserver.URL
+	defer okserver.Close()
+	if "test key1\ntest key2" != FetchKey("example", &config) {
+		t.Error("unmatch keys")
+	}
 
+	nghandler := getHandler(t, "notfound", "")
+	ngserver := httptest.NewServer(http.HandlerFunc(nghandler))
+	config.ApiEndPoint = ngserver.URL
+	defer ngserver.Close()
+
+	if "" != FetchKey("notfound", &config) {
+		t.Error("unmatch keys")
+	}
+
+}
+
+func getHandler(t *testing.T, name string, keys string) http.HandlerFunc {
 	response := &Response{
-		path:        "/user/name/example",
+		path:        "/user/name/" + name,
 		contenttype: "application/json",
-		body: `{
+		body: fmt.Sprintf(`{
 "meta": {
-"code": 400
+"code": 200
 },
 "id": 1,
 "name": "example",
@@ -27,9 +49,9 @@ func TestFetchKey(t *testing.T) {
 "directory": "/home/example",
 "shell": "/bin/sh",
 "keys": [
-	"test key"
+	%s
 ]
-}`,
+}`, keys),
 	}
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		// Check request.
@@ -41,11 +63,5 @@ func TestFetchKey(t *testing.T) {
 		w.Header().Set("Content-Type", response.contenttype)
 		io.WriteString(w, response.body)
 	}
-
-	server := httptest.NewServer(http.HandlerFunc(handler))
-	defer server.Close()
-	if "test key" != FetchKey("example", server.URL) {
-		t.Error("unmatch keys")
-	}
-
+	return handler
 }

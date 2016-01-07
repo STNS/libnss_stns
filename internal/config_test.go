@@ -4,8 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-
-	"github.com/pyama86/libnss_stns/internal"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -21,10 +19,9 @@ func TestLoadConfig(t *testing.T) {
 	configFile.Close()
 	defer os.Remove(configFile.Name())
 
-	config, err := libnss_stns.LoadConfig(configFile.Name())
+	config, err := LoadConfig(configFile.Name())
 	assertNoError(t, err)
-
-	assert(t, config.Api_End_Point == "is string", "ng api endpoint")
+	assert(t, config.ApiEndPoint == "is string", "ng api endpoint")
 }
 
 func assertNoError(t *testing.T, err error) {

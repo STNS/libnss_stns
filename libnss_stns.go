@@ -1,3 +1,5 @@
+// +build !test
+
 package main
 
 /*
@@ -18,6 +20,8 @@ import (
 
 	"github.com/pyama86/libnss_stns/internal"
 )
+
+const configFile = "/etc/stns/libnss_stns.conf"
 
 /*-------------------------------------------------------
 user
@@ -40,13 +44,13 @@ func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, va
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
+	config, err := libnss_stns.LoadConfig(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
 	}
 
-	s := []string{config.Api_End_Point, "user", column, value}
+	s := []string{config.ApiEndPoint, "user", column, value}
 
 	attr, err := libnss_stns.Request(strings.Join(s, "/"))
 	if err != nil {
@@ -58,7 +62,7 @@ func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, va
 		pwd.pw_name = C.CString(attr.Name)
 		pwd.pw_passwd = C.CString("x")
 		pwd.pw_uid = C.__uid_t(attr.Id)
-		pwd.pw_gid = C.__gid_t(attr.Group_Id)
+		pwd.pw_gid = C.__gid_t(attr.GroupId)
 		pwd.pw_gecos = C.CString(attr.Gecos)
 		pwd.pw_dir = C.CString(attr.Directory)
 		pwd.pw_shell = C.CString(attr.Shell)
@@ -85,13 +89,13 @@ func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
+	config, err := libnss_stns.LoadConfig(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
 	}
 
-	s := []string{config.Api_End_Point, "user", column, value}
+	s := []string{config.ApiEndPoint, "user", column, value}
 
 	attr, err := libnss_stns.Request(strings.Join(s, "/"))
 	if err != nil {
@@ -136,13 +140,13 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 		fmt.Print(err)
 		return 0
 	}
-	config, err := libnss_stns.LoadConfig("/etc/stns/libnss_stns.conf")
+	config, err := libnss_stns.LoadConfig(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
 	}
 
-	s := []string{config.Api_End_Point, "group", column, value}
+	s := []string{config.ApiEndPoint, "group", column, value}
 
 	attr, err := libnss_stns.Request(strings.Join(s, "/"))
 	if err != nil {
@@ -165,4 +169,6 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 	} else {
 		return 0
 	}
+}
+func main() {
 }

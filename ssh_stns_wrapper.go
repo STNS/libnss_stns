@@ -9,6 +9,8 @@ import (
 	"github.com/pyama86/libnss_stns/internal"
 )
 
+const configFile = "/etc/stns/libnss_stns.conf"
+
 func main() {
 	flag.Parse()
 	if err := libnss_stns.InitLogger("ssh_stns_wrapper"); err != nil {
@@ -16,19 +18,20 @@ func main() {
 		return
 	}
 
-	if keys := FetchKey(flag.Arg(0), "/etc/stns/libnss_stns.conf"); keys != "" {
+	config, err := libnss_stns.LoadConfig(configFile)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	if keys := FetchKey(flag.Arg(0), config); keys != "" {
 		fmt.Println(keys)
 	}
 }
 
-func FetchKey(name string, configFile string) string {
-	config, err := libnss_stns.LoadConfig(configFile)
-	if err != nil {
-		log.Print(err)
-		return ""
-	}
+func FetchKey(name string, config *libnss_stns.Config) string {
 
-	s := []string{config.Api_End_Point, "user", "name", name}
+	s := []string{config.ApiEndPoint, "user", "name", name}
 
 	attr, err := libnss_stns.Request(strings.Join(s, "/"))
 	if err != nil {
