@@ -1,4 +1,4 @@
-package libnss_stns
+package config
 
 import (
 	"io/ioutil"
@@ -19,7 +19,7 @@ func TestLoadConfig(t *testing.T) {
 	configFile.Close()
 	defer os.Remove(configFile.Name())
 
-	config, err := LoadConfig(configFile.Name())
+	config, err := Load(configFile.Name())
 	assertNoError(t, err)
 	assert(t, config.ApiEndPoint == "is string", "ng api endpoint")
 }

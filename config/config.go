@@ -1,4 +1,4 @@
-package libnss_stns
+package config
 
 import "github.com/BurntSushi/toml"
 
@@ -6,7 +6,7 @@ type Config struct {
 	ApiEndPoint string `toml:"api_end_point"`
 }
 
-func LoadConfig(filePath string) (*Config, error) {
+func Load(filePath string) (*Config, error) {
 	var config Config
 
 	defaultConfig(&config)

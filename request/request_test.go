@@ -1,4 +1,4 @@
-package libnss_stns
+package request
 
 import (
 	"io"
@@ -15,7 +15,7 @@ func TestRequest(t *testing.T) {
 	handler := getHandler(t, "example")
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
-	attr, _ := Request(server.URL + "/user/name/example")
+	attr, _ := Send(server.URL + "/user/name/example")
 
 	if attr.Id != 1 {
 		t.Error("unmatch id")

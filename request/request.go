@@ -1,12 +1,14 @@
-package libnss_stns
+package request
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/pyama86/STNS/attribute"
 )
 
-func Request(url string) (*Attr, error) {
+func Send(url string) (*attribute.All, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -30,7 +32,7 @@ func Request(url string) (*Attr, error) {
 		return nil, err
 	}
 
-	var attr Attr
+	var attr attribute.All
 	err = json.Unmarshal(body, &attr)
 	if err != nil {
 		return nil, err

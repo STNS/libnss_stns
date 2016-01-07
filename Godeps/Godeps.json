@@ -6,6 +6,10 @@
 			"ImportPath": "github.com/BurntSushi/toml",
 			"Comment": "v0.1.0-21-g056c9bc",
 			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
+		},
+		{
+			"ImportPath": "github.com/pyama86/STNS/attribute",
+			"Rev": "aa95ba8483229ce0471292eec889ad81e054eb7f"
 		}
 	]
 }

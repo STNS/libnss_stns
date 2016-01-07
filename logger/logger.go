@@ -1,11 +1,11 @@
-package libnss_stns
+package logger
 
 import (
 	"log"
 	"log/syslog"
 )
 
-func InitLogger(name string) error {
+func Init(name string) error {
 	logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, name)
 	if err != nil {
 		return err

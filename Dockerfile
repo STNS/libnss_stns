@@ -7,15 +7,13 @@ RUN tar zxvf /tmp/go1.5.2.linux-amd64.tar.gz -C /usr/local
 ENV GOPATH /go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 
-# rpm config
+# libnss_stns
 ADD ./ /go/src/github.com/pyama86/libnss_stns
 RUN chown root:root -R /go/src/github.com/pyama86/libnss_stns/RPM
 RUN echo '%_topdir /go/src/github.com/pyama86/libnss_stns/RPM' > ~/.rpmmacros
 
-# rpm build
 WORKDIR /go/src/github.com/pyama86/libnss_stns
 RUN go get github.com/tools/godep
 RUN godep restore
 RUN go build -buildmode=c-shared -o RPM/BUILD/libnss_stns.so libnss_stns.go
-RUN go build  -o RPM/BUILD/ssh_stns_wrapper ssh_stns_wrapper.go
 CMD rpmbuild -ba RPM/SPECS/libnss_stns.spec

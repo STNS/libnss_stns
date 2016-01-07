@@ -18,7 +18,9 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/pyama86/libnss_stns/internal"
+	"github.com/pyama86/libnss_stns/config"
+	"github.com/pyama86/libnss_stns/logger"
+	"github.com/pyama86/libnss_stns/request"
 )
 
 const configFile = "/etc/stns/libnss_stns.conf"
@@ -39,12 +41,12 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 }
 
 func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
-	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+	if err := logger.Init("libnss_stns"); err != nil {
 		fmt.Print(err)
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig(configFile)
+	config, err := config.Load(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -52,7 +54,7 @@ func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, va
 
 	s := []string{config.ApiEndPoint, "user", column, value}
 
-	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := request.Send(strings.Join(s, "/"))
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -84,12 +86,12 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 }
 
 func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
-	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+	if err := logger.Init("libnss_stns"); err != nil {
 		fmt.Print(err)
 		return 0
 	}
 
-	config, err := libnss_stns.LoadConfig(configFile)
+	config, err := config.Load(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -97,7 +99,7 @@ func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value
 
 	s := []string{config.ApiEndPoint, "user", column, value}
 
-	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := request.Send(strings.Join(s, "/"))
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -136,11 +138,11 @@ func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bu
 }
 
 func getGroup(grp *C.struct_group, result **C.struct_group, column string, value string) int {
-	if err := libnss_stns.InitLogger("libnss_stns"); err != nil {
+	if err := logger.Init("libnss_stns"); err != nil {
 		fmt.Print(err)
 		return 0
 	}
-	config, err := libnss_stns.LoadConfig(configFile)
+	config, err := config.Load(configFile)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -148,7 +150,7 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 
 	s := []string{config.ApiEndPoint, "group", column, value}
 
-	attr, err := libnss_stns.Request(strings.Join(s, "/"))
+	attr, err := request.Send(strings.Join(s, "/"))
 	if err != nil {
 		log.Print(err)
 		return 0
