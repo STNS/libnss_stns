@@ -37,7 +37,11 @@ AuthorizedKeysCommandUser root
 ```
 
 ## tips
-advisable to use it together`nscd`(resolver cache service)
+* advisable to use it together`nscd`(resolver cache service)
+* auto create home dir by successed ssh login
+```
+$ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
+```
 
 ## author
 * pyama86
