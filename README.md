@@ -16,14 +16,14 @@ $ rpm -ivh libnss_stns-<version>.noarch.rpm
 ## config
 * /etc/stns/libnss_stns.conf
 ```
-api_end_point = "http://localhost:1104"
+api_end_point = "http://<server>:1104"
 ```
 * /etc/nsswitch.conf
 ```
 ~
-passwd:     stns files sss ldap
-shadow:     stns files sss ldap
-group:      stns files sss ldap
+passwd:     files stns
+shadow:     files stns
+group:      files stns
 ~
 ```
 
@@ -38,6 +38,25 @@ AuthorizedKeysCommandUser root
 
 ## tips
 * advisable to use it together`nscd`(resolver cache service)
+ * /etc/nscd.conf
+```
+        enable-cache            passwd          yes
+        positive-time-to-live   passwd          600
+        negative-time-to-live   passwd          300
+        check-files             passwd          yes
+        shared                  group           yes
+
+        enable-cache            group           yes
+        positive-time-to-live   group           3600
+        negative-time-to-live   group           300
+        check-files             group           yes
+        shared                  group           yes
+
+        enable-cache            hosts           no
+        enable-cache            services        no
+        enable-cache            netgroup        no
+```
+
 * auto create home dir by successed ssh login
 ```
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
