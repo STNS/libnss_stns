@@ -1,5 +1,3 @@
-// +build !test
-
 package main
 
 /*
@@ -41,14 +39,8 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 }
 
 func getPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
-	if err := logger.Init("libnss_stns"); err != nil {
-		fmt.Print(err)
-		return 0
-	}
-
-	config, err := config.Load(configFile)
+	config, err := Init()
 	if err != nil {
-		log.Print(err)
 		return 0
 	}
 
@@ -86,14 +78,8 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 }
 
 func getShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
-	if err := logger.Init("libnss_stns"); err != nil {
-		fmt.Print(err)
-		return 0
-	}
-
-	config, err := config.Load(configFile)
+	config, err := Init()
 	if err != nil {
-		log.Print(err)
 		return 0
 	}
 
@@ -138,13 +124,8 @@ func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bu
 }
 
 func getGroup(grp *C.struct_group, result **C.struct_group, column string, value string) int {
-	if err := logger.Init("libnss_stns"); err != nil {
-		fmt.Print(err)
-		return 0
-	}
-	config, err := config.Load(configFile)
+	config, err := Init()
 	if err != nil {
-		log.Print(err)
 		return 0
 	}
 
@@ -172,5 +153,19 @@ func getGroup(grp *C.struct_group, result **C.struct_group, column string, value
 		return 0
 	}
 }
+
+func Init() (*config.Config, error) {
+	if err := logger.Init("libnss_stns"); err != nil {
+		fmt.Print(err)
+		return nil, err
+	}
+	config, err := config.Load(configFile)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return config, nil
+}
+
 func main() {
 }

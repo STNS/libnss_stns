@@ -12,7 +12,9 @@ ADD ./ /go/src/github.com/pyama86/libnss_stns
 RUN chown root:root -R /go/src/github.com/pyama86/libnss_stns/RPM
 RUN echo '%_topdir /go/src/github.com/pyama86/libnss_stns/RPM' > ~/.rpmmacros
 
+
 WORKDIR /go/src/github.com/pyama86/libnss_stns
+RUN cp build/ssh_stns_wrapper RPM/BUILD/
 RUN go get github.com/tools/godep
 RUN godep restore
 RUN go build -buildmode=c-shared -o RPM/BUILD/libnss_stns.so libnss_stns.go
