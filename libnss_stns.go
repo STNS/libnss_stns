@@ -15,49 +15,11 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"strings"
 	"unsafe"
 
 	"github.com/pyama86/STNS/attribute"
-	"github.com/pyama86/libnss_stns/init"
 	"github.com/pyama86/libnss_stns/request"
 )
-
-func getList(resource string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init()
-	if err != nil {
-		return nil, err
-	}
-	s := []string{config.ApiEndPoint, resource, "list"}
-
-	list, err := request.Send(strings.Join(s, "/"))
-
-	if err != nil {
-		return nil, err
-	}
-	return list, err
-}
-
-func getKeys(m map[string]*attribute.All) []string {
-	ks := []string{}
-	for k, _ := range m {
-		ks = append(ks, k)
-
-	}
-	sort.Strings(ks)
-	return ks
-}
-
-func getNextResource(list map[string]*attribute.All, pos *int) (string, *attribute.All) {
-	keys := getKeys(list)
-	if len(keys) > *pos && keys[*pos] != "" {
-		name := keys[*pos]
-		resource := list[name]
-		*pos++
-		return name, resource
-	}
-	return "", nil
-}
 
 /*-------------------------------------------------------
 passwd
@@ -81,7 +43,7 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 func _nss_stns_setpwent() {
 	var err error
 	passwdReadPos = 0
-	passwdList, err = getList("user")
+	passwdList, err = request.GetList("user")
 	if err != nil {
 		log.Print(err)
 	}
@@ -111,7 +73,7 @@ func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t
 }
 
 func GetPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
-	passwds, err := getList("user")
+	passwds, err := request.Get("user", column, value)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -148,7 +110,7 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 func _nss_stns_setspent() {
 	var err error
 	shadowReadPos = 0
-	shadowList, err = getList("user")
+	shadowList, err = request.GetList("user")
 	if err != nil {
 		log.Print(err)
 	}
@@ -179,7 +141,7 @@ func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t,
 }
 
 func GetShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
-	shadows, err := getList("user")
+	shadows, err := request.Get("user", column, value)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -243,7 +205,7 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 func _nss_stns_setgrent() {
 	var err error
 	groupReadPos = 0
-	groupList, err = getList("group")
+	groupList, err = request.GetList("group")
 	if err != nil {
 		log.Print(err)
 	}
@@ -257,7 +219,7 @@ func _nss_stns_endgrent() {
 
 func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value string) int {
 
-	groups, err := getList("group")
+	groups, err := request.Get("group", column, value)
 	if err != nil {
 		log.Print(err)
 		return 0
@@ -282,4 +244,25 @@ func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value
 }
 
 func main() {
+}
+
+func getKeys(m map[string]*attribute.All) []string {
+	ks := []string{}
+	for k, _ := range m {
+		ks = append(ks, k)
+
+	}
+	sort.Strings(ks)
+	return ks
+}
+
+func getNextResource(list map[string]*attribute.All, pos *int) (string, *attribute.All) {
+	keys := getKeys(list)
+	if len(keys) > *pos && keys[*pos] != "" {
+		name := keys[*pos]
+		resource := list[name]
+		*pos++
+		return name, resource
+	}
+	return "", nil
 }

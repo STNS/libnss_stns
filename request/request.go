@@ -4,9 +4,41 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/pyama86/STNS/attribute"
+	"github.com/pyama86/libnss_stns/init"
 )
+
+func Get(resource string, column string, value string) (map[string]*attribute.All, error) {
+	config, err := libnss_stns.Init()
+	if err != nil {
+		return nil, err
+	}
+	s := []string{config.ApiEndPoint, resource, column, value}
+
+	list, err := Send(strings.Join(s, "/"))
+
+	if err != nil {
+		return nil, err
+	}
+	return list, err
+}
+
+func GetList(resource string) (map[string]*attribute.All, error) {
+	config, err := libnss_stns.Init()
+	if err != nil {
+		return nil, err
+	}
+	s := []string{config.ApiEndPoint, resource, "list"}
+
+	list, err := Send(strings.Join(s, "/"))
+
+	if err != nil {
+		return nil, err
+	}
+	return list, err
+}
 
 func Send(url string) (map[string]*attribute.All, error) {
 	client := &http.Client{}
