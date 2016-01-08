@@ -8,7 +8,7 @@ import (
 	"github.com/pyama86/STNS/attribute"
 )
 
-func Send(url string) (*attribute.All, error) {
+func Send(url string) (map[string]*attribute.All, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -32,10 +32,10 @@ func Send(url string) (*attribute.All, error) {
 		return nil, err
 	}
 
-	var attr attribute.All
+	var attr map[string]*attribute.All
 	err = json.Unmarshal(body, &attr)
 	if err != nil {
 		return nil, err
 	}
-	return &attr, nil
+	return attr, nil
 }
