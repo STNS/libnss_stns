@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+%:
+	dh $@
+
+package=libnss_stns
+
+override_dh_auto_install:
+	dh_auto_install
+	install -d -m 755 debian/${package}/usr/local/bin/
+	install    -m 655 debian/ssh_stns_wrapper  debian/${package}/usr/local/bin/
+	install -d -m 755 debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/
+	install    -m 655 debian/${package}.so debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/
+	install -d -m 755 debian/${package}/etc/stns/
+	install    -m 644 debian/${package}.conf debian/${package}/etc/stns/${package}.conf
+
+override_dh_usrlocal:

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+
+  remove|purge)
+    rm -f /lib/$(DEB_HOST_MULTIARCH)/libnss_stns.so.2
+  ;;
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
+esac

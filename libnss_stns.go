@@ -38,18 +38,12 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 
 //export _nss_stns_setpwent
 func _nss_stns_setpwent() {
-	var err error
-	passwdReadPos = 0
-	passwdList, err = request.GetList("user")
-	if err != nil {
-		log.Print(err)
-	}
+	setList("user", passwdList, &passwdReadPos)
 }
 
 //export _nss_stns_endpwent
 func _nss_stns_endpwent() {
-	passwdList = nil
-	passwdReadPos = 0
+	resetList(passwdList, &passwdReadPos)
 }
 
 //export _nss_stns_getpwent_r
@@ -81,12 +75,7 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 
 //export _nss_stns_setspent
 func _nss_stns_setspent() {
-	var err error
-	shadowReadPos = 0
-	shadowList, err = request.GetList("user")
-	if err != nil {
-		log.Print(err)
-	}
+	setList("user", shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_endspent
@@ -149,41 +138,46 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 
 //export _nss_stns_setgrent
 func _nss_stns_setgrent() {
-	/*
-		var err error
-		groupReadPos = 0
-		groupList, err = request.GetList("group")
-		if err != nil {
-			log.Print(err)
-		}
-	*/
 	setList("group", groupList, &groupReadPos)
-}
-
-func getList(resource string, list map[string]*attribute.All, pos *int) {
-	*pos = 0
-	var err error
-	list, err = request.GetList(name)
-	if err != nil {
-		log.Print(err)
-	}
 }
 
 //export _nss_stns_endgrent
 func _nss_stns_endgrent() {
-	groupList = nil
-	groupReadPos = 0
+	resetList(groupList, &groupReadPos)
 }
 
 func main() {
 }
 
-var passwdList map[string]*attribute.All
+var passwdList = map[string]*attribute.All{}
+var shadowList = map[string]*attribute.All{}
+var groupList = map[string]*attribute.All{}
 var passwdReadPos int
-var shadowList map[string]*attribute.All
 var shadowReadPos int
-var groupList map[string]*attribute.All
 var groupReadPos int
+
+func setList(resource string, list map[string]*attribute.All, pos *int) {
+	// reset value
+	resetList(list, pos)
+
+	l, err := request.GetList(resource)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	for k, v := range l {
+		list[k] = v
+	}
+}
+
+func resetList(list map[string]*attribute.All, pos *int) {
+	// reset value
+	*pos = 0
+	for k, _ := range list {
+		delete(list, k)
+	}
+}
 
 func getKeys(m map[string]*attribute.All) []string {
 	ks := []string{}
