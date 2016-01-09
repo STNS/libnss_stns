@@ -24,9 +24,6 @@ import (
 /*-------------------------------------------------------
 passwd
 -------------------------------------------------------*/
-var passwdList map[string]*attribute.All
-var passwdReadPos int
-
 //export _nss_stns_getpwnam_r
 func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
 	status := GetPasswd(pwd, result, "name", C.GoString(name))
@@ -72,33 +69,9 @@ func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t
 	return 0
 }
 
-func GetPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
-	passwds, err := request.Get("user", column, value)
-	if err != nil {
-		log.Print(err)
-		return 0
-	}
-	if len(passwds) > 0 {
-		for n, p := range passwds {
-			pwd.pw_name = C.CString(n)
-			pwd.pw_passwd = C.CString("x")
-			pwd.pw_uid = C.__uid_t(p.Id)
-			pwd.pw_gid = C.__gid_t(p.GroupId)
-			pwd.pw_gecos = C.CString(p.Gecos)
-			pwd.pw_dir = C.CString(p.Directory)
-			pwd.pw_shell = C.CString(p.Shell)
-			*result = pwd
-			return 1
-		}
-	}
-	return 0
-}
-
 /*-------------------------------------------------------
 shadow
 -------------------------------------------------------*/
-var shadowList map[string]*attribute.All
-var shadowReadPos int
 
 //export _nss_stns_getspnam_r
 func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
@@ -140,36 +113,9 @@ func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t,
 	return 0
 }
 
-func GetShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
-	shadows, err := request.Get("user", column, value)
-	if err != nil {
-		log.Print(err)
-		return 0
-	}
-	if len(shadows) > 0 {
-		for n, _ := range shadows {
-			spwd.sp_namp = C.CString(n)
-			spwd.sp_pwdp = C.CString("!!")
-			spwd.sp_lstchg = -1
-			spwd.sp_min = -1
-			spwd.sp_max = -1
-			spwd.sp_warn = -1
-			spwd.sp_inact = -1
-			spwd.sp_expire = -1
-
-			result = &spwd
-			return 1
-		}
-	}
-	return 0
-}
-
 /*-------------------------------------------------------
 group
 -------------------------------------------------------*/
-var groupList map[string]*attribute.All
-var groupReadPos int
-
 //export _nss_stns_getgrnam_r
 func _nss_stns_getgrnam_r(name *C.char, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
 	status := GetGroup(grp, result, "name", C.GoString(name))
@@ -203,9 +149,21 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 
 //export _nss_stns_setgrent
 func _nss_stns_setgrent() {
+	/*
+		var err error
+		groupReadPos = 0
+		groupList, err = request.GetList("group")
+		if err != nil {
+			log.Print(err)
+		}
+	*/
+	setList("group", groupList, &groupReadPos)
+}
+
+func getList(resource string, list map[string]*attribute.All, pos *int) {
+	*pos = 0
 	var err error
-	groupReadPos = 0
-	groupList, err = request.GetList("group")
+	list, err = request.GetList(name)
 	if err != nil {
 		log.Print(err)
 	}
@@ -215,6 +173,82 @@ func _nss_stns_setgrent() {
 func _nss_stns_endgrent() {
 	groupList = nil
 	groupReadPos = 0
+}
+
+func main() {
+}
+
+var passwdList map[string]*attribute.All
+var passwdReadPos int
+var shadowList map[string]*attribute.All
+var shadowReadPos int
+var groupList map[string]*attribute.All
+var groupReadPos int
+
+func getKeys(m map[string]*attribute.All) []string {
+	ks := []string{}
+	for k, _ := range m {
+		ks = append(ks, k)
+
+	}
+	sort.Strings(ks)
+	return ks
+}
+
+func getNextResource(list map[string]*attribute.All, pos *int) (string, *attribute.All) {
+	keys := getKeys(list)
+	if len(keys) > *pos && keys[*pos] != "" {
+		name := keys[*pos]
+		resource := list[name]
+		*pos++
+		return name, resource
+	}
+	return "", nil
+}
+func GetPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, value string) int {
+	passwds, err := request.Get("user", column, value)
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+	if len(passwds) > 0 {
+		for n, p := range passwds {
+			pwd.pw_name = C.CString(n)
+			pwd.pw_passwd = C.CString("x")
+			pwd.pw_uid = C.__uid_t(p.Id)
+			pwd.pw_gid = C.__gid_t(p.GroupId)
+			pwd.pw_gecos = C.CString(p.Gecos)
+			pwd.pw_dir = C.CString(p.Directory)
+			pwd.pw_shell = C.CString(p.Shell)
+			*result = pwd
+			return 1
+		}
+	}
+	return 0
+}
+
+func GetShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value string) int {
+	shadows, err := request.Get("user", column, value)
+	if err != nil {
+		log.Print(err)
+		return 0
+	}
+	if len(shadows) > 0 {
+		for n, _ := range shadows {
+			spwd.sp_namp = C.CString(n)
+			spwd.sp_pwdp = C.CString("!!")
+			spwd.sp_lstchg = -1
+			spwd.sp_min = -1
+			spwd.sp_max = -1
+			spwd.sp_warn = -1
+			spwd.sp_inact = -1
+			spwd.sp_expire = -1
+
+			result = &spwd
+			return 1
+		}
+	}
+	return 0
 }
 
 func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value string) int {
@@ -241,28 +275,4 @@ func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value
 		}
 	}
 	return 0
-}
-
-func main() {
-}
-
-func getKeys(m map[string]*attribute.All) []string {
-	ks := []string{}
-	for k, _ := range m {
-		ks = append(ks, k)
-
-	}
-	sort.Strings(ks)
-	return ks
-}
-
-func getNextResource(list map[string]*attribute.All, pos *int) (string, *attribute.All) {
-	keys := getKeys(list)
-	if len(keys) > *pos && keys[*pos] != "" {
-		name := keys[*pos]
-		resource := list[name]
-		*pos++
-		return name, resource
-	}
-	return "", nil
 }

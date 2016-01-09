@@ -11,11 +11,11 @@ import (
 
 const configFile = "/etc/stns/libnss_stns.conf"
 
-var loaded *config.Config
+var Loaded *config.Config
 
 func Init(name string) (*config.Config, error) {
 
-	if reflect.ValueOf(loaded).IsNil() {
+	if reflect.ValueOf(Loaded).IsNil() {
 		if err := logger.Init(name); err != nil {
 			fmt.Print(err)
 			return nil, err
@@ -25,7 +25,7 @@ func Init(name string) (*config.Config, error) {
 			log.Print(err)
 			return nil, err
 		}
-		loaded = config
+		Loaded = config
 	}
-	return loaded, nil
+	return Loaded, nil
 }
