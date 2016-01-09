@@ -11,7 +11,7 @@ import (
 )
 
 func Get(resource string, column string, value string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init()
+	config, err := libnss_stns.Init("libnss_stns")
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func Get(resource string, column string, value string) (map[string]*attribute.Al
 }
 
 func GetList(resource string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init()
+	config, err := libnss_stns.Init("libnss_stns")
 	if err != nil {
 		return nil, err
 	}
