@@ -2,13 +2,14 @@
 
 set -e
 
+DEB_HOST_MULTIARCH=`dpkg-architecture -qDEB_HOST_MULTIARCH`
 case "$1" in
 
   remove|purge)
-    rm -f /lib/$(DEB_HOST_MULTIARCH)/libnss_stns.so.2
+    rm -f /lib/$DEB_HOST_MULTIARCH/libnss_stns.so.2
   ;;
   *)
     echo "postinst called with unknown argument \`$1'" >&2
-    exit 1
+    exit 0
   ;;
 esac
