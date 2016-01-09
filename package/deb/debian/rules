@@ -4,15 +4,15 @@
 %:
 	dh $@
 
-package=libnss_stns
+package=libnss-stns
 
 override_dh_auto_install:
 	dh_auto_install
 	install -d -m 755 debian/${package}/usr/local/bin/
-	install    -m 655 debian/ssh_stns_wrapper debian/${package}/usr/local/bin/ssh_stns_wrapper 
+	install    -m 655 debian/ssh-stns-wrapper debian/${package}/usr/local/bin/ssh_stns_wrapper
 	install -d -m 755 debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/
-	install    -m 655 debian/${package}.so debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/${package}.so
+	install    -m 655 debian/${package}.so debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/libnss_stns.so
 	install -d -m 755 debian/${package}/etc/stns/
-	install    -m 644 debian/${package}.conf debian/${package}/etc/stns/${package}.conf
+	install    -m 644 debian/libnss_stns.conf debian/${package}/etc/stns/libnss_stns.conf
 
 override_dh_usrlocal:
