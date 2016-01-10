@@ -17,9 +17,10 @@ func Init(name string) (*config.Config, error) {
 
 	if reflect.ValueOf(Loaded).IsNil() {
 		if err := logger.Init(name); err != nil {
+			// syslog not found
 			fmt.Print(err)
-			return nil, err
 		}
+
 		config, err := config.Load(configFile)
 		if err != nil {
 			log.Print(err)
