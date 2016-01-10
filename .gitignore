@@ -3,4 +3,5 @@ Godeps/_workspace
 RPM/BUILD/
 RPM/BUILDROOT/
 releases/*
-build/
+build/rhel/*
+build/ubuntu/*
