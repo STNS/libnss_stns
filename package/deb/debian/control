@@ -9,3 +9,4 @@ Homepage: https://github.com/pyama86/libnss_stns
 Package: libnss-stns
 Architecture: all
 Description: simple toml name service client
+Depends: dpkg-dev
