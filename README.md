@@ -30,6 +30,7 @@ group:      files stns
 * /etc/sshd/sshd_config
 ```
 ~
+UseLogin yes
 PubkeyAuthentication yes
 AuthorizedKeysCommand /usr/local/bin/ssh_stns_wrapper
 AuthorizedKeysCommandUser root
