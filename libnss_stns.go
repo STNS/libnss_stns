@@ -124,12 +124,14 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 		grp.gr_name = C.CString(name)
 		grp.gr_passwd = C.CString("!!")
 		grp.gr_gid = C.__gid_t(group.Id)
-		work := make([]*C.char, len(group.Users)+1)
-		for i, u := range group.Users {
-			work[i] = C.CString(u)
-		}
+		if len(groups.Users) > 0 {
+			work := make([]*C.char, len(group.Users)+1)
+			for i, u := range group.Users {
+				work[i] = C.CString(u)
+			}
 
-		grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+			grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+		}
 		result = &grp
 		return 1
 	}
