@@ -9,7 +9,8 @@
 		},
 		{
 			"ImportPath": "github.com/pyama86/STNS/attribute",
-			"Rev": "002d0681a5b09bdd7b123bd702cc4f7132e7bdbe"
+			"Comment": "v0.0.1-14-g5151d1a",
+			"Rev": "5151d1a24961698c4b35c299a83e5f8dfcf809d8"
 		}
 	]
 }
