@@ -28,18 +28,16 @@ group:      files stns
 ```
 
 * /etc/sshd/sshd_config
+
 ```
 ~
-UseLogin yes
 PubkeyAuthentication yes
 AuthorizedKeysCommand /usr/local/bin/ssh_stns_wrapper
 AuthorizedKeysCommandUser root
 ~
 ```
 
-## tips
-* advisable to use it together`nscd`(resolver cache service)
- * /etc/nscd.conf
+* /etc/nscd.conf
 ```
         enable-cache            passwd          yes
         positive-time-to-live   passwd          600
@@ -58,6 +56,7 @@ AuthorizedKeysCommandUser root
         enable-cache            netgroup        no
 ```
 
+## tips
 * auto create home dir by successed ssh login
 ```
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd

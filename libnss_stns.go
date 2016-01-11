@@ -60,6 +60,7 @@ func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t
 		result = &pwd
 		return 1
 	}
+	result = nil
 	return 0
 }
 
@@ -99,6 +100,7 @@ func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t,
 		result = &spwd
 		return 1
 	}
+	result = nil
 	return 0
 }
 
@@ -122,9 +124,9 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 	name, group := getNextResource(groupList, &groupReadPos)
 	if name != "" {
 		grp.gr_name = C.CString(name)
-		grp.gr_passwd = C.CString("!!")
+		grp.gr_passwd = C.CString("x")
 		grp.gr_gid = C.__gid_t(group.Id)
-		if len(groups.Users) > 0 {
+		if len(group.Users) > 0 {
 			work := make([]*C.char, len(group.Users)+1)
 			for i, u := range group.Users {
 				work[i] = C.CString(u)
@@ -135,6 +137,7 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 		result = &grp
 		return 1
 	}
+	result = nil
 	return 0
 }
 
@@ -258,9 +261,9 @@ func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value
 	if len(groups) > 0 {
 		for n, g := range groups {
 			grp.gr_name = C.CString(n)
-			grp.gr_passwd = C.CString("!!")
+			grp.gr_passwd = C.CString("x")
 			grp.gr_gid = C.__gid_t(g.Id)
-			if len(groups.Users) > 0 {
+			if len(g.Users) > 0 {
 				work := make([]*C.char, len(g.Users)+1)
 				for i, u := range g.Users {
 					work[i] = C.CString(u)
