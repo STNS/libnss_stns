@@ -134,6 +134,11 @@ func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t,
 
 			grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 		}
+		defer func() {
+			if err := recover(); err != nil {
+				log.Print(err)
+			}
+		}()
 		result = &grp
 		return 1
 	}
@@ -222,6 +227,11 @@ func GetPasswd(pwd *C.struct_passwd, result **C.struct_passwd, column string, va
 			*result = pwd
 			return 1
 		}
+		defer func() {
+			if err := recover(); err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 	return 0
 }
@@ -246,6 +256,11 @@ func GetShadow(spwd *C.struct_spwd, result **C.struct_spwd, column string, value
 			result = &spwd
 			return 1
 		}
+		defer func() {
+			if err := recover(); err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 	return 0
 }
@@ -271,9 +286,15 @@ func GetGroup(grp *C.struct_group, result **C.struct_group, column string, value
 
 				grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 			}
+
 			result = &grp
 			return 1
 		}
+		defer func() {
+			if err := recover(); err != nil {
+				log.Print(err)
+			}
+		}()
 	}
 	return 0
 }
