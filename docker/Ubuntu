@@ -12,7 +12,7 @@ WORKDIR /go/src/github.com/pyama86/libnss_stns
 RUN cp build/ubuntu/ssh-stns-wrapper package/deb/debian/;go get github.com/tools/godep;godep restore
 
 RUN go get github.com/tools/godep;godep restore
-RUN go build -buildmode=c-shared -o package/deb/debian/libnss-stns.so libnss_stns.go
+RUN go build -buildmode=c-shared -o package/deb/debian/libnss_stns.so libnss_stns.go entry.go passwd.go shadow.go group.go
 
 WORKDIR /go/src/github.com/pyama86/libnss_stns/package/deb/
 CMD debuild --no-tgz-check -uc -us;mv ../*.deb ../../releases/
