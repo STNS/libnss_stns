@@ -2,45 +2,38 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"log/syslog"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/pyama86/STNS/attribute"
-	"github.com/pyama86/libnss_stns/init"
+	"github.com/pyama86/libnss_stns/config"
 )
 
-func Get(resource string, column string, value string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init("libnss_stns")
-	if err != nil {
-		return nil, err
-	}
-	s := []string{config.ApiEndPoint, resource, column, value}
+const configFile = "/etc/stns/libnss_stns.conf"
 
-	list, err := Send(strings.Join(s, "/"))
+var Loaded *config.Config
 
-	if err != nil {
-		return nil, err
-	}
-	return list, err
+type Request struct {
+	Config *config.Config
+	PgName string
 }
 
-func GetList(resource string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init("libnss_stns")
-	if err != nil {
+func (r *Request) Get(resources []string) (attribute.UserGroups, error) {
+	if err := r.Init(); err != nil {
 		return nil, err
 	}
-	s := []string{config.ApiEndPoint, resource, "list"}
 
-	list, err := Send(strings.Join(s, "/"))
-
-	if err != nil {
-		return nil, err
-	}
-	return list, err
+	s := []string{r.Config.ApiEndPoint}
+	append(s, resources)
+	return Send(strings.Join(s, "/"))
 }
 
-func Send(url string) (map[string]*attribute.All, error) {
+func Send(url string) (attribute.UserGroups, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -64,10 +57,32 @@ func Send(url string) (map[string]*attribute.All, error) {
 		return nil, err
 	}
 
-	var attr map[string]*attribute.All
+	var attr attribute.UserGroups
 	err = json.Unmarshal(body, &attr)
 	if err != nil {
 		return nil, err
 	}
 	return attr, nil
+}
+
+func (r *Request) Init() error {
+
+	if reflect.ValueOf(Loaded).IsNil() {
+		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, r.PgName)
+		if err != nil {
+			// syslog not found
+			fmt.Print(err)
+		} else {
+			log.SetOutput(logger)
+		}
+
+		config, err := config.Load(configFile)
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		Loaded = config
+	}
+	r.Config = Loaded
+	return nil
 }

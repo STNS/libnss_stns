@@ -151,14 +151,14 @@ func _nss_stns_endgrent() {
 func main() {
 }
 
-var passwdList = map[string]*attribute.All{}
-var shadowList = map[string]*attribute.All{}
-var groupList = map[string]*attribute.All{}
+var passwdList = attribute.UserGroups{}
+var shadowList = attribute.UserGroups{}
+var groupList = attribute.UserGroups{}
 var passwdReadPos int
 var shadowReadPos int
 var groupReadPos int
 
-func setList(resource string, list map[string]*attribute.All, pos *int) {
+func setList(resource string, list attribute.UserGroups, pos *int) {
 	// reset value
 	resetList(list, pos)
 
@@ -173,7 +173,7 @@ func setList(resource string, list map[string]*attribute.All, pos *int) {
 	}
 }
 
-func resetList(list map[string]*attribute.All, pos *int) {
+func resetList(list attribute.UserGroups, pos *int) {
 	// reset value
 	*pos = 0
 	for k, _ := range list {
@@ -181,7 +181,7 @@ func resetList(list map[string]*attribute.All, pos *int) {
 	}
 }
 
-func getKeys(m map[string]*attribute.All) []string {
+func getKeys(m attribute.UserGroups) []string {
 	ks := []string{}
 	for k, _ := range m {
 		ks = append(ks, k)
@@ -191,7 +191,7 @@ func getKeys(m map[string]*attribute.All) []string {
 	return ks
 }
 
-func getNextResource(list map[string]*attribute.All, pos *int) (string, *attribute.All) {
+func getNextResource(list attribute.UserGroups, pos *int) (string, *attribute.All) {
 	keys := getKeys(list)
 	if len(keys) > *pos && keys[*pos] != "" {
 		name := keys[*pos]
