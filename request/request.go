@@ -2,48 +2,47 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"log/syslog"
 	"net/http"
+	"os"
+	"reflect"
 	"strings"
 
 	"github.com/pyama86/STNS/attribute"
-	"github.com/pyama86/libnss_stns/init"
+	"github.com/pyama86/libnss_stns/config"
 )
 
-func Get(resource string, column string, value string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init("libnss_stns")
-	if err != nil {
-		return nil, err
-	}
-	s := []string{config.ApiEndPoint, resource, column, value}
+var ConfigFileName = "/etc/stns/libnss_stns.conf"
+var loaded *config.Config
 
-	list, err := Send(strings.Join(s, "/"))
-
-	if err != nil {
-		return nil, err
-	}
-	return list, err
+type Request struct {
+	Url    string
+	Config *config.Config
 }
 
-func GetList(resource string) (map[string]*attribute.All, error) {
-	config, err := libnss_stns.Init("libnss_stns")
-	if err != nil {
+func NewRequest(resource string, column string, value string) (*Request, error) {
+	r := Request{}
+	if err := r.Init(); err != nil {
 		return nil, err
 	}
-	s := []string{config.ApiEndPoint, resource, "list"}
 
-	list, err := Send(strings.Join(s, "/"))
+	urls := []string{r.Config.ApiEndPoint, resource, column}
 
-	if err != nil {
-		return nil, err
+	if value != "" {
+		urls = append(urls, value)
 	}
-	return list, err
+
+	r.Url = strings.Join(urls, "/")
+	return &r, nil
 }
 
-func Send(url string) (map[string]*attribute.All, error) {
+func (r *Request) Get() (attribute.UserGroups, error) {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", r.Url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +63,35 @@ func Send(url string) (map[string]*attribute.All, error) {
 		return nil, err
 	}
 
-	var attr map[string]*attribute.All
+	var attr attribute.UserGroups
 	err = json.Unmarshal(body, &attr)
 	if err != nil {
 		return nil, err
 	}
 	return attr, nil
+}
+
+func (r *Request) Init() error {
+
+	if reflect.ValueOf(loaded).IsNil() {
+		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, os.Args[0])
+		if err != nil {
+			// syslog not found
+			fmt.Print(err)
+		} else {
+			log.SetOutput(logger)
+		}
+		if ConfigFileName != "" {
+			config, err := config.Load(ConfigFileName)
+			if err != nil {
+				log.Print(err)
+				return err
+			}
+			loaded = config
+		} else {
+			loaded = &config.Config{}
+		}
+	}
+	r.Config = loaded
+	return nil
 }

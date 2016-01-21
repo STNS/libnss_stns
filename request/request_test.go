@@ -15,7 +15,10 @@ func TestRequest(t *testing.T) {
 	handler := getHandler(t, "example")
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
-	users, _ := Send(server.URL + "/user/name/example")
+	ConfigFileName = ""
+	r, _ := NewRequest("user", "name", "example")
+	r.Config.ApiEndPoint = server.URL
+	users, _ := r.Get()
 	for n, u := range users {
 		if n != "example" {
 			t.Error("unmatch name")
