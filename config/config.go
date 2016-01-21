@@ -3,7 +3,8 @@ package config
 import "github.com/BurntSushi/toml"
 
 type Config struct {
-	ApiEndPoint string `toml:"api_end_point"`
+	ApiEndPoint     string `toml:"api_end_point"`
+	ChainSshWrapper string `toml:"chain_ssh_wrapper"`
 }
 
 func Load(filePath string) (*Config, error) {
