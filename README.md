@@ -7,7 +7,7 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 
 
 ## install
-donload page <https://github.com/pyama86/libnss_stns/releases>
+download page <https://github.com/pyama86/libnss_stns/releases>
 ```
 $ wget https://github.com/pyama86/libnss_stns/releases/download/<version>/libnss_stns-<version>.noarch.rpm
 $ rpm -ivh libnss_stns-<version>.noarch.rpm
