@@ -16,7 +16,7 @@ import (
 )
 
 var ConfigFileName = "/etc/stns/libnss_stns.conf"
-var loaded *config.Config
+var Loaded *config.Config
 
 type Request struct {
 	Url    string
@@ -73,7 +73,7 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 
 func (r *Request) Init() error {
 
-	if reflect.ValueOf(loaded).IsNil() {
+	if reflect.ValueOf(Loaded).IsNil() {
 		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, os.Args[0])
 		if err != nil {
 			// syslog not found
@@ -87,11 +87,11 @@ func (r *Request) Init() error {
 				log.Print(err)
 				return err
 			}
-			loaded = config
+			Loaded = config
 		} else {
-			loaded = &config.Config{}
+			Loaded = &config.Config{}
 		}
 	}
-	r.Config = loaded
+	r.Config = Loaded
 	return nil
 }

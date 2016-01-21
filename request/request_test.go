@@ -15,6 +15,7 @@ func TestRequest(t *testing.T) {
 	handler := getHandler(t, "example")
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
+
 	ConfigFileName = ""
 	r, _ := NewRequest("user", "name", "example")
 	r.Config.ApiEndPoint = server.URL
