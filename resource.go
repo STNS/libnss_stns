@@ -17,7 +17,7 @@ import (
 */
 import "C"
 
-func getResource(resource_name string, column string, value string, obj interface{}, result interface{}) int {
+func setResource(resource_name string, column string, value string, obj interface{}, result interface{}) int {
 	r, err := request.NewRequest(resource_name, column, value)
 	if err != nil {
 		log.Print(err)
@@ -30,24 +30,43 @@ func getResource(resource_name string, column string, value string, obj interfac
 		return 0
 	}
 	if len(resource) > 0 {
-		switch obj.(type) {
-		case *C.struct_passwd:
-			setPasswd(obj.(*C.struct_passwd), resource)
-			result = obj.(**C.struct_passwd)
-		case *C.struct_group:
-			setGroup(obj.(*C.struct_group), resource)
-			result = obj.(**C.struct_group)
-		case *C.struct_spwd:
-			setShadow(obj.(*C.struct_spwd), resource)
-			result = obj.(**C.struct_spwd)
-		case attribute.UserGroups:
-			for k, v := range resource {
-				obj.(attribute.UserGroups)[k] = v
-			}
-		}
+		setLinuxResource(obj, result, resource)
 		return 1
 	}
 	return 0
+}
+
+func setRecursiveResource(obj interface{}, result interface{}, list attribute.UserGroups, pos *int) int {
+	keys := getKeys(list)
+	if len(keys) > *pos && keys[*pos] != "" {
+		name := keys[*pos]
+		resource := attribute.UserGroups{
+			name: list[name],
+		}
+
+		setLinuxResource(obj, result, resource)
+		*pos++
+		return 1
+	}
+	return 0
+}
+
+func setLinuxResource(obj interface{}, result interface{}, resource attribute.UserGroups) {
+	switch obj.(type) {
+	case *C.struct_passwd:
+		setPasswd(obj.(*C.struct_passwd), resource)
+		result = &obj
+	case *C.struct_group:
+		setGroup(obj.(*C.struct_group), resource)
+		result = &obj
+	case *C.struct_spwd:
+		setShadow(obj.(*C.struct_spwd), resource)
+		result = &obj
+	case attribute.UserGroups:
+		for k, v := range resource {
+			obj.(attribute.UserGroups)[k] = v
+		}
+	}
 }
 
 func setPasswd(pwd *C.struct_passwd, passwds attribute.UserGroups) {
@@ -62,6 +81,7 @@ func setPasswd(pwd *C.struct_passwd, passwds attribute.UserGroups) {
 		return
 	}
 }
+
 func setShadow(spwd *C.struct_spwd, shadows attribute.UserGroups) {
 	for n, _ := range shadows {
 		spwd.sp_namp = C.CString(n)
@@ -94,7 +114,7 @@ func setGroup(grp *C.struct_group, groups attribute.UserGroups) {
 func setRecursiveList(resource_name string, list attribute.UserGroups, pos *int) {
 	// reset value
 	resetRecursiveList(list, pos)
-	err := getResource(resource_name, "list", "", list, nil)
+	err := setResource(resource_name, "list", "", list, nil)
 	if err != 1 {
 		log.Print(err)
 		return
@@ -107,31 +127,6 @@ func resetRecursiveList(list attribute.UserGroups, pos *int) {
 	for k, _ := range list {
 		delete(list, k)
 	}
-}
-
-func getRecursiveResource(obj interface{}, result interface{}, list attribute.UserGroups, pos *int) int {
-	keys := getKeys(list)
-	if len(keys) > *pos && keys[*pos] != "" {
-		name := keys[*pos]
-		resource := attribute.UserGroups{
-			name: list[name],
-		}
-
-		switch obj.(type) {
-		case *C.struct_passwd:
-			setPasswd(obj.(*C.struct_passwd), resource)
-			result = obj.(**C.struct_passwd)
-		case *C.struct_group:
-			setGroup(obj.(*C.struct_group), resource)
-			result = obj.(**C.struct_group)
-		case *C.struct_spwd:
-			setShadow(obj.(*C.struct_spwd), resource)
-			result = obj.(**C.struct_spwd)
-		}
-		*pos++
-		return 1
-	}
-	return 0
 }
 
 func getKeys(m attribute.UserGroups) []string {

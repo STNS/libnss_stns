@@ -20,12 +20,12 @@ group
 -------------------------------------------------------*/
 //export _nss_stns_getgrnam_r
 func _nss_stns_getgrnam_r(name *C.char, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return getResource("group", "name", C.GoString(name), grp, result)
+	return setResource("group", "name", C.GoString(name), grp, result)
 }
 
 //export _nss_stns_getgrgid_r
 func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return getResource("group", "id", strconv.Itoa(int(gid)), grp, result)
+	return setResource("group", "id", strconv.Itoa(int(gid)), grp, result)
 }
 
 //export _nss_stns_setgrent
@@ -35,7 +35,7 @@ func _nss_stns_setgrent() {
 
 //export _nss_stns_getgrent_r
 func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return getRecursiveResource(grp, result, groupList, &groupReadPos)
+	return setRecursiveResource(grp, result, groupList, &groupReadPos)
 }
 
 //export _nss_stns_endgrent

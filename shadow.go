@@ -16,7 +16,7 @@ shadow
 
 //export _nss_stns_getspnam_r
 func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	return getResource("user", "name", C.GoString(name), spwd, result)
+	return setResource("user", "name", C.GoString(name), spwd, result)
 }
 
 //export _nss_stns_setspent
@@ -31,5 +31,5 @@ func _nss_stns_endspent() {
 
 //export _nss_stns_getspent_r
 func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	return getRecursiveResource(spwd, result, shadowList, &shadowReadPos)
+	return setRecursiveResource(spwd, result, shadowList, &shadowReadPos)
 }
