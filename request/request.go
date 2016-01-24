@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/pyama86/STNS/attribute"
-	"github.com/pyama86/libnss_stns/config"
+	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/libnss_stns/config"
 )
 
 var ConfigFileName = "/etc/stns/libnss_stns.conf"

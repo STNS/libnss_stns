@@ -1,6 +1,6 @@
 package main
 
-import "github.com/pyama86/STNS/attribute"
+import "github.com/STNS/STNS/attribute"
 
 /*
 #include <shadow.h>

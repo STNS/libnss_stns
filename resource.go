@@ -5,8 +5,8 @@ import (
 	"sort"
 	"unsafe"
 
-	"github.com/pyama86/STNS/attribute"
-	"github.com/pyama86/libnss_stns/request"
+	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/libnss_stns/request"
 )
 
 /*

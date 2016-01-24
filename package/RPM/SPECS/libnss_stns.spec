@@ -9,7 +9,6 @@ Release: 1
 License: MIT
 Source0:   libnss_stns.conf
 Packager:  libnss-stns
-BuildArch: noarch
 BuildRoot: %{_tmppath}/libnss-stns-%{version}-%{release}-root
 
 %description

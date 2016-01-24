@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/pyama86/libnss_stns",
+	"ImportPath": "github.com/STNS/libnss_stns",
 	"GoVersion": "go1.5",
 	"Deps": [
 		{
@@ -8,9 +8,9 @@
 			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
 		},
 		{
-			"ImportPath": "github.com/pyama86/STNS/attribute",
-			"Comment": "v0.0.1-22-g3a3424d",
-			"Rev": "3a3424daead9494b377387bc6674ef23eec5db04"
+			"ImportPath": "github.com/STNS/STNS/attribute",
+			"Comment": "v0.0.1-25-g9f3130f",
+			"Rev": "9f3130f42d9b7ca7746e89df5052693605884c9a"
 		}
 	]
 }

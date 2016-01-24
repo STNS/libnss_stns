@@ -3,7 +3,7 @@ package main
 import (
 	"strconv"
 
-	"github.com/pyama86/STNS/attribute"
+	"github.com/STNS/STNS/attribute"
 )
 
 /*
