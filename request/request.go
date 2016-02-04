@@ -24,7 +24,7 @@ type Request struct {
 }
 
 type HttpResponse struct {
-	response *http.Response
+	response []byte
 	err      error
 }
 
@@ -50,11 +50,20 @@ func (r *Request) asyncHttpGets() ([]byte, error) {
 		go func(endPoint string) {
 			url := endPoint + "/" + r.apiPath
 			res, err := http.Get(url)
-
 			if err != nil {
 				ch <- &HttpResponse{nil, err}
 			} else {
-				ch <- &HttpResponse{res, err}
+				defer res.Body.Close()
+				if res.StatusCode == http.StatusOK {
+					body, err := ioutil.ReadAll(res.Body)
+					if err != nil {
+						ch <- &HttpResponse{nil, err}
+					} else {
+						ch <- &HttpResponse{body, nil}
+					}
+				} else {
+					ch <- &HttpResponse{nil, err}
+				}
 			}
 		}(endPoint)
 	}
@@ -63,17 +72,12 @@ func (r *Request) asyncHttpGets() ([]byte, error) {
 		select {
 		case c := <-ch:
 			responses = append(responses, c)
-			if c.response != nil {
-				if c.response.StatusCode != http.StatusOK {
-					continue
+			if len(responses) == len(r.Config.ApiEndPoint) {
+				for _, res := range responses {
+					if res.response != nil {
+						return res.response, nil
+					}
 				}
-				body, err := ioutil.ReadAll(c.response.Body)
-				if err != nil {
-					continue
-				}
-				c.response.Body.Close()
-				return body, nil
-			} else if c.response == nil && len(responses) == len(r.Config.ApiEndPoint) {
 				return nil, c.err
 			}
 		}

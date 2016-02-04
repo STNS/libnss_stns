@@ -3,14 +3,14 @@
 	"GoVersion": "go1.5",
 	"Deps": [
 		{
-			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.1.0-21-g056c9bc",
-			"Rev": "056c9bc7be7190eaa7715723883caffa5f8fa3e4"
+			"ImportPath": "github.com/STNS/STNS/attribute",
+			"Comment": "v0.0.1-39-g33ae261",
+			"Rev": "33ae2615ede6676f26ecef6b0f766c4ebdf9c29c"
 		},
 		{
-			"ImportPath": "github.com/STNS/STNS/attribute",
-			"Comment": "v0.0.1-37-g54d01cd",
-			"Rev": "54d01cdb64d64117e40ca2d5f798a9a74bd80b1a"
+			"ImportPath": "github.com/pyama86/toml",
+			"Comment": "v0.1.0-24-g12be6f1",
+			"Rev": "12be6f183c455a5307f916dafd6665dc38fc6d15"
 		}
 	]
 }

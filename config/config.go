@@ -1,6 +1,6 @@
 package config
 
-import "github.com/BurntSushi/toml"
+import "github.com/pyama86/toml"
 
 type Config struct {
 	ApiEndPoint     []string `toml:"api_end_point"`
