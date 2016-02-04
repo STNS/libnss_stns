@@ -23,11 +23,6 @@ type Request struct {
 	Config  *config.Config
 }
 
-type HttpResponse struct {
-	response []byte
-	err      error
-}
-
 func NewRequest(resource string, column string, value string) (*Request, error) {
 	r := Request{}
 	if err := r.Init(); err != nil {
@@ -43,58 +38,34 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 	return &r, nil
 }
 
-func (r *Request) asyncHttpGets() ([]byte, error) {
-	responses := []*HttpResponse{}
-	ch := make(chan *HttpResponse, len(r.Config.ApiEndPoint))
+func (r *Request) Get() (attribute.UserGroups, error) {
+	var lastError error
+	var attr attribute.UserGroups
 	for _, endPoint := range r.Config.ApiEndPoint {
-		go func(endPoint string) {
-			url := endPoint + "/" + r.apiPath
-			res, err := http.Get(url)
-			if err != nil {
-				ch <- &HttpResponse{nil, err}
-			} else {
-				defer res.Body.Close()
-				if res.StatusCode == http.StatusOK {
-					body, err := ioutil.ReadAll(res.Body)
-					if err != nil {
-						ch <- &HttpResponse{nil, err}
-					} else {
-						ch <- &HttpResponse{body, nil}
-					}
-				} else {
-					ch <- &HttpResponse{nil, err}
-				}
-			}
-		}(endPoint)
-	}
+		url := endPoint + "/" + r.apiPath
+		res, err := http.Get(url)
+		if err != nil {
+			lastError = err
+			continue
+		}
+		defer res.Body.Close()
 
-	for {
-		select {
-		case c := <-ch:
-			responses = append(responses, c)
-			if len(responses) == len(r.Config.ApiEndPoint) {
-				for _, res := range responses {
-					if res.response != nil {
-						return res.response, nil
-					}
-				}
-				return nil, c.err
+		if res.StatusCode == http.StatusOK {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				lastError = err
+				continue
 			}
+
+			err = json.Unmarshal(body, &attr)
+			if err != nil {
+				lastError = err
+				continue
+			}
+			return attr, nil
 		}
 	}
-}
-func (r *Request) Get() (attribute.UserGroups, error) {
-	body, err := r.asyncHttpGets()
-	if err != nil {
-		return nil, err
-	}
-
-	var attr attribute.UserGroups
-	err = json.Unmarshal(body, &attr)
-	if err != nil {
-		return nil, err
-	}
-	return attr, nil
+	return nil, lastError
 }
 
 func (r *Request) Init() error {
