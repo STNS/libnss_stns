@@ -3,8 +3,8 @@ package config
 import "github.com/BurntSushi/toml"
 
 type Config struct {
-	ApiEndPoint     string `toml:"api_end_point"`
-	ChainSshWrapper string `toml:"chain_ssh_wrapper"`
+	ApiEndPoint     []string `toml:"api_end_point"`
+	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
 }
 
 func Load(filePath string) (*Config, error) {
@@ -19,5 +19,5 @@ func Load(filePath string) (*Config, error) {
 }
 
 func defaultConfig(config *Config) {
-	config.ApiEndPoint = "http://localhost:1104"
+	config.ApiEndPoint = []string{"http://localhost:1104"}
 }

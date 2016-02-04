@@ -16,7 +16,7 @@ $ rpm -ivh libnss_stns-<version>.noarch.rpm
 ## config
 * /etc/stns/libnss_stns.conf
 ```
-api_end_point = "http://<server>:1104"
+api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
 
 # ssh_stns_wrapper on failure , this try chain_ssh_wrapper command
 chain_ssh_wrapper = "/usr/libexec/openssh/ssh-ldap-wrapper"

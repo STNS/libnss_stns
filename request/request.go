@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"log/syslog"
+	"math/rand"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/config"
@@ -23,13 +25,19 @@ type Request struct {
 	Config *config.Config
 }
 
+func choice(s []string) string {
+	rand.Seed(time.Now().UnixNano())
+	i := rand.Intn(len(s))
+	return s[i]
+}
+
 func NewRequest(resource string, column string, value string) (*Request, error) {
 	r := Request{}
 	if err := r.Init(); err != nil {
 		return nil, err
 	}
-
-	urls := []string{r.Config.ApiEndPoint, resource, column}
+	endPoint := choice(r.Config.ApiEndPoint)
+	urls := []string{endPoint, resource, column}
 
 	if value != "" {
 		urls = append(urls, value)
