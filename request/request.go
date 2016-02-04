@@ -6,12 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"log/syslog"
-	"math/rand"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/config"
@@ -25,10 +23,9 @@ type Request struct {
 	Config  *config.Config
 }
 
-func choice(s []string) string {
-	rand.Seed(time.Now().UnixNano())
-	i := rand.Intn(len(s))
-	return s[i]
+type HttpResponse struct {
+	response *http.Response
+	err      error
 }
 
 func NewRequest(resource string, column string, value string) (*Request, error) {
@@ -46,44 +43,54 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 	return &r, nil
 }
 
-func (r *Request) Get() (attribute.UserGroups, error) {
-	var resultErr error
-	client := &http.Client{}
-
+func (r *Request) asyncHttpGets() ([]byte, error) {
+	responses := []*HttpResponse{}
+	ch := make(chan *HttpResponse, len(r.Config.ApiEndPoint))
 	for _, endPoint := range r.Config.ApiEndPoint {
-		req, err := http.NewRequest("GET", endPoint+"/"+r.apiPath, nil)
-		if err != nil {
-			resultErr = err
-			continue
-		}
+		go func(endPoint string) {
+			url := endPoint + "/" + r.apiPath
+			res, err := http.Get(url)
 
-		res, err := client.Do(req)
-		if err != nil {
-			resultErr = err
-			continue
-		}
-
-		defer res.Body.Close()
-
-		if res.StatusCode != http.StatusOK {
-			continue
-		}
-
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			resultErr = err
-			continue
-		}
-
-		var attr attribute.UserGroups
-		err = json.Unmarshal(body, &attr)
-		if err != nil {
-			resultErr = err
-			continue
-		}
-		return attr, nil
+			if err != nil {
+				ch <- &HttpResponse{nil, err}
+			} else {
+				ch <- &HttpResponse{res, err}
+			}
+		}(endPoint)
 	}
-	return nil, resultErr
+
+	for {
+		select {
+		case c := <-ch:
+			responses = append(responses, c)
+			if c.response != nil {
+				if c.response.StatusCode != http.StatusOK {
+					continue
+				}
+				body, err := ioutil.ReadAll(c.response.Body)
+				if err != nil {
+					continue
+				}
+				c.response.Body.Close()
+				return body, nil
+			} else if c.response == nil && len(responses) == len(r.Config.ApiEndPoint) {
+				return nil, c.err
+			}
+		}
+	}
+}
+func (r *Request) Get() (attribute.UserGroups, error) {
+	body, err := r.asyncHttpGets()
+	if err != nil {
+		return nil, err
+	}
+
+	var attr attribute.UserGroups
+	err = json.Unmarshal(body, &attr)
+	if err != nil {
+		return nil, err
+	}
+	return attr, nil
 }
 
 func (r *Request) Init() error {
