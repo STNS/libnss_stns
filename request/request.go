@@ -21,8 +21,8 @@ var ConfigFileName = "/etc/stns/libnss_stns.conf"
 var Loaded *config.Config
 
 type Request struct {
-	Url    string
-	Config *config.Config
+	apiPath string
+	Config  *config.Config
 }
 
 func choice(s []string) string {
@@ -36,47 +36,54 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 	if err := r.Init(); err != nil {
 		return nil, err
 	}
-	endPoint := choice(r.Config.ApiEndPoint)
-	urls := []string{endPoint, resource, column}
+	urls := []string{resource, column}
 
 	if value != "" {
 		urls = append(urls, value)
 	}
 
-	r.Url = strings.Join(urls, "/")
+	r.apiPath = strings.Join(urls, "/")
 	return &r, nil
 }
 
 func (r *Request) Get() (attribute.UserGroups, error) {
+	var resultErr error
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", r.Url, nil)
-	if err != nil {
-		return nil, err
-	}
+	for _, endPoint := range r.Config.ApiEndPoint {
+		req, err := http.NewRequest("GET", endPoint+"/"+r.apiPath, nil)
+		if err != nil {
+			resultErr = err
+			continue
+		}
 
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
+		res, err := client.Do(req)
+		if err != nil {
+			resultErr = err
+			continue
+		}
 
-	defer res.Body.Close()
+		defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, nil
-	}
+		if res.StatusCode != http.StatusOK {
+			continue
+		}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			resultErr = err
+			continue
+		}
 
-	var attr attribute.UserGroups
-	err = json.Unmarshal(body, &attr)
-	if err != nil {
-		return nil, err
+		var attr attribute.UserGroups
+		err = json.Unmarshal(body, &attr)
+		if err != nil {
+			resultErr = err
+			continue
+		}
+		return attr, nil
 	}
-	return attr, nil
+	return nil, resultErr
 }
 
 func (r *Request) Init() error {
