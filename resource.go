@@ -71,13 +71,23 @@ func setLinuxResource(obj interface{}, result interface{}, resource attribute.Us
 
 func setPasswd(pwd *C.struct_passwd, passwds attribute.UserGroups) {
 	for n, p := range passwds {
+		dir := "/home/" + n
+		shell := "/bin/bash"
+
+		if p.Directory != "" {
+			dir = p.Directory
+		}
+
+		if p.Shell != "" {
+			shell = p.Shell
+		}
 		pwd.pw_name = C.CString(n)
 		pwd.pw_passwd = C.CString("x")
 		pwd.pw_uid = C.__uid_t(p.Id)
 		pwd.pw_gid = C.__gid_t(p.GroupId)
 		pwd.pw_gecos = C.CString(p.Gecos)
-		pwd.pw_dir = C.CString(p.Directory)
-		pwd.pw_shell = C.CString(p.Shell)
+		pwd.pw_dir = C.CString(dir)
+		pwd.pw_shell = C.CString(shell)
 		return
 	}
 }
