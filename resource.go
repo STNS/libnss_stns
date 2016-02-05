@@ -21,13 +21,13 @@ func setResource(resource_name string, column string, value string, obj interfac
 	r, err := request.NewRequest(resource_name, column, value)
 	if err != nil {
 		log.Print(err)
-		return 0
+		return -2
 	}
 
 	resource, err := r.Get()
 	if err != nil {
 		log.Print(err)
-		return 0
+		return -2
 	}
 	if len(resource) > 0 {
 		setLinuxResource(obj, result, resource)
