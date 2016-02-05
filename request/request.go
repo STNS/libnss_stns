@@ -19,9 +19,10 @@ import (
 
 var ConfigFileName = "/etc/stns/libnss_stns.conf"
 var Loaded *config.Config
+var Cache map[string]*attribute.UserGroups
 
 type Request struct {
-	apiPath string
+	ApiPath string
 	Config  *config.Config
 }
 
@@ -36,7 +37,7 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 		urls = append(urls, value)
 	}
 
-	r.apiPath = strings.Join(urls, "/")
+	r.ApiPath = strings.Join(urls, "/")
 	return &r, nil
 }
 
@@ -47,9 +48,14 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(len(r.Config.ApiEndPoint))
 
+	c, exist := Cache[r.ApiPath]
+	if exist {
+		return *c, nil
+	}
+
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
-		url := endPoint + "/" + r.apiPath
+		url := endPoint + "/" + r.ApiPath
 		res, err := http.Get(url)
 		if err != nil {
 			lastError = err
@@ -69,6 +75,7 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 				lastError = err
 				continue
 			}
+			Cache[r.ApiPath] = &attr
 			return attr, nil
 		}
 	}
@@ -76,6 +83,9 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 }
 
 func (r *Request) Init() error {
+	if len(Cache) == 0 {
+		Cache = map[string]*attribute.UserGroups{}
+	}
 
 	if reflect.ValueOf(Loaded).IsNil() {
 		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, os.Args[0])
