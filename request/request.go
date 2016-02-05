@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"log/syslog"
+	"math/rand"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/config"
@@ -41,7 +43,12 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 func (r *Request) Get() (attribute.UserGroups, error) {
 	var lastError error
 	var attr attribute.UserGroups
-	for _, endPoint := range r.Config.ApiEndPoint {
+
+	rand.Seed(time.Now().UnixNano())
+	perm := rand.Perm(len(r.Config.ApiEndPoint))
+
+	for _, v := range perm {
+		endPoint := r.Config.ApiEndPoint[v]
 		url := endPoint + "/" + r.apiPath
 		res, err := http.Get(url)
 		if err != nil {
