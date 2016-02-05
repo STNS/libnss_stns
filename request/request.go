@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -19,7 +20,12 @@ import (
 
 var ConfigFileName = "/etc/stns/libnss_stns.conf"
 var Loaded *config.Config
-var Cache map[string]*attribute.UserGroups
+var Cache map[string]*CacheObject
+
+type CacheObject struct {
+	userGroup *attribute.UserGroups
+	err       error
+}
 
 type Request struct {
 	ApiPath string
@@ -50,8 +56,15 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 
 	c, exist := Cache[r.ApiPath]
 	if exist {
-		return *c, nil
+		if c.err != nil {
+			return nil, c.err
+		} else {
+			return *c.userGroup, c.err
+		}
 	}
+
+	// default negative cache
+	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
@@ -75,7 +88,7 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 				lastError = err
 				continue
 			}
-			Cache[r.ApiPath] = &attr
+			Cache[r.ApiPath] = &CacheObject{&attr, nil}
 			return attr, nil
 		}
 	}
@@ -84,9 +97,8 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 
 func (r *Request) Init() error {
 	if len(Cache) == 0 {
-		Cache = map[string]*attribute.UserGroups{}
+		Cache = map[string]*CacheObject{}
 	}
-
 	if reflect.ValueOf(Loaded).IsNil() {
 		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, os.Args[0])
 		if err != nil {

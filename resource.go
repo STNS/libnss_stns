@@ -17,28 +17,33 @@ import (
 */
 import "C"
 
+const NSS_STATUS_TRYAGAIN = -2
+const NSS_STATUS_SUCCESS = 1
+const NSS_STATUS_NOTFOUND = 0
+
 func setResource(resource_name string, column string, value string, obj interface{}, result interface{}) int {
 	r, err := request.NewRequest(resource_name, column, value)
 	if err != nil {
 		log.Print(err)
-		return -2
+		return NSS_STATUS_TRYAGAIN
 	}
 
 	resource, err := r.Get()
+
 	if err != nil {
 		log.Print(err)
-		return -2
+		return NSS_STATUS_TRYAGAIN
 	}
 	if len(resource) > 0 {
 		setLinuxResource(obj, result, resource)
-		return 1
+		return NSS_STATUS_SUCCESS
 	}
-	return 0
+	return NSS_STATUS_NOTFOUND
 }
 
-func setRecursiveResource(obj interface{}, result interface{}, list attribute.UserGroups, pos *int) int {
+func setResourceByPool(obj interface{}, result interface{}, list attribute.UserGroups, pos *int) int {
 	keys := getKeys(list)
-	if len(keys) > *pos && keys[*pos] != "" {
+	if *pos != NSS_STATUS_TRYAGAIN && len(keys) > *pos && keys[*pos] != "" {
 		name := keys[*pos]
 		resource := attribute.UserGroups{
 			name: list[name],
@@ -46,9 +51,11 @@ func setRecursiveResource(obj interface{}, result interface{}, list attribute.Us
 
 		setLinuxResource(obj, result, resource)
 		*pos++
-		return 1
+		return NSS_STATUS_SUCCESS
+	} else if *pos == NSS_STATUS_TRYAGAIN {
+		return NSS_STATUS_TRYAGAIN
 	}
-	return 0
+	return NSS_STATUS_NOTFOUND
 }
 
 func setLinuxResource(obj interface{}, result interface{}, resource attribute.UserGroups) {
@@ -121,17 +128,17 @@ func setGroup(grp *C.struct_group, groups attribute.UserGroups) {
 	}
 }
 
-func setRecursiveList(resource_name string, list attribute.UserGroups, pos *int) {
+func setResourcePool(resource_name string, list attribute.UserGroups, pos *int) {
 	// reset value
-	resetRecursiveList(list, pos)
+	resetResourcePool(list, pos)
 	err := setResource(resource_name, "list", "", list, nil)
 	if err != 1 {
-		log.Print(err)
+		*pos = NSS_STATUS_TRYAGAIN
 		return
 	}
 }
 
-func resetRecursiveList(list attribute.UserGroups, pos *int) {
+func resetResourcePool(list attribute.UserGroups, pos *int) {
 	// reset value
 	*pos = 0
 	for k, _ := range list {

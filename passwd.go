@@ -30,15 +30,15 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 
 //export _nss_stns_setpwent
 func _nss_stns_setpwent() {
-	setRecursiveList("user", passwdList, &passwdReadPos)
+	setResourcePool("user", passwdList, &passwdReadPos)
 }
 
 //export _nss_stns_endpwent
 func _nss_stns_endpwent() {
-	resetRecursiveList(passwdList, &passwdReadPos)
+	resetResourcePool(passwdList, &passwdReadPos)
 }
 
 //export _nss_stns_getpwent_r
 func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	return setRecursiveResource(pwd, result, passwdList, &passwdReadPos)
+	return setResourceByPool(pwd, result, passwdList, &passwdReadPos)
 }

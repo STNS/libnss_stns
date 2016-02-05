@@ -21,15 +21,15 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 
 //export _nss_stns_setspent
 func _nss_stns_setspent() {
-	setRecursiveList("user", shadowList, &shadowReadPos)
+	setResourcePool("user", shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_endspent
 func _nss_stns_endspent() {
-	resetRecursiveList(shadowList, &shadowReadPos)
+	resetResourcePool(shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_getspent_r
 func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	return setRecursiveResource(spwd, result, shadowList, &shadowReadPos)
+	return setResourceByPool(spwd, result, shadowList, &shadowReadPos)
 }
