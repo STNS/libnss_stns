@@ -17,7 +17,6 @@ var groupList = attribute.UserGroups{}
 var groupReadPos int
 
 type Group struct {
-	*Resource
 	grp    *C.struct_group
 	result **C.struct_group
 }
@@ -44,14 +43,14 @@ group
 -------------------------------------------------------*/
 //export _nss_stns_getgrnam_r
 func _nss_stns_getgrnam_r(name *C.char, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	group := Group{&Resource{"group"}, grp, result}
-	return group.setResource(&group, "name", C.GoString(name))
+	r := Resource{"group"}
+	return r.setResource(&Group{grp, result}, "name", C.GoString(name))
 }
 
 //export _nss_stns_getgrgid_r
 func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	group := Group{&Resource{"group"}, grp, result}
-	return group.setResource(&group, "id", strconv.Itoa(int(gid)))
+	r := Resource{"group"}
+	return r.setResource(&Group{grp, result}, "id", strconv.Itoa(int(gid)))
 }
 
 //export _nss_stns_setgrent
@@ -62,9 +61,8 @@ func _nss_stns_setgrent() {
 
 //export _nss_stns_getgrent_r
 func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	group := Group{&Resource{"group"}, grp, result}
 	entry := EntryResource{&Resource{"group"}, groupList, &groupReadPos}
-	return entry.setNextResource(&group)
+	return entry.setNextResource(&Group{grp, result})
 }
 
 //export _nss_stns_endgrent

@@ -11,7 +11,6 @@ var shadowList = attribute.UserGroups{}
 var shadowReadPos int
 
 type Shadow struct {
-	*Resource
 	spwd   *C.struct_spwd
 	result **C.struct_spwd
 }
@@ -37,8 +36,8 @@ shadow
 
 //export _nss_stns_getspnam_r
 func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	shadow := Shadow{&Resource{"user"}, spwd, result}
-	return shadow.setResource(&shadow, "name", C.GoString(name))
+	r := Resource{"user"}
+	return r.setResource(&Shadow{spwd, result}, "name", C.GoString(name))
 }
 
 //export _nss_stns_setspent
@@ -55,7 +54,6 @@ func _nss_stns_endspent() {
 
 //export _nss_stns_getspent_r
 func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	shadow := Shadow{&Resource{"user"}, spwd, result}
 	entry := EntryResource{&Resource{"user"}, shadowList, &shadowReadPos}
-	return entry.setNextResource(&shadow)
+	return entry.setNextResource(&Shadow{spwd, result})
 }

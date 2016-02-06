@@ -16,7 +16,6 @@ var passwdList = attribute.UserGroups{}
 var passwdReadPos int
 
 type Passwd struct {
-	*Resource
 	pwd    *C.struct_passwd
 	result **C.struct_passwd
 }
@@ -50,14 +49,14 @@ passwd
 -------------------------------------------------------*/
 //export _nss_stns_getpwnam_r
 func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	passwd := Passwd{&Resource{"user"}, pwd, result}
-	return passwd.setResource(&passwd, "name", C.GoString(name))
+	r := Resource{"user"}
+	return r.setResource(&Passwd{pwd, result}, "name", C.GoString(name))
 }
 
 //export _nss_stns_getpwuid_r
 func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	passwd := Passwd{&Resource{"user"}, pwd, result}
-	return passwd.setResource(&passwd, "id", strconv.Itoa(int(uid)))
+	r := Resource{"user"}
+	return r.setResource(&Passwd{pwd, result}, "id", strconv.Itoa(int(uid)))
 }
 
 //export _nss_stns_setpwent
@@ -75,7 +74,6 @@ func _nss_stns_endpwent() {
 
 //export _nss_stns_getpwent_r
 func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	passwd := Passwd{&Resource{"user"}, pwd, result}
 	entry := EntryResource{&Resource{"user"}, passwdList, &passwdReadPos}
-	return entry.setNextResource(&passwd)
+	return entry.setNextResource(&Passwd{pwd, result})
 }
