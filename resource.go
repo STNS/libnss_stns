@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"sort"
-	"unsafe"
 
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/request"
@@ -21,134 +20,93 @@ const NSS_STATUS_TRYAGAIN = -2
 const NSS_STATUS_SUCCESS = 1
 const NSS_STATUS_NOTFOUND = 0
 
-func setResource(resource_name string, column string, value string, obj interface{}, result interface{}) int {
-	r, err := request.NewRequest(resource_name, column, value)
+type Resource struct {
+	resource_type string
+}
+
+type EntryResource struct {
+	*Resource
+	list     attribute.UserGroups
+	position *int
+}
+
+type LinuxResource interface {
+	setCStruct(attribute.UserGroups)
+}
+
+func (r *Resource) get(column string, value string) (attribute.UserGroups, error) {
+	req, err := request.NewRequest(r.resource_type, column, value)
 	if err != nil {
+		return nil, err
+	}
+
+	resource, err := req.Get()
+
+	if err != nil {
+		return nil, err
 		log.Print(err)
+	}
+	return resource, nil
+}
+
+func (r *Resource) setResource(linux LinuxResource, column string, value string) int {
+	resource, err := r.get(column, value)
+	if err != nil {
 		return NSS_STATUS_TRYAGAIN
 	}
 
-	resource, err := r.Get()
-
-	if err != nil {
-		log.Print(err)
-		return NSS_STATUS_TRYAGAIN
-	}
 	if len(resource) > 0 {
-		setLinuxResource(obj, result, resource)
+		linux.setCStruct(resource)
 		return NSS_STATUS_SUCCESS
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func setResourceByPool(obj interface{}, result interface{}, list attribute.UserGroups, pos *int) int {
-	keys := getKeys(list)
-	if *pos != NSS_STATUS_TRYAGAIN && len(keys) > *pos && keys[*pos] != "" {
-		name := keys[*pos]
+func (e *EntryResource) setNextResource(linux LinuxResource) int {
+	keys := e.keys()
+	if *e.position != NSS_STATUS_TRYAGAIN && len(keys) > *e.position && keys[*e.position] != "" {
+		name := keys[*e.position]
 		resource := attribute.UserGroups{
-			name: list[name],
+			name: e.list[name],
 		}
 
-		setLinuxResource(obj, result, resource)
-		*pos++
+		linux.setCStruct(resource)
+		*e.position++
 		return NSS_STATUS_SUCCESS
-	} else if *pos == NSS_STATUS_TRYAGAIN {
+	} else if *e.position == NSS_STATUS_TRYAGAIN {
 		return NSS_STATUS_TRYAGAIN
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func setLinuxResource(obj interface{}, result interface{}, resource attribute.UserGroups) {
-	switch obj.(type) {
-	case *C.struct_passwd:
-		setPasswd(obj.(*C.struct_passwd), resource)
-		result = &obj
-	case *C.struct_group:
-		setGroup(obj.(*C.struct_group), resource)
-		result = &obj
-	case *C.struct_spwd:
-		setShadow(obj.(*C.struct_spwd), resource)
-		result = &obj
-	case attribute.UserGroups:
+func (e *EntryResource) setList() {
+	// reset value
+	e.resetList()
+
+	resource, err := e.get("list", "")
+	if err != nil {
+		*e.position = NSS_STATUS_TRYAGAIN
+	}
+
+	if len(resource) > 0 {
 		for k, v := range resource {
-			obj.(attribute.UserGroups)[k] = v
+			e.list[k] = v
 		}
 	}
+	return
 }
 
-func setPasswd(pwd *C.struct_passwd, passwds attribute.UserGroups) {
-	for n, p := range passwds {
-		dir := "/home/" + n
-		shell := "/bin/bash"
-
-		if p.Directory != "" {
-			dir = p.Directory
-		}
-
-		if p.Shell != "" {
-			shell = p.Shell
-		}
-		pwd.pw_name = C.CString(n)
-		pwd.pw_passwd = C.CString("x")
-		pwd.pw_uid = C.__uid_t(p.Id)
-		pwd.pw_gid = C.__gid_t(p.GroupId)
-		pwd.pw_gecos = C.CString(p.Gecos)
-		pwd.pw_dir = C.CString(dir)
-		pwd.pw_shell = C.CString(shell)
-		return
-	}
-}
-
-func setShadow(spwd *C.struct_spwd, shadows attribute.UserGroups) {
-	for n, _ := range shadows {
-		spwd.sp_namp = C.CString(n)
-		spwd.sp_pwdp = C.CString("!!")
-		spwd.sp_lstchg = -1
-		spwd.sp_min = -1
-		spwd.sp_max = -1
-		spwd.sp_warn = -1
-		spwd.sp_inact = -1
-		spwd.sp_expire = -1
-		return
-	}
-}
-func setGroup(grp *C.struct_group, groups attribute.UserGroups) {
-	for n, g := range groups {
-		grp.gr_name = C.CString(n)
-		grp.gr_passwd = C.CString("x")
-		grp.gr_gid = C.__gid_t(g.Id)
-		work := make([]*C.char, len(g.Users)+1)
-		if len(g.Users) > 0 {
-			for i, u := range g.Users {
-				work[i] = C.CString(u)
-			}
-		}
-		grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
-		return
-	}
-}
-
-func setResourcePool(resource_name string, list attribute.UserGroups, pos *int) {
+func (e *EntryResource) resetList() {
 	// reset value
-	resetResourcePool(list, pos)
-	err := setResource(resource_name, "list", "", list, nil)
-	if err != 1 {
-		*pos = NSS_STATUS_TRYAGAIN
-		return
+	*e.position = 0
+	for k, _ := range e.list {
+		delete(e.list, k)
 	}
 }
 
-func resetResourcePool(list attribute.UserGroups, pos *int) {
-	// reset value
-	*pos = 0
-	for k, _ := range list {
-		delete(list, k)
-	}
-}
-
-func getKeys(m attribute.UserGroups) []string {
+func (e *EntryResource) keys() []string {
 	ks := []string{}
-	for k, _ := range m {
+	for k, _ := range e.list {
 		ks = append(ks, k)
 
 	}
