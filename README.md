@@ -7,10 +7,15 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 
 
 ## install
-download page <https://github.com/pyama86/libnss_stns/releases>
+## redhat/centos
 ```
-$ wget https://github.com/pyama86/libnss_stns/releases/download/<version>/libnss_stns-<version>.noarch.rpm
-$ rpm -ivh libnss_stns-<version>.noarch.rpm
+$ curl -fsSL https://repo.stns.jp/scripts/yum-repo.sh | sh
+$ yum install libnss-stns
+```
+## debian/ubuntu
+```
+$ curl -fsSL https://repo.stns.jp/scripts/apt-repo.sh | sh
+$ apt-get install libnss-stns
 ```
 
 ## config
