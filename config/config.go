@@ -4,6 +4,8 @@ import "github.com/pyama86/toml"
 
 type Config struct {
 	ApiEndPoint     []string `toml:"api_end_point"`
+	User            string   `toml:"user"`
+	Password        string   `toml:"password"`
 	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
 }
 

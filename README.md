@@ -22,6 +22,9 @@ $ apt-get install libnss-stns
 * /etc/stns/libnss_stns.conf
 ```
 api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
+# support basic auth
+user = "basic_user"
+password = "basic_password"
 
 # ssh_stns_wrapper on failure , this try chain_ssh_wrapper command
 chain_ssh_wrapper = "/usr/libexec/openssh/ssh-ldap-wrapper"

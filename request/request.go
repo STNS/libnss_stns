@@ -66,10 +66,17 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 	// default negative cache
 	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
+	client := &http.Client{}
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
 		url := endPoint + "/" + r.ApiPath
-		res, err := http.Get(url)
+		req, err := http.NewRequest("GET", url, nil)
+		if r.Config.User != "" && r.Config.Password != "" {
+			req.SetBasicAuth(r.Config.User, r.Config.Password)
+		}
+
+		res, err := client.Do(req)
+
 		if err != nil {
 			lastError = err
 			continue
