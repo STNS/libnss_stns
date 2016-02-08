@@ -1,6 +1,7 @@
 package request
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -67,6 +68,15 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
 	client := &http.Client{}
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	if r.Config.SslVerify == false {
+		client.Transport = transport
+	}
+
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
 		url := endPoint + "/" + r.ApiPath
