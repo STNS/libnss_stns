@@ -1,13 +1,10 @@
 package request
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/STNS/libnss_stns/request"
 )
 
 type Response struct {
@@ -19,14 +16,13 @@ func TestRequest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	request.ConfigFileName = ""
-	r, _ := request.NewRequest("user", "name", "example")
+	ConfigFileName = ""
+	r, _ := NewRequest("user", "name", "example")
 	r.Config.ApiEndPoint = []string{server.URL}
 	r.Config.User = "test_user"
 	r.Config.Password = "test_pass"
 
 	users, _ := r.Get()
-	fmt.Println(users)
 	if 0 == len(users) {
 		t.Error("fetch error")
 	}
@@ -58,12 +54,12 @@ func TestErrorBasicAuth(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	request.ConfigFileName = ""
-	r, _ := request.NewRequest("user", "name", "example")
+	ConfigFileName = ""
+	r, _ := NewRequest("user", "name", "example")
 	r.Config.ApiEndPoint = []string{server.URL}
 	r.Config.User = "error_user"
 	r.Config.Password = "error_pass"
-	request.Cache = map[string]*request.CacheObject{}
+	Cache = map[string]*CacheObject{}
 	users, _ := r.Get()
 	if 0 != len(users) {
 		t.Error("fetch error")

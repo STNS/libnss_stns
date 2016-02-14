@@ -8,34 +8,16 @@ import (
 	"github.com/STNS/libnss_stns/request"
 )
 
-/*
-#include <grp.h>
-#include <pwd.h>
-#include <shadow.h>
-#include <sys/types.h>
-*/
-import "C"
-
 const NSS_STATUS_TRYAGAIN = -2
 const NSS_STATUS_SUCCESS = 1
 const NSS_STATUS_NOTFOUND = 0
-
-type Resource struct {
-	resource_type string
-}
-
-type EntryResource struct {
-	*Resource
-	list     attribute.UserGroups
-	position *int
-}
 
 type LinuxResource interface {
 	setCStruct(attribute.UserGroups)
 }
 
-func (r *Resource) get(column string, value string) (attribute.UserGroups, error) {
-	req, err := request.NewRequest(r.resource_type, column, value)
+func get(resource_type, column, value string) (attribute.UserGroups, error) {
+	req, err := request.NewRequest(resource_type, column, value)
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +31,8 @@ func (r *Resource) get(column string, value string) (attribute.UserGroups, error
 	return resource, nil
 }
 
-func (r *Resource) setResource(linux LinuxResource, column string, value string) int {
-	resource, err := r.get(column, value)
+func setResource(linux LinuxResource, resource_type, column string, value string) int {
+	resource, err := get(resource_type, column, value)
 	if err != nil {
 		return NSS_STATUS_TRYAGAIN
 	}
@@ -62,51 +44,51 @@ func (r *Resource) setResource(linux LinuxResource, column string, value string)
 	return NSS_STATUS_NOTFOUND
 }
 
-func (e *EntryResource) setNextResource(linux LinuxResource) int {
-	keys := e.keys()
-	if *e.position != NSS_STATUS_TRYAGAIN && len(keys) > *e.position && keys[*e.position] != "" {
-		name := keys[*e.position]
+func setNextResource(linux LinuxResource, list attribute.UserGroups, position *int) int {
+	keys := keys(list)
+	if *position != NSS_STATUS_TRYAGAIN && len(keys) > *position && keys[*position] != "" {
+		name := keys[*position]
 		resource := attribute.UserGroups{
-			name: e.list[name],
+			name: list[name],
 		}
 
 		linux.setCStruct(resource)
-		*e.position++
+		*position++
 		return NSS_STATUS_SUCCESS
-	} else if *e.position == NSS_STATUS_TRYAGAIN {
+	} else if *position == NSS_STATUS_TRYAGAIN {
 		return NSS_STATUS_TRYAGAIN
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func (e *EntryResource) setList() {
+func setList(resource_type string, list attribute.UserGroups, position *int) {
 	// reset value
-	e.resetList()
+	resetList(list, position)
 
-	resource, err := e.get("list", "")
+	resource, err := get(resource_type, "list", "")
 	if err != nil {
-		*e.position = NSS_STATUS_TRYAGAIN
+		*position = NSS_STATUS_TRYAGAIN
 	}
 
 	if len(resource) > 0 {
 		for k, v := range resource {
-			e.list[k] = v
+			list[k] = v
 		}
 	}
 	return
 }
 
-func (e *EntryResource) resetList() {
+func resetList(list attribute.UserGroups, position *int) {
 	// reset value
-	*e.position = 0
-	for k, _ := range e.list {
-		delete(e.list, k)
+	*position = 0
+	for k, _ := range list {
+		delete(list, k)
 	}
 }
 
-func (e *EntryResource) keys() []string {
+func keys(list attribute.UserGroups) []string {
 	ks := []string{}
-	for k, _ := range e.list {
+	for k, _ := range list {
 		ks = append(ks, k)
 
 	}
