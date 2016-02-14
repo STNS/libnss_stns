@@ -98,14 +98,13 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 			continue
 		}
 		defer res.Body.Close()
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			lastError = err
+			continue
+		}
 
 		if res.StatusCode == http.StatusOK {
-			body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				lastError = err
-				continue
-			}
-
 			err = json.Unmarshal(body, &attr)
 			if err != nil {
 				lastError = err
