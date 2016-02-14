@@ -13,7 +13,7 @@ func_ssh_build()
   cd ../libnss_stns
 }
 
-while getopts brd OPT
+while getopts br OPT
 do
     case $OPT in
         r)
