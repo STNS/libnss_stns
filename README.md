@@ -1,5 +1,5 @@
 # libnss_stns
-[![Build Status](https://travis-ci.org/pyama86/libnss_stns.svg?branch=master)](https://travis-ci.org/pyama86/libnss_stns)
+[![Build Status](https://travis-ci.org/STNS/libnss_stns.svg?branch=master)](https://travis-ci.org/STNS/libnss_stns)
 
 libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
