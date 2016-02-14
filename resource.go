@@ -68,6 +68,7 @@ func setList(resource_type string, list attribute.UserGroups, position *int) {
 	resource, err := get(resource_type, "list", "")
 	if err != nil {
 		*position = NSS_STATUS_TRYAGAIN
+		return
 	}
 
 	if len(resource) > 0 {
@@ -75,7 +76,6 @@ func setList(resource_type string, list attribute.UserGroups, position *int) {
 			list[k] = v
 		}
 	}
-	return
 }
 
 func resetList(list attribute.UserGroups, position *int) {

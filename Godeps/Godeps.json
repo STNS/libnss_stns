@@ -4,8 +4,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/STNS/STNS/attribute",
-			"Comment": "v0.0.1-45-g8d23181",
-			"Rev": "8d23181a70ad508ab126192177f85ecb622a7173"
+			"Comment": "v0.0.1-56-gddf0757",
+			"Rev": "ddf07572ee059179511babea80c1c7598242694a"
 		},
 		{
 			"ImportPath": "github.com/pyama86/toml",

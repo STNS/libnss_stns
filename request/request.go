@@ -23,6 +23,8 @@ var ConfigFileName = "/etc/stns/libnss_stns.conf"
 var Loaded *config.Config
 var Cache map[string]*CacheObject
 
+var Pid int
+
 type CacheObject struct {
 	userGroup *attribute.UserGroups
 	err       error
@@ -45,6 +47,12 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 	}
 
 	r.ApiPath = strings.Join(urls, "/")
+
+	if Pid != 0 && Pid != os.Getpid() {
+		return nil, errors.New("unsupported fork process")
+	}
+
+	Pid = os.Getpid()
 	return &r, nil
 }
 
@@ -67,25 +75,23 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 	// default negative cache
 	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
-	client := &http.Client{}
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	if r.Config.SslVerify == false {
-		client.Transport = transport
-	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
 		url := endPoint + "/" + r.ApiPath
 		req, err := http.NewRequest("GET", url, nil)
+
+		if err != nil {
+			lastError = err
+			continue
+		}
+
 		if r.Config.User != "" && r.Config.Password != "" {
 			req.SetBasicAuth(r.Config.User, r.Config.Password)
 		}
 
-		res, err := client.Do(req)
+		res, err := http.DefaultClient.Do(req)
 
 		if err != nil {
 			lastError = err

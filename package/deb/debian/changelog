@@ -1,3 +1,9 @@
+libnss-stns (0.0.2) STABLE; urgency=low
+
+  * fix https://github.com/STNS/libnss_stns/pull/3
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sat, 09 Jan 2016 10:43:05 +0000
+
 libnss-stns (0.0.1) UNSTABLE; urgency=low
 
   * Initial release. 
