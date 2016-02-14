@@ -67,15 +67,7 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 	// default negative cache
 	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
-	client := &http.Client{}
-
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	if r.Config.SslVerify == false {
-		client.Transport = transport
-	}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
@@ -85,7 +77,7 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 			req.SetBasicAuth(r.Config.User, r.Config.Password)
 		}
 
-		res, err := client.Do(req)
+		res, err := http.DefaultClient.Do(req)
 
 		if err != nil {
 			lastError = err
