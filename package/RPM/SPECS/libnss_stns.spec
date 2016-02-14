@@ -39,6 +39,3 @@ rm -rf %{buildroot}
 
 %post
 ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
-
-%postun
-rm -f /usr/%{_lib}/libnss_stns.so.2
