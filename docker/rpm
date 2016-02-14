@@ -2,6 +2,7 @@ FROM pyama/stns:centos_build
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN chown root:root -R /go/src/github.com/STNS/libnss_stns/package/RPM && \
+mkdir -p package/RPM/BUILD/ && \
 echo '%_topdir /go/src/github.com/STNS/libnss_stns/package/RPM' > ~/.rpmmacros && \
 echo '%_signature gpg' >> ~/.rpmmacros && \
 echo '%_gpg_name stns-server' >> ~/.rpmmacros && \
