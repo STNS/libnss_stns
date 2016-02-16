@@ -15,6 +15,7 @@ var ConfigFileName = "/etc/stns/libnss_stns.conf"
 func main() {
 	config, err := cmd.LoadConfig()
 	if err == nil {
+		flag.Parse()
 		if raw := Fetch(config, flag.Arg(0)); raw != "" {
 			fmt.Println(raw)
 		}
@@ -22,7 +23,7 @@ func main() {
 }
 
 func Fetch(config *config.Config, path string) string {
-
+	fmt.Println(path)
 	r, err := request.NewRequest(config, path)
 
 	if err != nil {

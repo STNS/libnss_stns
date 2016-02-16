@@ -16,6 +16,7 @@ import (
 func main() {
 	config, err := cmd.LoadConfig()
 	if err == nil {
+		flag.Parse()
 		if raw := Fetch(config, flag.Arg(0)); raw != "" {
 			fmt.Println(raw)
 		}
