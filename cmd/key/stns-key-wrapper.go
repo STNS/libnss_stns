@@ -46,7 +46,7 @@ func Fetch(config *config.Config, name string) string {
 		}()
 	}
 
-	rex := regexp.MustCompile(`ssh_stns_wrapper$`)
+	rex := regexp.MustCompile(`stns-key-wrapper$`)
 	if r.Config.ChainSshWrapper != "" && !rex.MatchString(r.Config.ChainSshWrapper) {
 		out, err := exec.Command(r.Config.ChainSshWrapper, name).Output()
 		if err != nil {
