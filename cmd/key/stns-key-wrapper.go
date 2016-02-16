@@ -8,19 +8,23 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/STNS/libnss_stns/cmd"
+	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/request"
 )
 
 func main() {
-	flag.Parse()
-	if keys := FetchKey(flag.Arg(0)); keys != "" {
-		fmt.Println(keys)
+	config, err := cmd.LoadConfig()
+	if err == nil {
+		if raw := Fetch(config, flag.Arg(0)); raw != "" {
+			fmt.Println(raw)
+		}
 	}
 }
 
-func FetchKey(name string) string {
+func Fetch(config *config.Config, name string) string {
 	userKeys := ""
-	r, err := request.NewRequest("user", "name", name)
+	r, err := request.NewRequest(config, "user", "name", name)
 	if err != nil {
 		log.Print(err)
 		return ""

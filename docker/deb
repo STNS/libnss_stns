@@ -2,6 +2,7 @@ FROM pyama/stns:ubuntu_build
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN cp binary/libnss-stns.so package/deb/debian/libnss-stns.so && \
-cp binary/ssh-stns-wrapper package/deb/debian/ssh-stns-wrapper
+cp binary/stns-query-wrapper package/deb/debian/stns-query-wrapper && \
+cp binary/stns-key-wrapper package/deb/debian/stns-key-wrapper
 WORKDIR /go/src/github.com/STNS/libnss_stns/package/deb/
 CMD debuild --no-tgz-check -uc -us && cp ../*.deb ../../binary/

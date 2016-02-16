@@ -3,51 +3,29 @@ package request
 import (
 	"crypto/tls"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io/ioutil"
-	"log"
-	"log/syslog"
 	"math/rand"
 	"net/http"
-	"os"
-	"reflect"
 	"strings"
 	"time"
 
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/logger"
 )
-
-var ConfigFileName = "/etc/stns/libnss_stns.conf"
-var Loaded *config.Config
-var Cache map[string]*CacheObject
-
-var Pid int
-
-type CacheObject struct {
-	userGroup *attribute.UserGroups
-	err       error
-}
 
 type Request struct {
 	ApiPath string
 	Config  *config.Config
 }
 
-func NewRequest(paths ...string) (*Request, error) {
+func NewRequest(config *config.Config, paths ...string) (*Request, error) {
+	logger.Setlog()
 	r := Request{}
-	if err := r.Init(); err != nil {
-		return nil, err
-	}
 
+	r.Config = config
 	r.ApiPath = strings.Join(paths, "/")
 
-	if Pid != 0 && Pid != os.Getpid() {
-		return nil, errors.New("unsupported fork process")
-	}
-
-	Pid = os.Getpid()
 	return &r, nil
 }
 
@@ -95,18 +73,6 @@ func (r *Request) GetRaw() ([]byte, error) {
 func (r *Request) Get() (attribute.UserGroups, error) {
 	var attr attribute.UserGroups
 
-	c, exist := Cache[r.ApiPath]
-	if exist {
-		if c.err != nil {
-			return nil, c.err
-		} else {
-			return *c.userGroup, c.err
-		}
-	}
-
-	// default negative cache
-	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
-
 	body, err := r.GetRaw()
 
 	if err != nil {
@@ -119,33 +85,5 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 		return nil, err
 	}
 
-	Cache[r.ApiPath] = &CacheObject{&attr, nil}
 	return attr, nil
-}
-
-func (r *Request) Init() error {
-	if len(Cache) == 0 {
-		Cache = map[string]*CacheObject{}
-	}
-	if reflect.ValueOf(Loaded).IsNil() {
-		logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, os.Args[0])
-		if err != nil {
-			// syslog not found
-			fmt.Print(err)
-		} else {
-			log.SetOutput(logger)
-		}
-		if ConfigFileName != "" {
-			config, err := config.Load(ConfigFileName)
-			if err != nil {
-				log.Print(err)
-				return err
-			}
-			Loaded = config
-		} else {
-			Loaded = &config.Config{}
-		}
-	}
-	r.Config = Loaded
-	return nil
 }
