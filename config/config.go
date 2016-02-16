@@ -23,6 +23,6 @@ func Load(filePath string) (*Config, error) {
 }
 
 func defaultConfig(config *Config) {
-	config.WrapperCommand = "/usr/local/bin/stns-wrapper-query"
+	config.WrapperCommand = "/usr/local/bin/stns-query-wrapper"
 	config.ApiEndPoint = []string{"http://localhost:1104"}
 }
