@@ -35,18 +35,13 @@ type Request struct {
 	Config  *config.Config
 }
 
-func NewRequest(resource string, column string, value string) (*Request, error) {
+func NewRequest(paths ...string) (*Request, error) {
 	r := Request{}
 	if err := r.Init(); err != nil {
 		return nil, err
 	}
-	urls := []string{resource, column}
 
-	if value != "" {
-		urls = append(urls, value)
-	}
-
-	r.ApiPath = strings.Join(urls, "/")
+	r.ApiPath = strings.Join(paths, "/")
 
 	if Pid != 0 && Pid != os.Getpid() {
 		return nil, errors.New("unsupported fork process")
@@ -56,24 +51,10 @@ func NewRequest(resource string, column string, value string) (*Request, error) 
 	return &r, nil
 }
 
-func (r *Request) Get() (attribute.UserGroups, error) {
+func (r *Request) GetRaw() ([]byte, error) {
 	var lastError error
-	var attr attribute.UserGroups
-
 	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(len(r.Config.ApiEndPoint))
-
-	c, exist := Cache[r.ApiPath]
-	if exist {
-		if c.err != nil {
-			return nil, c.err
-		} else {
-			return *c.userGroup, c.err
-		}
-	}
-
-	// default negative cache
-	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
 
@@ -105,16 +86,41 @@ func (r *Request) Get() (attribute.UserGroups, error) {
 		}
 
 		if res.StatusCode == http.StatusOK {
-			err = json.Unmarshal(body, &attr)
-			if err != nil {
-				lastError = err
-				continue
-			}
-			Cache[r.ApiPath] = &CacheObject{&attr, nil}
-			return attr, nil
+			return body, nil
 		}
 	}
 	return nil, lastError
+}
+
+func (r *Request) Get() (attribute.UserGroups, error) {
+	var attr attribute.UserGroups
+
+	c, exist := Cache[r.ApiPath]
+	if exist {
+		if c.err != nil {
+			return nil, c.err
+		} else {
+			return *c.userGroup, c.err
+		}
+	}
+
+	// default negative cache
+	Cache[r.ApiPath] = &CacheObject{nil, errors.New(r.ApiPath + " is not fond")}
+
+	body, err := r.GetRaw()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(body, &attr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	Cache[r.ApiPath] = &CacheObject{&attr, nil}
+	return attr, nil
 }
 
 func (r *Request) Init() error {

@@ -7,6 +7,7 @@ type Config struct {
 	User            string   `toml:"user"`
 	Password        string   `toml:"password"`
 	SslVerify       bool     `toml:"ssl_verify"`
+	WrapperCommand  string   `toml:"wrapper_path"`
 	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
 }
 
@@ -22,5 +23,6 @@ func Load(filePath string) (*Config, error) {
 }
 
 func defaultConfig(config *Config) {
+	config.WrapperCommand = "/usr/local/bin/stns-wrapper-query"
 	config.ApiEndPoint = []string{"http://localhost:1104"}
 }
