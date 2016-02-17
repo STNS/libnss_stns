@@ -17,7 +17,8 @@ SimpleTomlNameService Client
 %install
 rm -rf %{buildroot}
 install -d -m 755 %{buildroot}/%{_localbindir}
-install    -m 655 %{_builddir}/ssh_stns_wrapper %{buildroot}/%{_localbindir}
+install    -m 655 %{_builddir}/stns-key-wrapper %{buildroot}/%{_localbindir}
+install    -m 655 %{_builddir}/stns-query-wrapper %{buildroot}/%{_localbindir}
 
 install -d -m 755 %{buildroot}/usr/%{_lib}
 install    -m 655 %{_builddir}/libnss_stns.so %{buildroot}/usr/%{_lib}
@@ -33,7 +34,8 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%{_localbindir}/ssh_stns_wrapper
+%{_localbindir}/stns-key-wrapper
+%{_localbindir}/stns-query-wrapper
 /usr/%{_lib}/libnss_stns.so
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
 

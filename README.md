@@ -5,7 +5,6 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
 
-
 ## install
 ## redhat/centos
 ```
@@ -27,7 +26,10 @@ api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
 user = "basic_user"
 password = "basic_password"
 
-# ssh_stns_wrapper on failure , this try chain_ssh_wrapper command
+# stns access wrapper
+wrapper_path = "/usr/local/bin/stns-query-wrapper"
+
+# stns-key-wrapper on failure , this try chain_ssh_wrapper command
 chain_ssh_wrapper = "/usr/libexec/openssh/ssh-ldap-wrapper"
 
 ssl_verify = true
@@ -46,7 +48,7 @@ group:      files stns
 ```
 ~
 PubkeyAuthentication yes
-AuthorizedKeysCommand /usr/local/bin/ssh_stns_wrapper
+AuthorizedKeysCommand /usr/local/bin/stns-key-wrapper
 AuthorizedKeysCommandUser root
 ~
 ```
@@ -69,7 +71,32 @@ AuthorizedKeysCommandUser root
         enable-cache            services        no
         enable-cache            netgroup        no
 ```
+## wrapper command
+* stns-query-wrapper "user/name/pyama"
+stns http query wrapper
+```
+# /usr/local/bin/stns-query-wrapper "user/name/pyama"
+{
+  "pyama": {
+    "id": 1001,
+    "group_id": 1001,
+    "directory": "/home/pyama",
+    "shell": "/bin/sh",
+    "gecos": "pyama",
+    "keys": [
+      "ssh-rsa xxx
+    ],
+    "users": null
+  }
+}
+```
 
+* stns-key-wrapper "pyama"
+stns ssh key wrapper
+```
+# /usr/local/bin/stns-key-wrapper "pyama"
+ssh-rsa xxx
+```
 ## tips
 * auto create home dir by successed ssh login
 ```
