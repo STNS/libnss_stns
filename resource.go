@@ -19,16 +19,15 @@ const NSS_STATUS_TRYAGAIN = -2
 const NSS_STATUS_SUCCESS = 1
 const NSS_STATUS_NOTFOUND = 0
 
-var ConfigFileName = "/etc/stns/libnss_stns.conf"
 var Config *config.Config
 
 type LinuxResource interface {
 	setCStruct(attribute.UserGroups)
 }
 
-var Cache map[string]*CacheObject
+var cache map[string]*cacheObject
 
-type CacheObject struct {
+type cacheObject struct {
 	userGroup *attribute.UserGroups
 	createAt  time.Time
 	err       error
@@ -44,30 +43,27 @@ func get(paths ...string) (attribute.UserGroups, error) {
 	}
 
 	if Config == nil {
-		config, err := config.Load(ConfigFileName)
+		c, err := config.Load("/etc/stns/libnss_stns.conf")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
-		Config = config
+		Config = c
 	}
 	// default negative cache
 	writeCache(path, nil, errors.New(path+" is not fond"))
-	var attr attribute.UserGroups
-
 	out, err := exec.Command(Config.WrapperCommand, path).Output()
-
-	if err != nil || out == nil {
+	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
+	var attr attribute.UserGroups
 	err = json.Unmarshal(out, &attr)
 	if err != nil {
 		return nil, err
 	}
 	writeCache(path, attr, nil)
-
 	return attr, nil
 }
 
@@ -105,7 +101,7 @@ func setList(resource_type string, list attribute.UserGroups, position *int) {
 	// reset value
 	resetList(list, position)
 
-	resource, err := get(resource_type, "list", "")
+	resource, err := get(resource_type, "list")
 	if err != nil {
 		*position = NSS_STATUS_TRYAGAIN
 		return
@@ -141,15 +137,15 @@ func readCache(path string) (attribute.UserGroups, error) {
 	m.RLock()
 	defer m.RUnlock()
 
-	if len(Cache) == 0 {
-		Cache = map[string]*CacheObject{}
+	if len(cache) == 0 {
+		cache = map[string]*cacheObject{}
 	}
 
-	c, exist := Cache[path]
+	c, exist := cache[path]
 	if exist {
 		// cache expire 10 minute
 		if time.Now().Sub(c.createAt) > time.Minute*10 {
-			delete(Cache, path)
+			delete(cache, path)
 			return nil, nil
 		} else if c.err != nil {
 			return nil, c.err
@@ -165,9 +161,9 @@ func writeCache(path string, attr attribute.UserGroups, err error) {
 	m.Lock()
 	defer m.Unlock()
 
-	if len(Cache) == 0 {
-		Cache = map[string]*CacheObject{}
+	if len(cache) == 0 {
+		cache = map[string]*cacheObject{}
 	}
 
-	Cache[path] = &CacheObject{&attr, time.Now(), err}
+	cache[path] = &cacheObject{&attr, time.Now(), err}
 }

@@ -10,8 +10,6 @@ import (
 	"github.com/STNS/libnss_stns/request"
 )
 
-var ConfigFileName = "/etc/stns/libnss_stns.conf"
-
 func main() {
 	config, err := cmd.LoadConfig()
 	if err == nil {
@@ -23,7 +21,6 @@ func main() {
 }
 
 func Fetch(config *config.Config, path string) string {
-	fmt.Println(path)
 	r, err := request.NewRequest(config, path)
 
 	if err != nil {
