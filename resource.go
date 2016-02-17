@@ -52,11 +52,7 @@ func get(paths ...string) (attribute.UserGroups, error) {
 	}
 	// default negative cache
 	writeCache(path, nil, errors.New(path+" is not fond"))
-	out, err := exec.Command(Config.WrapperCommand, path).Output()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
+	out, _ := exec.Command(Config.WrapperCommand, path).Output()
 
 	var attr attribute.UserGroups
 	err = json.Unmarshal(out, &attr)
