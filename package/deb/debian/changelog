@@ -1,8 +1,16 @@
+libnss-stns (0.0.3) STABLE; urgency=low
+
+  * fix broken go routine by cgo enabel
+    https://github.com/golang/go/commit/34c67eb24e1b3cfe16a512ab2d4899c78032030b
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sat, 09 Jan 2016 10:43:05 +0000
+
 libnss-stns (0.0.2) STABLE; urgency=low
 
   * fix https://github.com/STNS/libnss_stns/pull/3
 
  -- pyama86 <www.kazu.com@gmail.com>  Sat, 09 Jan 2016 10:43:05 +0000
+
 
 libnss-stns (0.0.1) UNSTABLE; urgency=low
 

@@ -1,6 +1,5 @@
 #!/bin/bash
 eval $(docker-machine env dev)
-rm -rf ./binary/*
 
 docker build --no-cache --rm -t stns:libnss_stns . &&
 docker run -v "$(pwd)"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:libnss_stns
