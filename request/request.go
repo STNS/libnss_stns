@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -38,7 +39,7 @@ func (r *Request) GetRaw() ([]byte, error) {
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
-		url := endPoint + "/" + r.ApiPath
+		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(path.Clean(r.ApiPath), "/")
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {

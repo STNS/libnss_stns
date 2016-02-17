@@ -39,6 +39,7 @@ rm -rf %{buildroot}
 %{_localbindir}/stns-query-wrapper
 /usr/%{_lib}/libnss_stns.so
 /usr/%{_lib}/libnss_stns.so.2
+%config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
 
 %post
 ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
@@ -46,5 +47,3 @@ ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
 if [ $1 = 0]; then
   rm -rf /usr/%{_lib}/libnss_stns.so.2
 fi
-
-%config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
