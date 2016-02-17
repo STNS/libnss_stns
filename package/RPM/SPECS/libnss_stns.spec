@@ -5,7 +5,7 @@ Name: libnss-stns
 Group: SipmleTomlNameService
 URL: https://github.com/pyama86/libnss_stns
 Version: 0.0
-Release: 2
+Release: 3
 License: MIT
 Source0:   libnss_stns.conf
 Packager:  libnss-stns
