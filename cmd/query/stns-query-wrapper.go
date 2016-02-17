@@ -24,14 +24,12 @@ func Fetch(config *config.Config, path string) string {
 	r, err := request.NewRequest(config, path)
 
 	if err != nil {
-		log.Print(err)
-		return ""
+		log.Fatal(err)
 	}
 
 	result, err := r.GetRaw()
 	if err != nil {
-		log.Print(err)
-		return ""
+		log.Fatal(err)
 	}
 
 	return string(result)

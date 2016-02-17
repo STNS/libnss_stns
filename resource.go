@@ -50,7 +50,7 @@ func get(paths ...string) (attribute.UserGroups, error) {
 		}
 		Config = c
 	}
-	// default negative cache
+	// deault negative cache
 	writeCache(path, nil, errors.New(path+" is not fond"))
 	out, _ := exec.Command(Config.WrapperCommand, path).Output()
 

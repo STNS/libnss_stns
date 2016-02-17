@@ -27,13 +27,12 @@ func Fetch(config *config.Config, name string) string {
 	userKeys := ""
 	r, err := request.NewRequest(config, "user", "name", name)
 	if err != nil {
-		log.Print(err)
-		return ""
+		log.Println(err)
 	}
 
 	users, err := r.Get()
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 	}
 
 	if users != nil {
@@ -52,9 +51,10 @@ func Fetch(config *config.Config, name string) string {
 		out, err := exec.Command(r.Config.ChainSshWrapper, name).Output()
 		if err != nil {
 			log.Print(err)
-			return ""
+		} else {
+			userKeys += string(out)
 		}
-		userKeys += string(out)
+
 	}
 	return userKeys
 }
