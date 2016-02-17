@@ -27,7 +27,7 @@ install -d -m 755 %{buildroot}/%{_localstatedir}/log/
 
 install -d -m 755 %{buildroot}/%{_sysconfdir}/stns/
 install    -m 644 %{_sourcedir}/libnss_stns.conf %{buildroot}/%{_sysconfdir}/stns/libnss_stns.conf
-ln -fs %{buildroot}/usr/%{_lib}/libnss_stns.so %{buildroot}/usr/%{_lib}/libnss_stns.so.2
+ln -fs /usr/%{_lib}/libnss_stns.so %{buildroot}/usr/%{_lib}/libnss_stns.so.2
 
 %clean
 rm -rf %{_builddir}
@@ -39,5 +39,12 @@ rm -rf %{buildroot}
 %{_localbindir}/stns-query-wrapper
 /usr/%{_lib}/libnss_stns.so
 /usr/%{_lib}/libnss_stns.so.2
+
+%post
+ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
+%preun
+if [ $1 = 0]; then
+  rm -rf /usr/%{_lib}/libnss_stns.so.2
+fi
 
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
