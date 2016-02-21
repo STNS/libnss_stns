@@ -18,5 +18,5 @@ end
 
 def docker_run(file, dir="binary")
   sh "docker build --no-cache --rm -f docker/#{file} -t stns:stns ."
-  sh "docker run -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/STNS/#{dir} -t stns:stns"
+  sh "docker run -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
 end
