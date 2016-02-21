@@ -6,14 +6,10 @@ task "build" do
   sh "docker run -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
 end
 
-desc "build rpm"
-task "rpm" => [:build] do
-  docker_run "rpm"
-end
-
-desc "build deb"
-task "deb" => [:build] do
+desc "make package"
+task "pkg" => [:build] do
   docker_run "deb"
+  docker_run "rpm"
 end
 
 def docker_run(file, dir="binary")
