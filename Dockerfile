@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM golang:1.5.3
 ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN go get github.com/tools/godep && godep restore

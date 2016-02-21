@@ -39,7 +39,7 @@ func (self Passwd) setCStruct(passwds attribute.UserGroups) {
 		self.pwd.pw_gecos = C.CString(p.Gecos)
 		self.pwd.pw_dir = C.CString(dir)
 		self.pwd.pw_shell = C.CString(shell)
-		self.result = &self.pwd
+		*self.result = self.pwd
 		return
 	}
 }
