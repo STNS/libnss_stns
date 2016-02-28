@@ -5,6 +5,9 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
 
+## diagram
+![diagram](https://cloud.githubusercontent.com/assets/8022082/13377619/83fc7e98-de25-11e5-9bc8-8de31c7d9118.png)
+
 ## install
 ## redhat/centos
 ```
