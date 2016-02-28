@@ -19,7 +19,7 @@ $ apt-get install libnss-stns
 
 ## config
 * /etc/stns/libnss_stns.conf
-```
+```toml
 api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
 
 # support basic auth
@@ -34,23 +34,20 @@ chain_ssh_wrapper = "/usr/libexec/openssh/ssh-ldap-wrapper"
 
 ssl_verify = true
 ```
+
 * /etc/nsswitch.conf
 ```
-~
 passwd:     files stns
 shadow:     files stns
 group:      files stns
-~
 ```
 
 * /etc/sshd/sshd_config
 
 ```
-~
 PubkeyAuthentication yes
 AuthorizedKeysCommand /usr/local/bin/stns-key-wrapper
 AuthorizedKeysCommandUser root
-~
 ```
 
 * /etc/nscd.conf
@@ -71,6 +68,7 @@ AuthorizedKeysCommandUser root
         enable-cache            services        no
         enable-cache            netgroup        no
 ```
+
 ## wrapper command
 * stns-query-wrapper "user/name/pyama"
 stns http query wrapper
@@ -97,6 +95,7 @@ stns ssh key wrapper
 # /usr/local/bin/stns-key-wrapper "pyama"
 ssh-rsa xxx
 ```
+
 ## tips
 * auto create home dir by successed ssh login
 ```
