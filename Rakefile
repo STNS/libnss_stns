@@ -1,5 +1,10 @@
 task :default => "build"
 
+desc "test"
+task "test" do
+  docker_run("test")
+end
+
 desc "build binary"
 task "build" do
   sh "docker build --no-cache --rm -t stns:stns ."
