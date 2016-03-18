@@ -77,17 +77,6 @@ func TestFetchKey(t *testing.T) {
 			t.Errorf("unmatch keys: '%#v'", Fetch(c, "example"))
 		}
 	}
-
-	// chain command
-	c = &config.Config{
-		ApiEndPoint:     []string{successServer.URL},
-		ChainSshWrapper: "/bin/echo",
-	}
-
-	if "test key1\ntest key2\nexample\n" != Fetch(c, "example") {
-		t.Error("unmatch keys")
-	}
-
 }
 
 func GetHandler(t *testing.T, path string, responseBody string) http.HandlerFunc {
