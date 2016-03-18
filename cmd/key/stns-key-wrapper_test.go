@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/STNS/libnss_stns/config"
@@ -13,12 +14,18 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
+func useTestBins(t *testing.T) func() {
+	origPath := os.Getenv("PATH")
+	os.Setenv("PATH", "./test-fixtures/bin:/bin:/usr/bin")
+	return func() { os.Setenv("PATH", origPath) }
+}
+
 func TestFetchKey(t *testing.T) {
 	okhandler := GetHandler(t)
 	okserver := httptest.NewServer(http.HandlerFunc(okhandler))
 	c := &config.Config{ApiEndPoint: []string{okserver.URL}}
 	defer okserver.Close()
-	if "test key1\ntest key2" != Fetch(c, "example") {
+	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
 	}
 
@@ -35,10 +42,19 @@ func TestFetchKey(t *testing.T) {
 	c = &config.Config{ApiEndPoint: []string{"", okserver.URL}}
 	defer ngserver.Close()
 
-	if "test key1\ntest key2" != Fetch(c, "example") {
+	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
 	}
 
+	// chain wrapper
+	{
+		defer useTestBins(t)()
+
+		c = &config.Config{ApiEndPoint: []string{okserver.URL}, ChainSshWrapper: "get-external-keys"}
+		if "test key1\ntest key2\nexternal key1\nexternal key2\n" != Fetch(c, "example") {
+			t.Errorf("unmatch keys: '%#v'", Fetch(c, "example"))
+		}
+	}
 }
 
 func GetHandler(t *testing.T) http.HandlerFunc {
