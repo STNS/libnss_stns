@@ -37,7 +37,7 @@ func Fetch(config *config.Config, name string) string {
 
 	if users != nil {
 		for _, u := range users {
-			userKeys += strings.Join(u.Keys, "\n")
+			userKeys += strings.Join(u.Keys, "\n") + "\n"
 		}
 		defer func() {
 			if err := recover(); err != nil {

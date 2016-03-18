@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if test "$#" -ne 1 || test -z "$1" ; then
+    echo "Invalid arguments for $0" >&2
+    exit 1
+fi
+
+echo 'external key1'
+echo 'external key2'

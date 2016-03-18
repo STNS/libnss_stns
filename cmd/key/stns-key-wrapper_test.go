@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/STNS/libnss_stns/config"
@@ -11,6 +12,12 @@ import (
 
 type Response struct {
 	path, query, contenttype, body string
+}
+
+func useTestBins(t *testing.T) func() {
+	origPath := os.Getenv("PATH")
+	os.Setenv("PATH", "./test-fixtures/bin:/bin:/usr/bin")
+	return func() { os.Setenv("PATH", origPath) }
 }
 
 func TestFetchKey(t *testing.T) {
@@ -31,10 +38,11 @@ func TestFetchKey(t *testing.T) {
 		}`,
 	)
 	successServer := httptest.NewServer(http.HandlerFunc(successHandler))
-	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
 	defer successServer.Close()
 
-	if "test key1\ntest key2" != Fetch(c, "example") {
+	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
+
+	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
 	}
 
@@ -45,8 +53,9 @@ func TestFetchKey(t *testing.T) {
 		}`,
 	)
 	notfoundServer := httptest.NewServer(http.HandlerFunc(notfoundHandler))
-	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
 	defer notfoundServer.Close()
+
+	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
 
 	if "" != Fetch(c, "notfound") {
 		t.Error("unmatch keys")
@@ -54,10 +63,19 @@ func TestFetchKey(t *testing.T) {
 
 	// fail over
 	c = &config.Config{ApiEndPoint: []string{"", successServer.URL}}
-	defer notfoundServer.Close()
 
-	if "test key1\ntest key2" != Fetch(c, "example") {
+	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
+	}
+
+	// chain wrapper
+	{
+		defer useTestBins(t)()
+
+		c = &config.Config{ApiEndPoint: []string{successServer.URL}, ChainSshWrapper: "get-external-keys"}
+		if "test key1\ntest key2\nexternal key1\nexternal key2\n" != Fetch(c, "example") {
+			t.Errorf("unmatch keys: '%#v'", Fetch(c, "example"))
+		}
 	}
 
 	// chain command
@@ -66,8 +84,7 @@ func TestFetchKey(t *testing.T) {
 		ChainSshWrapper: "/bin/echo",
 	}
 
-	defer successServer.Close()
-	if "test key1\ntest key2\nexample" != Fetch(c, "example") {
+	if "test key1\ntest key2\nexample\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
 	}
 
