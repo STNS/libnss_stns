@@ -14,6 +14,7 @@ type Response struct {
 }
 
 func TestFetchKey(t *testing.T) {
+	// normal
 	successHandler := GetHandler(t,
 		"/user/name/example",
 		`{
@@ -37,6 +38,7 @@ func TestFetchKey(t *testing.T) {
 		t.Error("unmatch keys")
 	}
 
+	// user notfound
 	notfoundHandler := GetHandler(t,
 		"/user/name/notfound",
 		`{
@@ -55,6 +57,17 @@ func TestFetchKey(t *testing.T) {
 	defer notfoundServer.Close()
 
 	if "test key1\ntest key2" != Fetch(c, "example") {
+		t.Error("unmatch keys")
+	}
+
+	// chain command
+	c = &config.Config{
+		ApiEndPoint:     []string{successServer.URL},
+		ChainSshWrapper: "/bin/echo",
+	}
+
+	defer successServer.Close()
+	if "test key1\ntest key2\nexample" != Fetch(c, "example") {
 		t.Error("unmatch keys")
 	}
 
