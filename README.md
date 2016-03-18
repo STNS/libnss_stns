@@ -105,5 +105,14 @@ ssh-rsa xxx
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
 ```
 
+# develop test
+Use docker machine
+
+```
+$ docker-machine start dev
+$ eval $(docker-machine env dev)
+$ rake test
+```
+
 ## author
 * pyama86
