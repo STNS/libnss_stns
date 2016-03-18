@@ -44,6 +44,6 @@ rm -rf %{buildroot}
 %post
 ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
 %preun
-if [ $1 = 0]; then
+if [ $1 = 0 ]; then
   rm -rf /usr/%{_lib}/libnss_stns.so.2
 fi
