@@ -77,6 +77,7 @@ func setResource(linux LinuxResource, resource_type, column string, value string
 
 func setNextResource(linux LinuxResource, list attribute.UserGroups, position *int) int {
 	keys := keys(list)
+L:
 	if *position != NSS_STATUS_TRYAGAIN && len(keys) > *position && keys[*position] != "" {
 		name := keys[*position]
 		resource := attribute.UserGroups{
@@ -84,7 +85,14 @@ func setNextResource(linux LinuxResource, list attribute.UserGroups, position *i
 		}
 
 		*position++
-		return linux.setCStruct(resource)
+		result := linux.setCStruct(resource)
+
+		// lack of data
+		if result == NSS_STATUS_NOTFOUND {
+			goto L
+		}
+
+		return result
 	} else if *position == NSS_STATUS_TRYAGAIN {
 		return NSS_STATUS_TRYAGAIN
 	}
