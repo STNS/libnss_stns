@@ -38,7 +38,8 @@ func (self Group) setCStruct(groups attribute.UserGroups) int {
 				}
 				self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 			} else {
-				self.grp.gr_mem = nil
+				work := make([]*C.char, 1)
+				self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 			}
 
 			self.result = &self.grp
