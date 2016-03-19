@@ -8,13 +8,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/STNS/libnss_stns/cmd"
 	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/logger"
 	"github.com/STNS/libnss_stns/request"
 )
 
 func main() {
-	config, err := cmd.LoadConfig()
+	logger.Setlog()
+	config, err := config.Load("/etc/stns/libnss_stns.conf")
 	if err == nil {
 		flag.Parse()
 		if raw := Fetch(config, flag.Arg(0)); raw != "" {
