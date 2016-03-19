@@ -11,7 +11,7 @@ func TestLoadConfig(t *testing.T) {
 	configFile, err := ioutil.TempFile("", "libnss_stns-config-test")
 	assertNoError(t, err)
 
-	configContent := "api_end_point=[\"is string\"]"
+	configContent := "api_end_point=[\"is string\", \"is string\"]"
 
 	_, err = configFile.WriteString(configContent)
 	assertNoError(t, err)
@@ -22,6 +22,7 @@ func TestLoadConfig(t *testing.T) {
 	config, err := Load(configFile.Name())
 	assertNoError(t, err)
 	assert(t, config.ApiEndPoint[0] == "is string", "ng api endpoint")
+	assert(t, config.ApiEndPoint[1] == "is string", "ng api endpoint")
 }
 
 func assertNoError(t *testing.T, err error) {

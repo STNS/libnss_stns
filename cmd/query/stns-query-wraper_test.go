@@ -1,22 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"regexp"
 	"testing"
 
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/test"
 )
 
-func useTestBins(t *testing.T) func() {
-	origPath := os.Getenv("PATH")
-	os.Setenv("PATH", "./test-fixtures/bin:/bin:/usr/bin")
-	return func() { os.Setenv("PATH", origPath) }
-}
-
-func TestFetchKey(t *testing.T) {
+func TestFetch(t *testing.T) {
 	// normal
 	successHandler := test.GetHandler(t,
 		"/user/name/example",
@@ -36,13 +31,15 @@ func TestFetchKey(t *testing.T) {
 	successServer := httptest.NewServer(http.HandlerFunc(successHandler))
 	defer successServer.Close()
 
+	r := regexp.MustCompile(`example`)
 	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
 
-	if "test key1\ntest key2\n" != Fetch(c, "example") {
-		t.Error("unmatch keys")
+	if !r.MatchString(Fetch(c, "/user/name/example")) {
+		t.Error("unmatch response")
 	}
 
 	// user notfound
+	r = regexp.MustCompile(`{\s+}`)
 	notfoundHandler := test.GetHandler(t,
 		"/user/name/notfound",
 		`{
@@ -52,25 +49,8 @@ func TestFetchKey(t *testing.T) {
 	defer notfoundServer.Close()
 
 	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
-
-	if "" != Fetch(c, "notfound") {
+	fmt.Println(Fetch(c, "/user/name/notfound"))
+	if !r.MatchString(Fetch(c, "/user/name/notfound")) {
 		t.Error("unmatch keys")
-	}
-
-	// fail over
-	c = &config.Config{ApiEndPoint: []string{"", successServer.URL}}
-
-	if "test key1\ntest key2\n" != Fetch(c, "example") {
-		t.Error("unmatch keys")
-	}
-
-	// chain wrapper
-	{
-		defer useTestBins(t)()
-
-		c = &config.Config{ApiEndPoint: []string{successServer.URL}, ChainSshWrapper: "get-external-keys"}
-		if "test key1\ntest key2\nexternal key1\nexternal key2\n" != Fetch(c, "example") {
-			t.Errorf("unmatch keys: '%#v'", Fetch(c, "example"))
-		}
 	}
 }
