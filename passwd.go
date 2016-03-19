@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strconv"
 
 	"github.com/STNS/STNS/attribute"
@@ -21,24 +22,34 @@ type Passwd struct {
 }
 
 func (self Passwd) setCStruct(passwds attribute.UserGroups) {
+	var dir, shell, gecos string
+	var gid int
+
 	for n, p := range passwds {
-		dir := "/home/" + n
-		shell := "/bin/bash"
-
-		if p.Directory != "" {
-			dir = p.Directory
-		}
-
-		if p.Shell != "" {
-			shell = p.Shell
-		}
 		self.pwd.pw_name = C.CString(n)
+
+		dir = "/home/" + n
+		shell = "/bin/bash"
+
+		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
+			self.pwd.pw_uid = C.__uid_t(p.Id)
+
+			if p.Directory != "" {
+				dir = p.Directory
+			}
+
+			if p.Shell != "" {
+				shell = p.Shell
+			}
+			gid = p.GroupId
+			gecos = p.GeCos
+		}
+		self.pwd.pw_gid = C.__gid_t(gid)
 		self.pwd.pw_passwd = C.CString("x")
-		self.pwd.pw_uid = C.__uid_t(p.Id)
-		self.pwd.pw_gid = C.__gid_t(p.GroupId)
-		self.pwd.pw_gecos = C.CString(p.Gecos)
 		self.pwd.pw_dir = C.CString(dir)
 		self.pwd.pw_shell = C.CString(shell)
+		self.pwd.pw_gecos = C.CString(gecos)
+
 		*self.result = self.pwd
 		return
 	}

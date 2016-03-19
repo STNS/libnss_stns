@@ -4,35 +4,25 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/STNS/libnss_stns/test"
 )
 
 func TestLoadConfig(t *testing.T) {
 
 	configFile, err := ioutil.TempFile("", "libnss_stns-config-test")
-	assertNoError(t, err)
+	test.AssertNoError(t, err)
 
 	configContent := "api_end_point=[\"is string\", \"is string\"]"
 
 	_, err = configFile.WriteString(configContent)
-	assertNoError(t, err)
+	test.AssertNoError(t, err)
 
 	configFile.Close()
 	defer os.Remove(configFile.Name())
 
 	config, err := Load(configFile.Name())
-	assertNoError(t, err)
-	assert(t, config.ApiEndPoint[0] == "is string", "ng api endpoint")
-	assert(t, config.ApiEndPoint[1] == "is string", "ng api endpoint")
-}
-
-func assertNoError(t *testing.T, err error) {
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func assert(t *testing.T, ok bool, msg string) {
-	if !ok {
-		t.Error(msg)
-	}
+	test.AssertNoError(t, err)
+	test.Assert(t, config.ApiEndPoint[0] == "is string", "ng api endpoint")
+	test.Assert(t, config.ApiEndPoint[1] == "is string", "ng api endpoint")
 }

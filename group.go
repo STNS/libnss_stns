@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strconv"
 	"unsafe"
 
@@ -25,14 +26,18 @@ func (self Group) setCStruct(groups attribute.UserGroups) {
 	for n, g := range groups {
 		self.grp.gr_name = C.CString(n)
 		self.grp.gr_passwd = C.CString("x")
-		self.grp.gr_gid = C.__gid_t(g.Id)
-		work := make([]*C.char, len(g.Users)+1)
-		if len(g.Users) > 0 {
-			for i, u := range g.Users {
-				work[i] = C.CString(u)
+
+		if g.Group != nil && !reflect.ValueOf(g.Group).IsNil() {
+			self.grp.gr_gid = C.__gid_t(g.Id)
+			work := make([]*C.char, len(g.Users)+1)
+			if len(g.Users) > 0 {
+				for i, u := range g.Users {
+					work[i] = C.CString(u)
+				}
 			}
+			self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 		}
-		self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+
 		self.result = &self.grp
 		return
 	}
