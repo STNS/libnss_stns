@@ -21,18 +21,15 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds attribute.UserGroups) {
-	var dir, shell, gecos string
-	var gid int
+func (self Passwd) setCStruct(passwds attribute.UserGroups) int {
 
 	for n, p := range passwds {
-		self.pwd.pw_name = C.CString(n)
-
-		dir = "/home/" + n
-		shell = "/bin/bash"
-
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
 			self.pwd.pw_uid = C.__uid_t(p.Id)
+			self.pwd.pw_name = C.CString(n)
+
+			dir := "/home/" + n
+			shell := "/bin/bash"
 
 			if p.Directory != "" {
 				dir = p.Directory
@@ -41,18 +38,16 @@ func (self Passwd) setCStruct(passwds attribute.UserGroups) {
 			if p.Shell != "" {
 				shell = p.Shell
 			}
-			gid = p.GroupId
-			gecos = p.GeCos
+			self.pwd.pw_gid = C.__gid_t(p.GroupId)
+			self.pwd.pw_passwd = C.CString("x")
+			self.pwd.pw_dir = C.CString(dir)
+			self.pwd.pw_shell = C.CString(shell)
+			self.pwd.pw_gecos = C.CString(p.Gecos)
+			*self.result = self.pwd
+			return NSS_STATUS_SUCCESS
 		}
-		self.pwd.pw_gid = C.__gid_t(gid)
-		self.pwd.pw_passwd = C.CString("x")
-		self.pwd.pw_dir = C.CString(dir)
-		self.pwd.pw_shell = C.CString(shell)
-		self.pwd.pw_gecos = C.CString(gecos)
-
-		*self.result = self.pwd
-		return
 	}
+	return NSS_STATUS_NOTFOUND
 }
 
 /*-------------------------------------------------------

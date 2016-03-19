@@ -15,7 +15,7 @@ type Shadow struct {
 	result **C.struct_spwd
 }
 
-func (self Shadow) setCStruct(shadows attribute.UserGroups) {
+func (self Shadow) setCStruct(shadows attribute.UserGroups) int {
 	for n, _ := range shadows {
 		self.spwd.sp_namp = C.CString(n)
 		self.spwd.sp_pwdp = C.CString("!!")
@@ -26,8 +26,9 @@ func (self Shadow) setCStruct(shadows attribute.UserGroups) {
 		self.spwd.sp_inact = -1
 		self.spwd.sp_expire = -1
 		self.result = &self.spwd
-		return
+		return NSS_STATUS_SUCCESS
 	}
+	return NSS_STATUS_NOTFOUND
 }
 
 /*-------------------------------------------------------
