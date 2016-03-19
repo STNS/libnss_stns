@@ -4,13 +4,13 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.1.0-39-ga4eecd4",
-			"Rev": "a4eecd407cf4129fc902ece859a0114e4cf1a7f4"
+			"Comment": "v0.1.0-46-gbbd5bb6",
+			"Rev": "bbd5bb678321a0d6e58f1099321dfa73391c1b6f"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/attribute",
-			"Comment": "v0.0.1-81-g905a547",
-			"Rev": "905a54739f1540a34a9d8c7feb6a390f00d04890"
+			"Comment": "v0.0.1-95-gdd0c077",
+			"Rev": "dd0c0774cef4c141863a2339c2666180eb105ea2"
 		}
 	]
 }
