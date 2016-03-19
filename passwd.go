@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strconv"
 
 	"github.com/STNS/STNS/attribute"
@@ -20,28 +21,33 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds attribute.UserGroups) {
+func (self Passwd) setCStruct(passwds attribute.UserGroups) int {
+
 	for n, p := range passwds {
-		dir := "/home/" + n
-		shell := "/bin/bash"
+		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
+			self.pwd.pw_uid = C.__uid_t(p.Id)
+			self.pwd.pw_name = C.CString(n)
 
-		if p.Directory != "" {
-			dir = p.Directory
-		}
+			dir := "/home/" + n
+			shell := "/bin/bash"
 
-		if p.Shell != "" {
-			shell = p.Shell
+			if p.Directory != "" {
+				dir = p.Directory
+			}
+
+			if p.Shell != "" {
+				shell = p.Shell
+			}
+			self.pwd.pw_gid = C.__gid_t(p.GroupId)
+			self.pwd.pw_passwd = C.CString("x")
+			self.pwd.pw_dir = C.CString(dir)
+			self.pwd.pw_shell = C.CString(shell)
+			self.pwd.pw_gecos = C.CString(p.Gecos)
+			*self.result = self.pwd
+			return NSS_STATUS_SUCCESS
 		}
-		self.pwd.pw_name = C.CString(n)
-		self.pwd.pw_passwd = C.CString("x")
-		self.pwd.pw_uid = C.__uid_t(p.Id)
-		self.pwd.pw_gid = C.__gid_t(p.GroupId)
-		self.pwd.pw_gecos = C.CString(p.Gecos)
-		self.pwd.pw_dir = C.CString(dir)
-		self.pwd.pw_shell = C.CString(shell)
-		*self.result = self.pwd
-		return
 	}
+	return NSS_STATUS_NOTFOUND
 }
 
 /*-------------------------------------------------------

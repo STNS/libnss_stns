@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/test"
 )
 
 type Response struct {
@@ -14,15 +15,26 @@ type Response struct {
 }
 
 func TestRequest(t *testing.T) {
-	handler := getHandler(t, "example")
+	handler := test.GetHandler(t,
+		"/user/name/example",
+		`{
+			"example": {
+				"id": 1,
+				"group_id": 2,
+				"directory": "/home/example",
+				"shell": "/bin/sh",
+				"keys": [
+					"test"
+				]
+			}
+		}`,
+	)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	config := &config.Config{}
-	config.ApiEndPoint = []string{server.URL}
-	config.User = "test_user"
-	config.Password = "test_pass"
-	r, _ := NewRequest(config, "user", "name", "example")
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL}
+	r, _ := NewRequest(c, "user", "name", "example")
 
 	users, _ := r.Get()
 	if 0 == len(users) {
@@ -49,26 +61,38 @@ func TestRequest(t *testing.T) {
 			t.Error("unmatch shell")
 		}
 	}
+
 }
 
-func TestErrorBasicAuth(t *testing.T) {
-	handler := getHandler(t, "example")
+func TestBasicAuth(t *testing.T) {
+	handler := getBasicAuthHandler(t, "example")
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	config := &config.Config{}
-	config.ApiEndPoint = []string{server.URL}
-	config.User = "error_user"
-	config.Password = "error_pass"
-	r, _ := NewRequest(config, "user", "name", "example")
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL}
+	c.User = "test_user"
+	c.Password = "test_pass"
+	r, _ := NewRequest(c, "user", "name", "example")
+
 	users, _ := r.Get()
+	if 0 == len(users) {
+		t.Error("fetch error")
+	}
+
+	e := &config.Config{}
+	e.ApiEndPoint = []string{server.URL}
+	e.User = "error_user"
+	e.Password = "error_pass"
+	r, _ = NewRequest(e, "user", "name", "example")
+	users, _ = r.Get()
 	if 0 != len(users) {
 		t.Error("fetch error")
 	}
 
 }
 
-func getHandler(t *testing.T, name string) http.HandlerFunc {
+func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
 	response := &Response{
 		path:        "/user/name/" + name,
 		contenttype: "application/json",

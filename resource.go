@@ -22,7 +22,7 @@ const NSS_STATUS_NOTFOUND = 0
 var Config *config.Config
 
 type LinuxResource interface {
-	setCStruct(attribute.UserGroups)
+	setCStruct(attribute.UserGroups) int
 }
 
 var cache map[string]*cacheObject
@@ -70,8 +70,7 @@ func setResource(linux LinuxResource, resource_type, column string, value string
 	}
 
 	if len(resource) > 0 {
-		linux.setCStruct(resource)
-		return NSS_STATUS_SUCCESS
+		return linux.setCStruct(resource)
 	}
 	return NSS_STATUS_NOTFOUND
 }
@@ -84,9 +83,8 @@ func setNextResource(linux LinuxResource, list attribute.UserGroups, position *i
 			name: list[name],
 		}
 
-		linux.setCStruct(resource)
 		*position++
-		return NSS_STATUS_SUCCESS
+		return linux.setCStruct(resource)
 	} else if *position == NSS_STATUS_TRYAGAIN {
 		return NSS_STATUS_TRYAGAIN
 	}

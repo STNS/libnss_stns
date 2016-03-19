@@ -28,3 +28,15 @@ func GetHandler(t *testing.T, path string, responseBody string) http.HandlerFunc
 	}
 	return handler
 }
+
+func AssertNoError(t *testing.T, err error) {
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Assert(t *testing.T, ok bool, msg string) {
+	if !ok {
+		t.Error(msg)
+	}
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"strconv"
 	"unsafe"
 
@@ -21,21 +22,25 @@ type Group struct {
 	result **C.struct_group
 }
 
-func (self Group) setCStruct(groups attribute.UserGroups) {
+func (self Group) setCStruct(groups attribute.UserGroups) int {
 	for n, g := range groups {
+		self.grp.gr_gid = C.__gid_t(g.Id)
 		self.grp.gr_name = C.CString(n)
 		self.grp.gr_passwd = C.CString("x")
-		self.grp.gr_gid = C.__gid_t(g.Id)
-		work := make([]*C.char, len(g.Users)+1)
-		if len(g.Users) > 0 {
-			for i, u := range g.Users {
-				work[i] = C.CString(u)
+
+		if g.Group != nil && !reflect.ValueOf(g.Group).IsNil() {
+			work := make([]*C.char, len(g.Users)+1)
+			if len(g.Users) > 0 {
+				for i, u := range g.Users {
+					work[i] = C.CString(u)
+				}
 			}
+			self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 		}
-		self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 		self.result = &self.grp
-		return
+		return NSS_STATUS_SUCCESS
 	}
+	return NSS_STATUS_NOTFOUND
 }
 
 /*-------------------------------------------------------
