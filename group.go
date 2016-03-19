@@ -37,7 +37,10 @@ func (self Group) setCStruct(groups attribute.UserGroups) int {
 					}
 				}
 				self.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+			} else {
+				self.grp.gr_mem = nil
 			}
+
 			self.result = &self.grp
 			return NSS_STATUS_SUCCESS
 		}
