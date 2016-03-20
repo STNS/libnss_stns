@@ -64,8 +64,8 @@ func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, b
 }
 
 //export _nss_stns_setpwent
-func _nss_stns_setpwent() {
-	setList("user", passwdList, &passwdReadPos)
+func _nss_stns_setpwent() int {
+	return setList("user", passwdList, &passwdReadPos)
 
 }
 

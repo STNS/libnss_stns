@@ -99,21 +99,23 @@ L:
 	return NSS_STATUS_NOTFOUND
 }
 
-func setList(resource_type string, list attribute.UserGroups, position *int) {
+func setList(resource_type string, list attribute.UserGroups, position *int) int {
 	// reset value
 	resetList(list, position)
 
 	resource, err := get(resource_type, "list")
 	if err != nil {
 		*position = NSS_STATUS_TRYAGAIN
-		return
+		return NSS_STATUS_TRYAGAIN
 	}
 
 	if len(resource) > 0 {
 		for k, v := range resource {
 			list[k] = v
 		}
+		return NSS_STATUS_SUCCESS
 	}
+	return NSS_STATUS_NOTFOUND
 }
 
 func resetList(list attribute.UserGroups, position *int) {

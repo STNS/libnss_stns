@@ -41,8 +41,8 @@ func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, buf
 }
 
 //export _nss_stns_setspent
-func _nss_stns_setspent() {
-	setList("user", shadowList, &shadowReadPos)
+func _nss_stns_setspent() int {
+	return setList("user", shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_endspent
