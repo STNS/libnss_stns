@@ -9,4 +9,4 @@ echo '%_gpg_name stns-server' >> ~/.rpmmacros && \
 cp binary/libnss-stns.so  package/RPM/BUILD/libnss_stns.so && \
 cp binary/stns-key-wrapper package/RPM/BUILD/stns-key-wrapper && \
 cp binary/stns-query-wrapper package/RPM/BUILD/stns-query-wrapper
-CMD rpmbuild --target x86_64 -ba package/RPM/SPECS/libnss_stns.spec && cp package/RPM/RPMS/x86_64/* binary/
+CMD rpmbuild --target ${TARGET} -ba package/RPM/SPECS/libnss_stns.spec && cp package/RPM/RPMS/${TARGET}/* binary/
