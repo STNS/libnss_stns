@@ -63,8 +63,8 @@ func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bu
 }
 
 //export _nss_stns_setgrent
-func _nss_stns_setgrent() {
-	setList("group", groupList, &groupReadPos)
+func _nss_stns_setgrent() int {
+	return setList("group", groupList, &groupReadPos)
 }
 
 //export _nss_stns_endgrent
