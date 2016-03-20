@@ -7,6 +7,6 @@ Standards-Version: 3.8.4
 Homepage: https://github.com/pyama86/libnss_stns
 
 Package: libnss-stns
-Architecture: all
+Architecture: any
 Description: simple toml name service client
 Depends: dpkg-dev

@@ -1,0 +1,9 @@
+FROM pyama/go:32bit
+RUN apt-get update && apt-get install -yq --force-yes build-essential devscripts debhelper fakeroot --no-install-recommends
+ADD ./ /go/src/github.com/STNS/libnss_stns
+WORKDIR /go/src/github.com/STNS/libnss_stns
+RUN cp binary/libnss-stns.so package/deb/debian/libnss-stns.so && \
+cp binary/stns-query-wrapper package/deb/debian/stns-query-wrapper && \
+cp binary/stns-key-wrapper package/deb/debian/stns-key-wrapper
+WORKDIR /go/src/github.com/STNS/libnss_stns/package/deb/
+CMD debuild --no-tgz-check -uc -us && cp ../*.deb ../../binary/
