@@ -10,8 +10,12 @@ task "clean" do
   sh "rm -rf binary/*"
 end
 
+task "clean_bin" do
+  sh "ls -d binary/* | grep -v -e 'rpm$' -e 'deb$' | xargs rm -rf"
+end
+
 desc "build binary 64bit"
-task "build_64" => [:clean]  do
+task "build_64" => [:clean_bin]  do
   sh "docker build --no-cache --rm -t stns:stns ."
   sh "docker run -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
 end
@@ -23,7 +27,7 @@ task "pkg_64" => [:build_64] do
 end
 
 desc "make binary 32bit"
-task "build_32" => [:clean]   do
+task "build_32" => [:clean_bin]   do
   docker_run "build_32"
 end
 
