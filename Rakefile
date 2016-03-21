@@ -1,43 +1,35 @@
 task :default => "test"
 
-desc "test"
-task "test" do
-  docker_run("test")
-end
+task "make" => [:pkg_x86, :pkg_i386]
 
-desc "clean tmp directory"
-task "clean" do
-  sh "rm -rf binary/*"
+task "test" do
+  docker_run("ubuntu-x86-test")
 end
 
 task "clean_bin" do
   sh "ls -d binary/* | grep -v -e 'rpm$' -e 'deb$' | xargs rm -rf"
 end
 
-desc "build binary 64bit"
-task "build_64" => [:clean_bin]  do
-  sh "docker build --no-cache --rm -t stns:stns ."
-  sh "docker run -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
-end
+[
+  %w(x86 x86_64 amd64),
+  %w(i386 i386 i386)
+].each do |r|
+  task "build_#{r[0]}" => [:clean_bin]  do
+    docker_run "ubuntu-#{r[0]}-build"
+  end
 
-desc "make package 64bit"
-task "pkg_64" => [:build_64] do
-  docker_run("rpm", "x86_64")
-  docker_run("deb", "amd64")
-end
+  task "pkg_#{r[0]}" => ["build_#{r[0]}".to_sym] do
+    sh "ls -d binary/* | grep -e '#{r[1]}.rpm$' -e '#{r[2]}.deb$'| xargs rm -rf"
+    docker_run("centos-#{r[0]}-rpm", r[1])
+    docker_run("ubuntu-#{r[0]}-deb", r[2])
 
-desc "make binary 32bit"
-task "build_32" => [:clean_bin]   do
-  docker_run "build_32"
-end
-
-desc "make package 32bit"
-task "pkg_32" => [:build_32] do
-  docker_run("rpm", "i386")
-  docker_run("deb_32", "i386")
+    # check package
+    sh "test -e binary/*#{r[1]}.rpm"
+    sh "test -e binary/*#{r[2]}.deb"
+  end
 end
 
 def docker_run(file, arch="x86_64", dir="binary")
   sh "docker build --no-cache --rm -f docker/#{file} -t stns:stns ."
-  sh "docker run -e TARGET=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
+  sh "docker run -e ARCH=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
 end
