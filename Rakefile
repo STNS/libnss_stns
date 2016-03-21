@@ -1,12 +1,17 @@
-task :default => "build"
+task :default => "test"
 
 desc "test"
 task "test" do
   docker_run("test")
 end
 
+desc "clean tmp directory"
+task "clean" do
+  sh "rm -rf binary/*"
+end
+
 desc "build binary 64bit"
-task "build_64" do
+task "build_64" => [:clean]  do
   sh "docker build --no-cache --rm -t stns:stns ."
   sh "docker run -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
 end
@@ -18,7 +23,7 @@ task "pkg_64" => [:build_64] do
 end
 
 desc "make binary 32bit"
-task "build_32" do
+task "build_32" => [:clean]   do
   docker_run "build_32"
 end
 
