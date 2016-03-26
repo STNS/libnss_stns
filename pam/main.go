@@ -24,7 +24,7 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 		case "sudo":
 			var passwd *C.String
 			defer C.free(unsafe.Pointer(passwd))
-			if len(a) > 1 {
+			if len(a) > 0 {
 				if C.pam_get_authtok(pamh, C.PAM_AUTHTOK, password, nil) != C.PAM_SUCCESS {
 					return int(C.PAM_AUTH_ERR)
 				}
