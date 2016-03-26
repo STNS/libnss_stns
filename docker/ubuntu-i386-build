@@ -3,5 +3,6 @@ ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN go get github.com/tools/godep && godep restore
 CMD go build -o binary/libnss-stns.so -buildmode=c-shared nss/main.go nss/resource.go nss/passwd.go nss/shadow.go nss/group.go && \
+go build -o binary/libpam-stns.so -buildmode=c-shared pam/main.go pam/auth.go pam/link_methods.go && \
 go build -o binary/stns-query-wrapper cmd/query/stns-query-wrapper.go && \
 go build -o binary/stns-key-wrapper cmd/key/stns-key-wrapper.go
