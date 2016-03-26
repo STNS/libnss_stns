@@ -5,6 +5,7 @@ package main
 */
 import "C"
 import (
+	"crypto/sha256"
 	"log"
 	"unsafe"
 
@@ -40,7 +41,7 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 					return int(C.PAM_AUTH_ERR)
 				}
 
-				if C.GoString(password) == sudo.Password {
+				if sha256.Sum256(C.GoString(password)) == sudo.Password {
 					return int(C.PAM_AUTH_SUCCESS)
 				}
 			}
