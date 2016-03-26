@@ -22,18 +22,18 @@ const NSS_STATUS_NOTFOUND = 0
 var Config *config.Config
 
 type LinuxResource interface {
-	setCStruct(attribute.UserGroups) int
+	setCStruct(attribute.AllAttribute) int
 }
 
 var cache map[string]*cacheObject
 
 type cacheObject struct {
-	userGroup *attribute.UserGroups
+	userGroup *attribute.AllAttribute
 	createAt  time.Time
 	err       error
 }
 
-func get(paths ...string) (attribute.UserGroups, error) {
+func get(paths ...string) (attribute.AllAttribute, error) {
 	logger.Setlog()
 	path := strings.Join(paths, "/")
 
@@ -54,7 +54,7 @@ func get(paths ...string) (attribute.UserGroups, error) {
 	writeCache(path, nil, errors.New(path+" is not fond"))
 	out, _ := exec.Command(Config.WrapperCommand, path).Output()
 
-	var attr attribute.UserGroups
+	var attr attribute.AllAttribute
 	err = json.Unmarshal(out, &attr)
 	if err != nil {
 		return nil, err
@@ -75,12 +75,12 @@ func setResource(linux LinuxResource, resource_type, column string, value string
 	return NSS_STATUS_NOTFOUND
 }
 
-func setNextResource(linux LinuxResource, list attribute.UserGroups, position *int) int {
+func setNextResource(linux LinuxResource, list attribute.AllAttribute, position *int) int {
 	keys := keys(list)
 L:
 	if *position != NSS_STATUS_TRYAGAIN && len(keys) > *position && keys[*position] != "" {
 		name := keys[*position]
-		resource := attribute.UserGroups{
+		resource := attribute.AllAttribute{
 			name: list[name],
 		}
 
@@ -99,7 +99,7 @@ L:
 	return NSS_STATUS_NOTFOUND
 }
 
-func setList(resource_type string, list attribute.UserGroups, position *int) int {
+func setList(resource_type string, list attribute.AllAttribute, position *int) int {
 	// reset value
 	resetList(list, position)
 
@@ -118,7 +118,7 @@ func setList(resource_type string, list attribute.UserGroups, position *int) int
 	return NSS_STATUS_NOTFOUND
 }
 
-func resetList(list attribute.UserGroups, position *int) {
+func resetList(list attribute.AllAttribute, position *int) {
 	// reset value
 	*position = 0
 	for k, _ := range list {
@@ -126,7 +126,7 @@ func resetList(list attribute.UserGroups, position *int) {
 	}
 }
 
-func keys(list attribute.UserGroups) []string {
+func keys(list attribute.AllAttribute) []string {
 	ks := []string{}
 	for k, _ := range list {
 		ks = append(ks, k)
@@ -136,7 +136,7 @@ func keys(list attribute.UserGroups) []string {
 	return ks
 }
 
-func readCache(path string) (attribute.UserGroups, error) {
+func readCache(path string) (attribute.AllAttribute, error) {
 	m := sync.RWMutex{}
 	m.RLock()
 	defer m.RUnlock()
@@ -160,7 +160,7 @@ func readCache(path string) (attribute.UserGroups, error) {
 	return nil, nil
 }
 
-func writeCache(path string, attr attribute.UserGroups, err error) {
+func writeCache(path string, attr attribute.AllAttribute, err error) {
 	m := sync.Mutex{}
 	m.Lock()
 	defer m.Unlock()

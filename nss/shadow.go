@@ -7,7 +7,7 @@ import "github.com/STNS/STNS/attribute"
 */
 import "C"
 
-var shadowList = attribute.UserGroups{}
+var shadowList = attribute.AllAttribute{}
 var shadowReadPos int
 
 type Shadow struct {
@@ -15,7 +15,7 @@ type Shadow struct {
 	result **C.struct_spwd
 }
 
-func (self Shadow) setCStruct(shadows attribute.UserGroups) int {
+func (self Shadow) setCStruct(shadows attribute.AllAttribute) int {
 	for n, _ := range shadows {
 		self.spwd.sp_namp = C.CString(n)
 		self.spwd.sp_pwdp = C.CString("!!")

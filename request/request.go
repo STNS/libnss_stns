@@ -71,8 +71,8 @@ func (r *Request) GetRaw() ([]byte, error) {
 	return nil, lastError
 }
 
-func (r *Request) Get() (attribute.UserGroups, error) {
-	var attr attribute.UserGroups
+func (r *Request) Get() (attribute.AllAttribute, error) {
+	var attr attribute.AllAttribute
 
 	body, err := r.GetRaw()
 
