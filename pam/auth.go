@@ -8,6 +8,7 @@ package main
 import "C"
 import (
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"log"
 	"strings"
@@ -18,68 +19,105 @@ import (
 )
 
 type Certifier interface {
-	Auth() C.int
+	Auth(string) C.int
+	getUser() string
 }
+
+type Supplicant struct {
+	authType string
+	pamh     *C.pam_handle_t
+	argc     int
+	argv     []string
+	config   *config.Config
+}
+
 type Sudo struct {
-	pamh   *C.pam_handle_t
-	argc   int
-	argv   []string
-	config *config.Config
+	*Supplicant
 }
 
 func getCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *config.Config) Certifier {
 	gargc := int(argc)
+	gargv := GoStrings(gargc, argv)
 	if gargc > 0 {
-		gargv := GoStrings(gargc, argv)
 		switch gargv[0] {
 		case "sudo":
-			return Sudo{pamh, gargc, gargv, config}
+			return Sudo{&Supplicant{"sudo", pamh, gargc, gargv, config}}
 		}
 	}
-	return nil
+	return Supplicant{"user", pamh, gargc, gargv, config}
 }
 
-func (s Sudo) Auth() C.int {
+func (s Supplicant) getUser() string {
+	var user *C.char
+	defer C.free(unsafe.Pointer(user))
+	if authUser(s.pamh, &user) {
+		return C.GoString(user)
+	}
+	return ""
+}
+
+func (s Sudo) getUser() string {
 	if s.argc > 1 {
-		var password *C.char
-		defer C.free(unsafe.Pointer(password))
-		if !getPassword(s.pamh, C.PAM_AUTHTOK, &password) {
-			return C.PAM_AUTH_ERR
-		}
+		return s.argv[1]
+	}
+	return ""
+}
 
-		r, err := request.NewRequest(s.config, "sudo", "name", s.argv[1])
-		if err != nil {
-			log.Println(err)
-			return C.PAM_AUTH_ERR
-		}
+func (s Supplicant) Auth(user string) C.int {
+	var password *C.char
+	defer C.free(unsafe.Pointer(password))
+	if !authPassword(s.pamh, &password) {
+		return C.PAM_AUTH_ERR
+	}
 
-		sudoers, err := r.Get()
-		if err != nil {
-			log.Println(err)
-			return C.PAM_AUTH_ERR
-		}
+	r, err := request.NewRequest(s.config, s.authType, "name", user)
+	if err != nil {
+		log.Println(err)
+		return C.PAM_AUTH_ERR
+	}
 
-		if sudoers != nil {
-			for _, s := range sudoers {
-				if strings.ToLower(sha256Sum([]byte(C.GoString(password)))) == strings.ToLower(s.Password) {
-					return C.PAM_SUCCESS
-				}
+	attr, err := r.Get()
+	if err != nil {
+		log.Println(err)
+		return C.PAM_AUTHINFO_UNAVAIL
+	}
+
+	if attr != nil {
+		for _, s := range attr {
+			var hash string
+			switch s.HashType {
+			case "sha512":
+				hash = strings.ToLower(sha512Sum([]byte(C.GoString(password))))
+			default:
+				hash = strings.ToLower(sha256Sum([]byte(C.GoString(password))))
 			}
+			if hash == strings.ToLower(s.Password) {
+				return C.PAM_SUCCESS
+			}
+
 		}
 	}
 	return C.PAM_AUTH_ERR
 }
 
 func GoStrings(length int, argv **C.char) []string {
-	tmpslice := (*[1 << 30]*C.char)(unsafe.Pointer(argv))[:length:length]
-	gostrings := make([]string, length)
-	for i, s := range tmpslice {
-		gostrings[i] = C.GoString(s)
+	if length > 0 {
+		tmpslice := (*[1 << 27]*C.char)(unsafe.Pointer(argv))[:length:length]
+		gostrings := make([]string, length)
+		for i, s := range tmpslice {
+			gostrings[i] = C.GoString(s)
+		}
+		return gostrings
 	}
-	return gostrings
+	return nil
 }
 
 func sha256Sum(data []byte) string {
 	bytes := sha256.Sum256(data)
+	return hex.EncodeToString(bytes[:])
+}
+
+func sha512Sum(data []byte) string {
+	bytes := sha512.Sum512(data)
 	return hex.EncodeToString(bytes[:])
 }

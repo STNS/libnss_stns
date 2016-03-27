@@ -17,12 +17,16 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 	config, err := config.Load("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Println(err)
-		return C.PAM_AUTH_ERR
+		return C.PAM_AUTHINFO_UNAVAIL
 	}
 
 	certifier := getCertifier(pamh, argc, argv, config)
 	if certifier != nil {
-		return certifier.Auth()
+		user := certifier.getUser()
+		if user == "" {
+			return C.PAM_USER_UNKNOWN
+		}
+		return certifier.Auth(user)
 	}
 
 	return C.PAM_AUTH_ERR
