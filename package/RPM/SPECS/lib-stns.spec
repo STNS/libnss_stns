@@ -47,6 +47,13 @@ rm -rf %{buildroot}
 
 %post
 ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
+
+if [ -e /etc/stns/libnss_stns.conf && ! -e /etc/stns/lib_stns.conf ]; then
+  cp -p /etc/stns/libnss_stns.conf /etc/stns/libnss_stns.conf.back
+  mv /etc/stns/libnss_stns.conf /etc/stns/lib_stns.conf
+  echo "move config file libnss_stns.conf to lib_stns.conf"
+fi
+
 %preun
 if [ $1 = 0 ]; then
   rm -rf /usr/%{_lib}/libnss_stns.so.2
