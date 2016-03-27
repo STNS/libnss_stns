@@ -1,12 +1,12 @@
-Source: libnss-stns
+Source: lib-stns
 Section: admin
 Priority: extra
 Maintainer: pyama86
 Build-Depends: debhelper (>= 7.0.50~)
 Standards-Version: 3.8.4
-Homepage: https://github.com/pyama86/libnss_stns
-
-Package: libnss-stns
+Homepage: https://github.com/STNS/lib-stns
+Package: lib-stns
+Replaces: libnss-stns
 Architecture: any
 Description: simple toml name service client
 Depends: dpkg-dev

@@ -1,27 +1,27 @@
-# libnss_stns
-[![Build Status](https://travis-ci.org/STNS/libnss_stns.svg?branch=master)](https://travis-ci.org/STNS/libnss_stns)
+# lib-stns
+[![Build Status](https://travis-ci.org/STNS/lib-stns.svg?branch=master)](https://travis-ci.org/STNS/lib-stns)
 
-libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
+lib-stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
 
 ## diagram
-![diagram](https://cloud.githubusercontent.com/assets/8022082/13377619/83fc7e98-de25-11e5-9bc8-8de31c7d9118.png)
+![diagram](https://cloud.githubusercontent.com/assets/8022082/14065462/37435f26-f465-11e5-9d3a-c25b81cf6ae1.png)
 
 ## install
 ## redhat/centos
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/yum-repo.sh | sh
-$ yum install libnss-stns
+$ yum install lib-stns
 ```
 ## debian/ubuntu
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/apt-repo.sh | sh
-$ apt-get install libnss-stns
+$ apt-get install lib-stns
 ```
 
 ## config
-* /etc/stns/libnss_stns.conf
+* /etc/stns/lib_stns.conf
 ```toml
 api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
 
@@ -100,12 +100,12 @@ ssh-rsa xxx
 ```
 
 ## tips
-* auto create home dir by successed ssh login
+###  auto create home dir by successed ssh login
 ```
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
 ```
 
-* Sudo Password authentication by Pam
+### Sudo Password authentication by Pam
 STNS attribute
 
 ```toml
@@ -129,7 +129,7 @@ session    required     pam_limits.soi
 In this case, against STNS to issue query that key example of sudoers, to obtain a password.
 This password is the system common.
 
-* Password authentication by Pam
+### Password authentication by Pam
 STNS attribute
 ```toml
 [users.example]

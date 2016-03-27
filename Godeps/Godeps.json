@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/STNS/libnss_stns",
+	"ImportPath": "github.com/STNS/lib-stns",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v60",
 	"Deps": [

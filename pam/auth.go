@@ -14,8 +14,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/lib-stns/config"
+	"github.com/STNS/lib-stns/request"
 )
 
 type Certifier interface {

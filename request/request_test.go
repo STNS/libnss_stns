@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/test"
+	"github.com/STNS/lib-stns/config"
+	"github.com/STNS/lib-stns/test"
 )
 
 type Response struct {

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/lib-stns/config"
+	"github.com/STNS/lib-stns/logger"
+	"github.com/STNS/lib-stns/request"
 )
 
 func main() {
 	logger.Setlog()
-	config, err := config.Load("/etc/stns/libnss_stns.conf")
+	config, err := config.Load("/etc/stns/lib_stns.conf")
 	if err == nil {
 		flag.Parse()
 		if raw := Fetch(config, flag.Arg(0)); raw != "" {

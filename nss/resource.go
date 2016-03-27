@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/STNS/STNS/attribute"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
+	"github.com/STNS/lib-stns/config"
+	"github.com/STNS/lib-stns/logger"
 )
 
 const NSS_STATUS_TRYAGAIN = -2
@@ -43,7 +43,7 @@ func get(paths ...string) (attribute.AllAttribute, error) {
 	}
 
 	if Config == nil {
-		c, err := config.Load("/etc/stns/libnss_stns.conf")
+		c, err := config.Load("/etc/stns/lib_stns.conf")
 		if err != nil {
 			log.Print(err)
 			return nil, err
