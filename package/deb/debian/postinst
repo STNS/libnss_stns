@@ -7,7 +7,7 @@ case "$1" in
 
   configure)
     ln -sf /usr/lib/$DEB_HOST_MULTIARCH/libnss_stns.so /lib/$DEB_HOST_MULTIARCH/libnss_stns.so.2
-    if [ -e /etc/stns/libnss_stns.conf && ! -e /etc/stns/lib_stns.conf ]; then
+    if [ -e /etc/stns/libnss_stns.conf ]; then
       cp -p /etc/stns/libnss_stns.conf /etc/stns/libnss_stns.conf.back
       mv /etc/stns/libnss_stns.conf /etc/stns/lib_stns.conf
       echo "move config file libnss_stns.conf to lib_stns.conf"
