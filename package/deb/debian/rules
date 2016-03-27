@@ -13,6 +13,8 @@ override_dh_auto_install:
 	install    -m 655 debian/stns-key-wrapper debian/${package}/usr/local/bin/stns-key-wrapper
 	install -d -m 755 debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/
 	install    -m 655 debian/${package}.so debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/libnss_stns.so
+	install -d -m 755 debian/${package}/lib/$(DEB_HOST_MULTIARCH)/security
+	install    -m 655 debian/libpam-stns.so debian/${package}/lib/$(DEB_HOST_MULTIARCH)/security/libpam_stns.so
 	install -d -m 755 debian/${package}/etc/stns/
 	install    -m 644 debian/libnss_stns.conf debian/${package}/etc/stns/libnss_stns.conf
 

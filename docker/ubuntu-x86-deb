@@ -2,6 +2,7 @@ FROM stns:ubuntu-x86
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN cp binary/libnss-stns.so package/deb/debian/libnss-stns.so && \
+cp binary/libpam-stns.so package/deb/debian/libpam-stns.so && \
 cp binary/stns-query-wrapper package/deb/debian/stns-query-wrapper && \
 cp binary/stns-key-wrapper package/deb/debian/stns-key-wrapper
 WORKDIR /go/src/github.com/STNS/libnss_stns/package/deb/
