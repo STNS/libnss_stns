@@ -8,8 +8,9 @@ Version: 0.0
 Release: 5
 License: MIT
 Source0:   lib_stns.conf
-Packager:  li-stns
+Packager:  lib-stns
 BuildRoot: %{_tmppath}/lib-stns-%{version}-%{release}-root
+Obsoletes: libnss-stns
 
 %description
 SimpleTomlNameService Client

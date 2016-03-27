@@ -43,7 +43,7 @@ func get(paths ...string) (attribute.AllAttribute, error) {
 	}
 
 	if Config == nil {
-		c, err := config.Load("/etc/stns/lib-stns.conf")
+		c, err := config.Load("/etc/stns/lib_stns.conf")
 		if err != nil {
 			log.Print(err)
 			return nil, err
