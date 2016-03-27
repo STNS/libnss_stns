@@ -100,12 +100,12 @@ ssh-rsa xxx
 ```
 
 ## tips
-* auto create home dir by successed ssh login
+###  auto create home dir by successed ssh login
 ```
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
 ```
 
-* Sudo Password authentication by Pam
+### Sudo Password authentication by Pam
 STNS attribute
 
 ```toml
@@ -129,7 +129,7 @@ session    required     pam_limits.soi
 In this case, against STNS to issue query that key example of sudoers, to obtain a password.
 This password is the system common.
 
-* Password authentication by Pam
+### Password authentication by Pam
 STNS attribute
 ```toml
 [users.example]
