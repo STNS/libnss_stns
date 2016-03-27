@@ -103,7 +103,48 @@ ssh-rsa xxx
 * auto create home dir by successed ssh login
 ```
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
+
+* Sudo Password authentication by Pam
+STNS attribute
+```toml
+[sudoers.example]
+password = "sha256hash"
+hash_type = "sha256"
 ```
+
+`/etc/pam.d/sudo`
+```
+#%PAM-1.0
+auth       sufficient libpam-stns.so sudo example ⇐
+auth       include      system-auth
+account    include      system-auth
+password   include      system-auth
+session    optional     pam_keyinit.so revoke
+session    required     pam_limits.soi
+...
+```
+In this case, against STNS to issue query that key example of sudoers, to obtain a password.
+This password is the system common.
+
+* Password authentication by Pam
+STNS attribute
+```toml
+[users.example]
+id = 2000
+directory = "/home/exaple"
+password = "sha256hash"
+hash_type = "sha256"
+```
+`/etc/pam.d/system-auth`
+```
+#%PAM-1.0
+# This file is auto-generated.
+# User changes will be destroyed the next time authconfig is run.
+auth        required      pam_env.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        sufficient    libpam-stns.so ⇐
+```
+In this way you can make the password authentication in the system-wide by configure
 
 # develop test
 Use docker machine
