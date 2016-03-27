@@ -6,7 +6,7 @@ lib-stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * ssh authorized keys wrapper
 
 ## diagram
-![diagram](https://cloud.githubusercontent.com/assets/8022082/13377619/83fc7e98-de25-11e5-9bc8-8de31c7d9118.png)
+![diagram](https://cloud.githubusercontent.com/assets/8022082/14065462/37435f26-f465-11e5-9d3a-c25b81cf6ae1.png)
 
 ## install
 ## redhat/centos
