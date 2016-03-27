@@ -31,5 +31,5 @@ end
 
 def docker_run(file, arch="x86_64", dir="binary")
   sh "docker build --no-cache --rm -f docker/#{file} -t stns:stns ."
-  sh "docker run -e ARCH=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
+  sh "docker run -e ARCH=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/lib-stns/#{dir} -t stns:stns"
 end

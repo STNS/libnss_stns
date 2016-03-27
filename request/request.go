@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/STNS/STNS/attribute"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
+	"github.com/STNS/lib-stns/config"
+	"github.com/STNS/lib-stns/logger"
 )
 
 type Request struct {

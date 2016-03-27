@@ -1,7 +1,7 @@
-# libnss_stns
-[![Build Status](https://travis-ci.org/STNS/libnss_stns.svg?branch=master)](https://travis-ci.org/STNS/libnss_stns)
+# lib-stns
+[![Build Status](https://travis-ci.org/STNS/lib-stns.svg?branch=master)](https://travis-ci.org/STNS/lib-stns)
 
-libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
+lib-stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
 
@@ -12,16 +12,16 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 ## redhat/centos
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/yum-repo.sh | sh
-$ yum install libnss-stns
+$ yum install lib-stns
 ```
 ## debian/ubuntu
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/apt-repo.sh | sh
-$ apt-get install libnss-stns
+$ apt-get install lib-stns
 ```
 
 ## config
-* /etc/stns/libnss_stns.conf
+* /etc/stns/lib_stns.conf
 ```toml
 api_end_point = ["http://<server-master>:1104", "http://<server-slave>:1104"]
 

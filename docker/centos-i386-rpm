@@ -1,15 +1,15 @@
 FROM stns:centos-i386
-ADD ./ /go/src/github.com/STNS/libnss_stns
-WORKDIR /go/src/github.com/STNS/libnss_stns
+ADD ./ /go/src/github.com/STNS/lib-stns
+WORKDIR /go/src/github.com/STNS/lib-stns
 
-RUN chown root:root -R /go/src/github.com/STNS/libnss_stns/package/RPM && \
+RUN chown root:root -R /go/src/github.com/STNS/lib-stns/package/RPM && \
 mkdir -p package/RPM/BUILD/ && \
-echo '%_topdir /go/src/github.com/STNS/libnss_stns/package/RPM' > ~/.rpmmacros && \
+echo '%_topdir /go/src/github.com/STNS/lib-stns/package/RPM' > ~/.rpmmacros && \
 echo '%_signature gpg' >> ~/.rpmmacros && \
 echo '%_gpg_name stns-server' >> ~/.rpmmacros && \
-cp binary/libnss-stns.so  package/RPM/BUILD/libnss_stns.so && \
-cp binary/libpam-stns.so  package/RPM/BUILD/libpam_stns.so && \
+cp binary/libnss-stns.so  package/RPM/BUILD/libnss-stns.so && \
+cp binary/libpam-stns.so  package/RPM/BUILD/libpam-stns.so && \
 cp binary/stns-key-wrapper package/RPM/BUILD/stns-key-wrapper && \
 cp binary/stns-query-wrapper package/RPM/BUILD/stns-query-wrapper
 
-CMD rpmbuild --target ${ARCH} -ba package/RPM/SPECS/libnss_stns.spec && cp package/RPM/RPMS/${ARCH}/* binary/
+CMD rpmbuild --target ${ARCH} -ba package/RPM/SPECS/lib-stns.spec && cp package/RPM/RPMS/${ARCH}/* binary/

@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/STNS/libnss_stns/test"
+	"github.com/STNS/lib-stns/test"
 )
 
 func TestLoadConfig(t *testing.T) {
 
-	configFile, err := ioutil.TempFile("", "libnss_stns-config-test")
+	configFile, err := ioutil.TempFile("", "lib-stns-config-test")
 	test.AssertNoError(t, err)
 
 	configContent := "api_end_point=[\"is string\", \"is string\"]"
