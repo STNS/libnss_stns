@@ -1,5 +1,4 @@
 FROM stns:ubuntu-x86
-FROM golang:latest
 ADD . /go/src/github.com/STNS/lib-stns
 WORKDIR /go/src/github.com/STNS/lib-stns
 RUN go get github.com/tools/godep && godep restore
