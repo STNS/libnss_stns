@@ -3,7 +3,7 @@
 Summary: SimpleTomlNameServiceLibrary
 Name: libnss-stns
 Group: SipmleTomlNameService
-URL: https://github.com/pyama86/libnss_stns
+URL: https://github.com/STNS/libnss_stns
 Version: 0.0
 Release: 5
 License: MIT
@@ -23,6 +23,9 @@ install    -m 655 %{_builddir}/stns-query-wrapper %{buildroot}/%{_localbindir}
 install -d -m 755 %{buildroot}/usr/%{_lib}
 install    -m 655 %{_builddir}/libnss_stns.so %{buildroot}/usr/%{_lib}
 
+install -d -m 755 %{buildroot}/%{_lib}/security
+install    -m 655 %{_builddir}/libpam_stns.so %{buildroot}/%{_lib}/security
+
 install -d -m 755 %{buildroot}/%{_localstatedir}/log/
 
 install -d -m 755 %{buildroot}/%{_sysconfdir}/stns/
@@ -39,6 +42,7 @@ rm -rf %{buildroot}
 %{_localbindir}/stns-query-wrapper
 /usr/%{_lib}/libnss_stns.so
 /usr/%{_lib}/libnss_stns.so.2
+/%{_lib}/security/libpam_stns.so
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
 
 %post

@@ -1,6 +1,7 @@
 {
 	"ImportPath": "github.com/STNS/libnss_stns",
 	"GoVersion": "go1.6",
+	"GodepVersion": "v60",
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
@@ -9,8 +10,8 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/attribute",
-			"Comment": "v0.0.1-95-gdd0c077",
-			"Rev": "dd0c0774cef4c141863a2339c2666180eb105ea2"
+			"Comment": "0.0.3-11-g1e88bd1",
+			"Rev": "1e88bd16b00ea4e5bca9841fd21efae13aca4f0c"
 		}
 	]
 }

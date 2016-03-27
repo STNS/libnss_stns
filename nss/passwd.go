@@ -13,7 +13,7 @@ import (
 */
 import "C"
 
-var passwdList = attribute.UserGroups{}
+var passwdList = attribute.AllAttribute{}
 var passwdReadPos int
 
 type Passwd struct {
@@ -21,7 +21,7 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds attribute.UserGroups) int {
+func (self Passwd) setCStruct(passwds attribute.AllAttribute) int {
 
 	for n, p := range passwds {
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {

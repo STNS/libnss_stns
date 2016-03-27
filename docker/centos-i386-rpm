@@ -8,6 +8,7 @@ echo '%_topdir /go/src/github.com/STNS/libnss_stns/package/RPM' > ~/.rpmmacros &
 echo '%_signature gpg' >> ~/.rpmmacros && \
 echo '%_gpg_name stns-server' >> ~/.rpmmacros && \
 cp binary/libnss-stns.so  package/RPM/BUILD/libnss_stns.so && \
+cp binary/libpam-stns.so  package/RPM/BUILD/libpam_stns.so && \
 cp binary/stns-key-wrapper package/RPM/BUILD/stns-key-wrapper && \
 cp binary/stns-query-wrapper package/RPM/BUILD/stns-query-wrapper
 
