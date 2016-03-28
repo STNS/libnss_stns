@@ -127,9 +127,16 @@ session    optional     pam_keyinit.so revoke
 session    required     pam_limits.soi
 ...
 ```
-
 In this case, against STNS to issue query that key example of sudoers, to obtain a password.
 This password is the system common.
+
+You will be able to sudo in this only
+
+```
+$ sudo ls
+[sudo] password for example: <plain password>
+example.txt
+```
 
 ### Password authentication by Pam
 STNS attribute
