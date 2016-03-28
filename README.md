@@ -73,17 +73,17 @@ AuthorizedKeysCommandUser root
 ```
 
 ## wrapper command
-* stns-query-wrapper "user/name/pyama"
-stns http query wrapper
+Query is always through the wrapper.
+
 ```
-# /usr/local/bin/stns-query-wrapper "user/name/pyama"
+# /usr/local/bin/stns-query-wrapper "user/name/example"
 {
-  "pyama": {
+  "example": {
     "id": 1001,
     "group_id": 1001,
-    "directory": "/home/pyama",
+    "directory": "/home/example",
     "shell": "/bin/sh",
-    "gecos": "pyama",
+    "gecos": "example",
     "keys": [
       "ssh-rsa xxx
     ],
@@ -92,17 +92,19 @@ stns http query wrapper
 }
 ```
 
-* stns-key-wrapper "pyama"
-stns ssh key wrapper
+Public key is using a key wrapper
+
 ```
-# /usr/local/bin/stns-key-wrapper "pyama"
+# /usr/local/bin/stns-key-wrapper "example"
 ssh-rsa xxx
 ```
 
-## tips
+## Tips
 ### auto create home dir by successed ssh login
 ```
+
 $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> /etc/pam.d/sshd
+
 ```
 
 ### Sudo Password authentication by Pam
