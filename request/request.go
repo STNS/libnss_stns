@@ -113,6 +113,7 @@ func (r *Request) checkLockFile(endPoint string) bool {
 	}
 
 	if time.Now().Unix() > timeStamp+settings.LOCK_TIME {
+		os.Remove(fileName)
 		return true
 	}
 
