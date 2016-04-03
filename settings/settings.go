@@ -1,6 +1,6 @@
 package settings
 
 const (
-	TIMEOUT   = 5
-	WAIT_TIME = 5
+	HTTP_TIMEOUT = 3
+	LOCK_TIME    = 10
 )

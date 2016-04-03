@@ -44,7 +44,7 @@ func (r *Request) GetRaw() ([]byte, error) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
 	http.DefaultTransport.(*http.Transport).Dial = (&net.Dialer{
-		Timeout:   settings.TIMEOUT * time.Second,
+		Timeout:   settings.HTTP_TIMEOUT * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).Dial
 
@@ -112,7 +112,7 @@ func (r *Request) checkLockFile(endPoint string) bool {
 		return false
 	}
 
-	if time.Now().Unix() > timeStamp+settings.WAIT_TIME {
+	if time.Now().Unix() > timeStamp+settings.LOCK_TIME {
 		return true
 	}
 
