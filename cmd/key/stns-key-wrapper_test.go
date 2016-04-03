@@ -51,6 +51,7 @@ func TestFetchKey(t *testing.T) {
 				"group_id": 2,
 				"directory": "/home/example",
 				"shell": "/bin/sh",
+				"keys": []
 			}
 		}`,
 	)
@@ -68,6 +69,7 @@ func TestFetchKey(t *testing.T) {
 		`{
 		}`,
 	)
+
 	notfoundServer := httptest.NewServer(http.HandlerFunc(notfoundHandler))
 	defer notfoundServer.Close()
 
