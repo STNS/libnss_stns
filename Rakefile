@@ -24,7 +24,7 @@ end
     open("docker/tmp/ubuntu-#{arch}-build","w") {
       |f| f.write(content)
     }
-    docker_run "ubuntu-#{arch}-build"
+    docker_run "tmp/ubuntu-#{arch}-build"
   end
 
   task "pkg_#{arch}" => ["build_#{arch}".to_sym] do
@@ -39,7 +39,7 @@ end
 
       sh "find binary | grep -e '#{o[1]}.#{o[2]}$' | xargs rm -rf"
 
-      docker_run("#{o[0]}-#{arch}-pkg", o[1])
+      docker_run("tmp/#{o[0]}-#{arch}-pkg", o[1])
       # check package
       sh "test -e binary/*#{o[1]}.#{o[2]}"
     end
@@ -47,6 +47,6 @@ end
 end
 
 def docker_run(file, arch="x86_64", dir="binary")
-  sh "docker build --no-cache --rm -f docker/tmp/#{file} -t stns:stns ."
+  sh "docker build --no-cache --rm -f docker/#{file} -t stns:stns ."
   sh "docker run -e ARCH=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
 end

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"path"
 	"strings"
@@ -36,6 +37,10 @@ func (r *Request) GetRaw() ([]byte, error) {
 	perm := rand.Perm(len(r.Config.ApiEndPoint))
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
+	http.DefaultTransport.(*http.Transport).Dial = (&net.Dialer{
+		Timeout:   5 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).Dial
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
