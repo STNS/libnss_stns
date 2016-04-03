@@ -1,3 +1,11 @@
+libnss-stns (0.0.6) STABLE; urgency=low
+
+  * Add sudoers password by pam module
+  * Add user password by pam module
+  * Wait depending on the setting when there is no response of api
+
+ -- pyama86 <www.kazu.com@gmail.com>  Fri, 19 Mar 2016 00:00:00 +0000
+
 libnss-stns (0.0.5) STABLE; urgency=low
 
   * Add a link group
