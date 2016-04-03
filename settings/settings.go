@@ -2,5 +2,5 @@ package settings
 
 const (
 	HTTP_TIMEOUT = 3
-	LOCK_TIME    = 10
+	LOCK_TIME    = 6
 )

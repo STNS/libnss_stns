@@ -42,6 +42,26 @@ func TestFetchKey(t *testing.T) {
 		t.Error("unmatch keys")
 	}
 
+	// no key
+	nokeyHandler := test.GetHandler(t,
+		"/user/name/example",
+		`{
+			"example": {
+				"id": 1,
+				"group_id": 2,
+				"directory": "/home/example",
+				"shell": "/bin/sh",
+			}
+		}`,
+	)
+	nokeyServer := httptest.NewServer(http.HandlerFunc(nokeyHandler))
+	defer nokeyServer.Close()
+
+	c = &config.Config{ApiEndPoint: []string{nokeyServer.URL}}
+	if "" != Fetch(c, "example") {
+		t.Error("unmatch keys by nokey")
+	}
+
 	// user notfound
 	notfoundHandler := test.GetHandler(t,
 		"/user/name/notfound",
