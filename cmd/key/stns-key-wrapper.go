@@ -38,7 +38,9 @@ func Fetch(config *config.Config, name string) string {
 
 	if users != nil {
 		for _, u := range users {
-			userKeys += strings.Join(u.Keys, "\n") + "\n"
+			if len(u.Keys) > 0 {
+				userKeys += strings.Join(u.Keys, "\n") + "\n"
+			}
 		}
 		defer func() {
 			if err := recover(); err != nil {
@@ -46,13 +48,16 @@ func Fetch(config *config.Config, name string) string {
 			}
 		}()
 	}
+
 	rex := regexp.MustCompile(`stns-key-wrapper$`)
 	if r.Config.ChainSshWrapper != "" && !rex.MatchString(r.Config.ChainSshWrapper) {
 		out, err := exec.Command(r.Config.ChainSshWrapper, name).Output()
 		if err != nil {
 			log.Print(err)
 		} else {
-			userKeys += string(out)
+			if "" != string(out) {
+				userKeys += string(out)
+			}
 		}
 
 	}

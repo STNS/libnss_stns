@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/STNS/libnss_stns/config"
@@ -25,7 +26,8 @@ func TestRequest(t *testing.T) {
 				"shell": "/bin/sh",
 				"keys": [
 					"test"
-				]
+				],
+				"password": "password"
 			}
 		}`,
 	)
@@ -60,6 +62,9 @@ func TestRequest(t *testing.T) {
 		if u.Keys[0] != "test" || len(u.Keys) != 1 {
 			t.Error("unmatch shell")
 		}
+		if u.Password != "password" {
+			t.Error("unmatch password")
+		}
 	}
 
 }
@@ -90,6 +95,30 @@ func TestBasicAuth(t *testing.T) {
 		t.Error("fetch error")
 	}
 
+}
+
+func TestLockfile(t *testing.T) {
+	handler := test.GetHandler(t, "dummy", "dummy")
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"example1", "example2"}
+	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
+
+	r.Get()
+	lock1 := "/tmp/libnss_stns." + GetMD5Hash("example1")
+	lock2 := "/tmp/libnss_stns." + GetMD5Hash("example2")
+
+	_, err := os.Stat(lock1)
+	if err != nil {
+		t.Error("not exist lock file 1")
+	}
+
+	_, err = os.Stat(lock2)
+	if err != nil {
+		t.Error("not exist lock file 2")
+	}
 }
 
 func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
