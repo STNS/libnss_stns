@@ -1,4 +1,4 @@
-FROM stns:centos-i386
+FROM stns:centos-<%= arch %>
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 
