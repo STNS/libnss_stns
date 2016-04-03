@@ -1,12 +1,17 @@
 package request
 
 import (
+	"bytes"
+	"crypto/md5"
 	"crypto/tls"
+	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -14,6 +19,7 @@ import (
 	"github.com/STNS/STNS/attribute"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
+	"github.com/STNS/libnss_stns/settings"
 )
 
 type Request struct {
@@ -38,7 +44,7 @@ func (r *Request) GetRaw() ([]byte, error) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
 	http.DefaultTransport.(*http.Transport).Dial = (&net.Dialer{
-		Timeout:   5 * time.Second,
+		Timeout:   settings.TIMEOUT * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).Dial
 
@@ -56,24 +62,70 @@ func (r *Request) GetRaw() ([]byte, error) {
 			req.SetBasicAuth(r.Config.User, r.Config.Password)
 		}
 
-		res, err := http.DefaultClient.Do(req)
+		if r.checkLockFile(endPoint) {
+			res, err := http.DefaultClient.Do(req)
 
-		if err != nil {
-			lastError = err
+			if err != nil {
+				r.writeLockFile(endPoint)
+				lastError = err
+				continue
+			}
+
+			defer res.Body.Close()
+			body, err := ioutil.ReadAll(res.Body)
+
+			if err != nil {
+				lastError = err
+				continue
+			}
+
+			if res.StatusCode == http.StatusOK {
+				return body, nil
+			}
+
+		} else {
+			r.writeLockFile(endPoint)
 			continue
 		}
-		defer res.Body.Close()
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			lastError = err
-			continue
-		}
 
-		if res.StatusCode == http.StatusOK {
-			return body, nil
-		}
 	}
 	return nil, lastError
+}
+
+func (r *Request) checkLockFile(endPoint string) bool {
+	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+	_, err := os.Stat(fileName)
+
+	// lockfile not  exists
+	if err != nil {
+		return true
+	}
+
+	buff, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return false
+	}
+
+	buf := bytes.NewBuffer(buff)
+	timeStamp, err := binary.ReadVarint(buf)
+	if err != nil {
+		return false
+	}
+
+	if time.Now().Unix() > timeStamp+settings.WAIT_TIME {
+		return true
+	}
+
+	return false
+
+}
+
+func (r *Request) writeLockFile(endPoint string) {
+	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+
+	result := make([]byte, binary.MaxVarintLen64)
+	binary.PutVarint(result, time.Now().Unix())
+	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
 func (r *Request) Get() (attribute.AllAttribute, error) {
@@ -92,4 +144,10 @@ func (r *Request) Get() (attribute.AllAttribute, error) {
 	}
 
 	return attr, nil
+}
+
+func GetMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
