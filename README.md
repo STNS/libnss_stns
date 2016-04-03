@@ -147,7 +147,9 @@ directory = "/home/exaple"
 password = "sha256hash"
 hash_type = "sha256"
 ```
-* /etc/pam.d/system-auth
+
+* /etc/pam.d/system-auth or /etc/pam.d/common-auth
+
 ```
 #%PAM-1.0
 # This file is auto-generated.

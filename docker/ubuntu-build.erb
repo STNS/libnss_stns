@@ -1,4 +1,4 @@
-FROM stns:ubuntu-i386
+FROM stns:ubuntu-<%= arch %>
 ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN go get github.com/tools/godep && godep restore

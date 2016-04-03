@@ -5,3 +5,4 @@ RPM/BUILDROOT/
 releases/*
 binary/*
 vendor/*
+docker/tmp/

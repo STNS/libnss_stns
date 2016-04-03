@@ -1,4 +1,4 @@
-FROM stns:ubuntu-x86
+FROM stns:ubuntu-<%= arch %>
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN cp binary/libnss-stns.so package/deb/debian/libnss-stns.so && \

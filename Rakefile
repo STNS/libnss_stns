@@ -1,3 +1,4 @@
+require 'erb'
 task :default => "test"
 
 task "make" => [:pkg_x86, :pkg_i386]
@@ -14,22 +15,38 @@ end
   %w(x86 x86_64 amd64),
   %w(i386 i386 i386)
 ].each do |r|
-  task "build_#{r[0]}" => [:clean_bin]  do
-    docker_run "ubuntu-#{r[0]}-build"
+  arch = r[0]
+  arch_rpm = r[1]
+  arch_deb = r[2]
+
+  task "build_#{arch}" => [:clean_bin]  do
+    content = ERB.new(open("docker/ubuntu-build.erb").read).result(binding)
+    open("docker/tmp/ubuntu-#{arch}-build","w") {
+      |f| f.write(content)
+    }
+    docker_run "ubuntu-#{arch}-build"
   end
 
-  task "pkg_#{r[0]}" => ["build_#{r[0]}".to_sym] do
-    sh "ls -d binary/* | grep -e '#{r[1]}.rpm$' -e '#{r[2]}.deb$'| xargs rm -rf"
-    docker_run("centos-#{r[0]}-rpm", r[1])
-    docker_run("ubuntu-#{r[0]}-deb", r[2])
+  task "pkg_#{arch}" => ["build_#{arch}".to_sym] do
+    [
+      ["centos", arch_rpm, "rpm"],
+      ["ubuntu", arch_deb, "deb"]
+    ].each do |o|
+      content = ERB.new(open("docker/#{o[0]}-pkg.erb").read).result(binding)
+      open("docker/tmp/#{o[0]}-#{arch}-pkg","w") {
+        |f| f.write(content)
+      }
 
-    # check package
-    sh "test -e binary/*#{r[1]}.rpm"
-    sh "test -e binary/*#{r[2]}.deb"
+      sh "find binary | grep -e '#{o[1]}.#{o[2]}$' | xargs rm -rf"
+
+      docker_run("#{o[0]}-#{arch}-pkg", o[1])
+      # check package
+      sh "test -e binary/*#{o[1]}.#{o[2]}"
+    end
   end
 end
 
 def docker_run(file, arch="x86_64", dir="binary")
-  sh "docker build --no-cache --rm -f docker/#{file} -t stns:stns ."
+  sh "docker build --no-cache --rm -f docker/tmp/#{file} -t stns:stns ."
   sh "docker run -e ARCH=#{arch} -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
 end
