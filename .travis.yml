@@ -1,9 +1,13 @@
 language: go
 sudo: true
+services:
+  - docker
 before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y libpam0g-dev
+- bundle install
+- mkdir docker/tmp
+script:
+- bundle exec rake pkg_test
 go:
   - 1.6
-  - tip
-

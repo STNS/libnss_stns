@@ -1,4 +1,4 @@
-FROM stns:ubuntu-<%= arch %>
+FROM pyama/stns:ubuntu-<%= arch %>
 ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN godep restore

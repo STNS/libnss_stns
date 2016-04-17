@@ -6,3 +6,4 @@ releases/*
 binary/*
 vendor/*
 docker/tmp/
+Gemfile.lock

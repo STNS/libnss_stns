@@ -1,0 +1,1 @@
+libpam_stns.so lib/@DEB_HOST_MULTIARCH@/security
