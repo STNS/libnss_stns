@@ -5,8 +5,9 @@ services:
 before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y libpam0g-dev
+- bundle install
+- mkdir docker/tmp
 script:
-  - bundle install
-  - bundle exec rake make
+- bundle exec rake make
 go:
   - 1.6
