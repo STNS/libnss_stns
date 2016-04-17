@@ -1,5 +1,12 @@
 FROM pyama/stns:ubuntu-<%= arch %>
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
-RUN dpkg -i binary/libnss-snts*${ARCH}.deb
-RUN dpkg -i binary/libpam-snts*${ARCH}.deb
+
+ENV PATH /root/.rbenv/shims/:$PATH
+RUN sed -i "2i auth      sufficient    libpam_stns.so sudo example" /etc/pam.d/sudo
+RUN sed -i "4i auth        sufficient    libpam_stns.so" /etc/pam.d/common-auth 
+RUN bundle install --path=vendor/bundle --binstubs --jobs 4
+
+CMD dpkg -i binary/libnss-stns*${ARCH}.deb && \
+dpkg -i binary/libpam-stns*${ARCH}.deb && \
+bin/rake spec

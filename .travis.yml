@@ -8,6 +8,6 @@ before_install:
 - bundle install
 - mkdir docker/tmp
 script:
-- bundle exec rake make
+- bundle exec rake pkg_test
 go:
   - 1.6

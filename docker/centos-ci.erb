@@ -1,5 +1,13 @@
 FROM pyama/stns:centos-<%= arch %>
 ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
-RUN rpm -ivh binary/libnss-snts*${ARCH}.rpm
-RUN rpm -ivh binary/libpam-snts*${ARCH}.rpm
+
+ENV PATH /root/.rbenv/shims/:$PATH
+RUN yum -y install sudo
+RUN sed -i 's/Defaults    requiretty//g' /etc/sudoers
+RUN sed -i 's/Defaults    secure_path.*//g' /etc/sudoers
+RUN bundle install --path=vendor/bundle --binstubs --jobs 4
+
+CMD rpm -ivh binary/libnss-stns*${ARCH}.rpm && \
+rpm -ivh binary/libpam-stns*${ARCH}.rpm && \
+bin/rake spec
