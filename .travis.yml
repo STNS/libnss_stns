@@ -3,7 +3,7 @@ sudo: true
 before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y libpam0g-dev
+script:
+  - bundle exec rake make
 go:
   - 1.6
-  - tip
-
