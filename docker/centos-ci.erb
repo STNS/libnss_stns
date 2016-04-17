@@ -3,7 +3,6 @@ ADD ./ /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 
 ENV PATH /root/.rbenv/shims/:$PATH
-RUN yum -y install sudo
 RUN sed -i 's/Defaults    requiretty//g' /etc/sudoers
 RUN sed -i 's/Defaults    secure_path.*//g' /etc/sudoers
 RUN bundle install --path=vendor/bundle --binstubs --jobs 4

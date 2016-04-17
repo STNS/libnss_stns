@@ -36,9 +36,10 @@ elsif ['debian', 'ubuntu'].include?(os[:family])
   end
 end
 
-files.each do |f|
+files.each_with_index do |f,i|
   describe file(f) do
     it { should be_owned_by('root') }
     it { should be_grouped_into('root') }
+    it { should be_symlink } if i == 2
   end
 end
