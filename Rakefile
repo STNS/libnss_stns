@@ -56,7 +56,6 @@ end
       docker_run("tmp/#{os}-#{arch}-ci", pkg_arch)
     end
   end
-
 end
 
 def docker_run(file, arch="x86_64", dir="binary")
