@@ -8,7 +8,7 @@ task "test" do
 end
 
 task "clean_bin" do
-  sh "ls -d binary/* | grep -v -e 'rpm$' -e 'deb$' | xargs rm -rf"
+  sh "find binary/* | grep -v -e 'rpm$' -e 'deb$' | xargs rm -rf"
 end
 
 [
