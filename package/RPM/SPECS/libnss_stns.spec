@@ -1,6 +1,6 @@
 %define _localbindir /usr/local/bin
 %define _binaries_in_noarch_packages_terminate_build   0
-Summary: SimpleTomlNameServiceLibrary
+Summary: Simple Toml NameService Library
 Name: libnss-stns
 Group: SipmleTomlNameService
 URL: https://github.com/STNS/libnss_stns
@@ -11,8 +11,15 @@ Source0:   libnss_stns.conf
 Packager:  libnss-stns
 BuildRoot: %{_tmppath}/libnss-stns-%{version}-%{release}-root
 
+%package -n libpam-stns
+Summary: Simple Toml NameService Pam Module
+Group: SipmleTomlNameService
+
+%description -n libpam-stns
+SimpleTomlNameService Pam Module
+
 %description
-SimpleTomlNameService Client
+SimpleTomlNameService Nss Module
 
 %install
 rm -rf %{buildroot}
@@ -42,12 +49,10 @@ rm -rf %{buildroot}
 %{_localbindir}/stns-query-wrapper
 /usr/%{_lib}/libnss_stns.so
 /usr/%{_lib}/libnss_stns.so.2
-/%{_lib}/security/libpam_stns.so
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
+
+%files -n libpam-stns
+/%{_lib}/security/libpam_stns.so
 
 %post
 ln -fs /usr/%{_lib}/libnss_stns.so /usr/%{_lib}/libnss_stns.so.2
-%preun
-if [ $1 = 0 ]; then
-  rm -rf /usr/%{_lib}/libnss_stns.so.2
-fi

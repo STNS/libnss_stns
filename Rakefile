@@ -41,7 +41,8 @@ end
 
       docker_run("tmp/#{o[0]}-#{arch}-pkg", o[1])
       # check package
-      sh "test -e binary/*#{o[1]}.#{o[2]}"
+      sh "test -e binary/libnss*#{o[1]}.#{o[2]}"
+      sh "test -e binary/libpam*#{o[1]}.#{o[2]}"
     end
   end
 end
