@@ -4,7 +4,7 @@ task :default => "test"
 task "make" => [:pkg_x86, :pkg_i386]
 
 task "test" do
-  docker_run("ubuntu-x86-test")
+  docker_run "ubuntu-x86-test"
 end
 
 task "clean_bin" do
@@ -45,6 +45,21 @@ end
       sh "test -e binary/libpam*#{o[1]}.#{o[2]}"
     end
   end
+
+  task "ci_#{arch}" => ["pkg_#{arch}"] do
+    [
+      ["centos", arch_rpm],
+      ["ubuntu", arch_deb]
+    ].each do |o|
+      content = ERB.new(open("docker/#{o[0]}-ci.erb").read).result(binding)
+      open("docker/tmp/#{o[0]}-#{arch}-ci","w") {
+        |f| f.write(content)
+      }
+
+      docker_run("tmp/#{o[0]}-#{arch}-ci", o[1])
+    end
+  end
+
 end
 
 def docker_run(file, arch="x86_64", dir="binary")

@@ -1,0 +1,5 @@
+FROM pyama/stns:ubuntu-<%= arch %>
+ADD ./ /go/src/github.com/STNS/libnss_stns
+WORKDIR /go/src/github.com/STNS/libnss_stns
+RUN dpkg -i binary/libnss-snts*${ARCH}.deb
+RUN dpkg -i binary/libpam-snts*${ARCH}.deb

@@ -1,0 +1,5 @@
+FROM pyama/stns:centos-<%= arch %>
+ADD ./ /go/src/github.com/STNS/libnss_stns
+WORKDIR /go/src/github.com/STNS/libnss_stns
+RUN rpm -ivh binary/libnss-snts*${ARCH}.rpm
+RUN rpm -ivh binary/libpam-snts*${ARCH}.rpm
