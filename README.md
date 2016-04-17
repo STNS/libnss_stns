@@ -1,9 +1,10 @@
 # libnss_stns
 [![Build Status](https://travis-ci.org/STNS/libnss_stns.svg?branch=master)](https://travis-ci.org/STNS/libnss_stns)
 
-libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
+libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Module.
 * /etc/passwd,/etc/groups,/etc/shadow resolver.
 * ssh authorized keys wrapper
+* sudo auth wrapper
 
 ## diagram
 ![diagram](https://cloud.githubusercontent.com/assets/8022082/14065462/37435f26-f465-11e5-9d3a-c25b81cf6ae1.png)
@@ -12,12 +13,12 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Library.
 ## redhat/centos
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/yum-repo.sh | sh
-$ yum install libnss-stns
+$ yum install libnss-stns libpam-stns
 ```
 ## debian/ubuntu
 ```
 $ curl -fsSL https://repo.stns.jp/scripts/apt-repo.sh | sh
-$ apt-get install libnss-stns
+$ apt-get install libnss-stns libpam-stns
 ```
 
 ## config
