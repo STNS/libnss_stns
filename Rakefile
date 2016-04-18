@@ -43,6 +43,10 @@ task "test_pkg" => %W(
   )
 end
 
+task "clean_all" do
+  sh "rm -rf binary/*"
+end
+
 desc "delete binarys"
 task "clean_bin" do
   sh "find binary/* | grep -v -e 'rpm$' -e 'deb$' | xargs rm -rf"
