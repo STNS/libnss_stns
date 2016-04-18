@@ -84,14 +84,14 @@ end
   end
 end
 
-def docker_run(os, arch, task, pkg_arch=nil, dir="binary")
+def docker_run(os, arch, task, pkg_arch=nil)
   content = ERB.new(open("docker/#{os}-#{task}.erb").read).result(binding)
   open("docker/tmp/#{os}-#{arch}-#{task}","w") {
     |f| f.write(content)
   }
 
   sh "docker build --rm -f docker/tmp/#{os}-#{arch}-#{task} -t stns:stns ."
-  sh "docker run -e ARCH=#{pkg_arch} --rm -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/#{dir} -t stns:stns"
+  sh "docker run -e ARCH=#{pkg_arch} --rm -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
 end
 
 namespace :spec do
