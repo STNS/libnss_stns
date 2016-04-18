@@ -5,6 +5,6 @@ WORKDIR /go/src/github.com/STNS/libnss_stns
 ENV PATH /root/.rbenv/shims/:$PATH
 RUN bundle install --path=vendor/bundle --binstubs --jobs 4
 
-CMD dpkg -i binary/libnss-stns*${ARCH}.deb && \
-dpkg -i binary/libpam-stns*${ARCH}.deb && \
+CMD dpkg -i binary/libnss-stns*<%= pkg_arch %>.deb && \
+dpkg -i binary/libpam-stns*<%= pkg_arch %>.deb && \
 bin/rake spec

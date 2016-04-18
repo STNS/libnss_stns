@@ -12,4 +12,4 @@ cp binary/libpam-stns.so  package/RPM/BUILD/libpam_stns.so && \
 cp binary/stns-key-wrapper package/RPM/BUILD/stns-key-wrapper && \
 cp binary/stns-query-wrapper package/RPM/BUILD/stns-query-wrapper
 
-CMD rpmbuild --target ${ARCH} -ba package/RPM/SPECS/libnss_stns.spec && cp package/RPM/RPMS/${ARCH}/* binary/
+CMD rpmbuild --target <%= pkg_arch %> -ba package/RPM/SPECS/libnss_stns.spec && cp package/RPM/RPMS/<%= pkg_arch %>/* binary/
