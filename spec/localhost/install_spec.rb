@@ -42,4 +42,9 @@ files.each_with_index do |f,i|
     it { should be_grouped_into('root') }
     it { should be_symlink } if i == 2
   end
+
+  describe command("file #{f}") do
+    bit = i386? ? "32" : "64"
+    its(:stdout) { should match /#{bit}-bit/ }
+  end
 end
