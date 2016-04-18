@@ -46,5 +46,5 @@ files.each_with_index do |f,i|
   describe command("file #{f}") do
     bit = i386? ? "32" : "64"
     its(:stdout) { should match /#{bit}-bit/ }
-  end
+  end unless i == 2
 end
