@@ -2,7 +2,7 @@ libnss-stns (0.0.7) STABLE; urgency=low
 
   * To separate the pam from package
 
- -- pyama86 <www.kazu.com@gmail.com>  Man, 18 Apr 2016 01:13:00 +0000
+ -- pyama86 <www.kazu.com@gmail.com>  Mon, 18 Apr 2016 01:13:00 +0000
 
 libnss-stns (0.0.6) STABLE; urgency=low
 
