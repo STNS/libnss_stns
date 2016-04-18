@@ -90,8 +90,8 @@ def docker_run(os, arch, task, pkg_arch=nil)
     |f| f.write(content)
   }
 
-  sh "docker build --rm -f docker/tmp/#{os}-#{arch}-#{task} -t stns:stns ."
-  sh "docker run -e ARCH=#{pkg_arch} --rm -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:stns"
+  sh "docker build --rm -f docker/tmp/#{os}-#{arch}-#{task} -t stns:lib_stns ."
+  sh "docker run -e ARCH=#{pkg_arch} --rm -it -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary -t stns:lib_stns"
 end
 
 namespace :spec do
