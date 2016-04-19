@@ -107,8 +107,8 @@ func TestLockfile(t *testing.T) {
 	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
 
 	r.Get()
-	lock1 := "/tmp/libnss_stns." + GetMD5Hash("example1")
-	lock2 := "/tmp/libnss_stns." + GetMD5Hash("example2")
+	lock1 := "/tmp/libnss_stns." + r.GetMD5Hash("example1")
+	lock2 := "/tmp/libnss_stns." + r.GetMD5Hash("example2")
 
 	_, err := os.Stat(lock1)
 	if err != nil {

@@ -89,7 +89,7 @@ func (r *Request) GetRaw() ([]byte, error) {
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
-	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
 	_, err := os.Stat(fileName)
 
 	// lockfile not exists
@@ -117,7 +117,7 @@ func (r *Request) checkLockFile(endPoint string) bool {
 }
 
 func (r *Request) writeLockFile(endPoint string) {
-	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
 
 	result := make([]byte, binary.MaxVarintLen64)
 	binary.PutVarint(result, time.Now().Unix())
@@ -142,7 +142,7 @@ func (r *Request) Get() (stns.Attributes, error) {
 	return attr, nil
 }
 
-func GetMD5Hash(text string) string {
+func (r *Request) GetMD5Hash(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
