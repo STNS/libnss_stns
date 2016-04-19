@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/STNS/stns"
 )
 
 /*
@@ -13,7 +13,7 @@ import (
 */
 import "C"
 
-var passwdList = attribute.AllAttribute{}
+var passwdList = stns.Attributes{}
 var passwdReadPos int
 
 type Passwd struct {
@@ -21,7 +21,7 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds attribute.AllAttribute) int {
+func (self Passwd) setCStruct(passwds stns.Attributes) int {
 
 	for n, p := range passwds {
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {

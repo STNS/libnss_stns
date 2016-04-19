@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/STNS/stns"
 )
 
 /*
@@ -14,7 +14,7 @@ import (
 */
 import "C"
 
-var groupList = attribute.AllAttribute{}
+var groupList = stns.Attributes{}
 var groupReadPos int
 
 type Group struct {
@@ -22,7 +22,7 @@ type Group struct {
 	result **C.struct_group
 }
 
-func (self Group) setCStruct(groups attribute.AllAttribute) int {
+func (self Group) setCStruct(groups stns.Attributes) int {
 	for n, g := range groups {
 		if g.Id != 0 {
 			self.grp.gr_gid = C.__gid_t(g.Id)
