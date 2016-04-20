@@ -36,20 +36,20 @@ shadow
 
 //export _nss_stns_getspnam_r
 func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	return setResource(&Shadow{spwd, result}, "user", "name", C.GoString(name))
+	return set(&Shadow{spwd, result}, "user", "name", C.GoString(name))
 }
 
 //export _nss_stns_setspent
 func _nss_stns_setspent() int {
-	return setList("user", shadowList, &shadowReadPos)
+	return initList("user", shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_endspent
 func _nss_stns_endspent() {
-	resetList(shadowList, &shadowReadPos)
+	purgeList(shadowList, &shadowReadPos)
 }
 
 //export _nss_stns_getspent_r
 func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
-	return setNextResource(&Shadow{spwd, result}, shadowList, &shadowReadPos)
+	return setByList(&Shadow{spwd, result}, shadowList, &shadowReadPos)
 }

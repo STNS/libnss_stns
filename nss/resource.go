@@ -7,34 +7,22 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
 )
 
 const NSS_STATUS_TRYAGAIN = -2
 const NSS_STATUS_SUCCESS = 1
 const NSS_STATUS_NOTFOUND = 0
 
-var Config *config.Config
+var conf *config.Config
 
 type LinuxResource interface {
 	setCStruct(stns.Attributes) int
 }
 
-var cache map[string]*cacheObject
-
-type cacheObject struct {
-	userGroup *stns.Attributes
-	createAt  time.Time
-	err       error
-}
-
 func get(paths ...string) (stns.Attributes, error) {
-	logger.Setlog()
 	path := strings.Join(paths, "/")
 
 	u, err := readCache(path)
@@ -42,17 +30,18 @@ func get(paths ...string) (stns.Attributes, error) {
 		return u, err
 	}
 
-	if Config == nil {
+	if conf == nil {
 		c, err := config.Load("/etc/stns/libnss_stns.conf")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
-		Config = c
+		conf = c
 	}
+
 	// deault negative cache
 	writeCache(path, nil, errors.New(path+" is not fond"))
-	out, _ := exec.Command(Config.WrapperCommand, path).Output()
+	out, _ := exec.Command(conf.WrapperCommand, path).Output()
 
 	var attr stns.Attributes
 	err = json.Unmarshal(out, &attr)
@@ -63,7 +52,7 @@ func get(paths ...string) (stns.Attributes, error) {
 	return attr, nil
 }
 
-func setResource(linux LinuxResource, resource_type, column string, value string) int {
+func set(linux LinuxResource, resource_type, column string, value string) int {
 	resource, err := get(resource_type, column, value)
 	if err != nil {
 		return NSS_STATUS_TRYAGAIN
@@ -75,7 +64,7 @@ func setResource(linux LinuxResource, resource_type, column string, value string
 	return NSS_STATUS_NOTFOUND
 }
 
-func setNextResource(linux LinuxResource, list stns.Attributes, position *int) int {
+func setByList(linux LinuxResource, list stns.Attributes, position *int) int {
 	keys := keys(list)
 L:
 	if *position != NSS_STATUS_TRYAGAIN && len(keys) > *position && keys[*position] != "" {
@@ -99,9 +88,9 @@ L:
 	return NSS_STATUS_NOTFOUND
 }
 
-func setList(resource_type string, list stns.Attributes, position *int) int {
+func initList(resource_type string, list stns.Attributes, position *int) int {
 	// reset value
-	resetList(list, position)
+	purgeList(list, position)
 
 	resource, err := get(resource_type, "list")
 	if err != nil {
@@ -118,7 +107,7 @@ func setList(resource_type string, list stns.Attributes, position *int) int {
 	return NSS_STATUS_NOTFOUND
 }
 
-func resetList(list stns.Attributes, position *int) {
+func purgeList(list stns.Attributes, position *int) {
 	// reset value
 	*position = 0
 	for k, _ := range list {
@@ -134,40 +123,4 @@ func keys(list stns.Attributes) []string {
 	}
 	sort.Strings(ks)
 	return ks
-}
-
-func readCache(path string) (stns.Attributes, error) {
-	m := sync.RWMutex{}
-	m.RLock()
-	defer m.RUnlock()
-
-	if len(cache) == 0 {
-		cache = map[string]*cacheObject{}
-	}
-
-	c, exist := cache[path]
-	if exist {
-		// cache expire 10 minute
-		if time.Now().Sub(c.createAt) > time.Minute*10 {
-			delete(cache, path)
-			return nil, nil
-		} else if c.err != nil {
-			return nil, c.err
-		} else {
-			return *c.userGroup, c.err
-		}
-	}
-	return nil, nil
-}
-
-func writeCache(path string, attr stns.Attributes, err error) {
-	m := sync.Mutex{}
-	m.Lock()
-	defer m.Unlock()
-
-	if len(cache) == 0 {
-		cache = map[string]*cacheObject{}
-	}
-
-	cache[path] = &cacheObject{&attr, time.Now(), err}
 }
