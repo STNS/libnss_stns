@@ -19,8 +19,8 @@ import (
 )
 
 type Certifier interface {
-	Auth(string) C.int
-	getUser() string
+	Auth(Certifier) C.int
+	userName() string
 }
 
 type Supplicant struct {
@@ -35,7 +35,7 @@ type Sudo struct {
 	*Supplicant
 }
 
-func getCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *config.Config) Certifier {
+func NewCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *config.Config) Certifier {
 	gargc := int(argc)
 	gargv := GoStrings(gargc, argv)
 	if gargc > 0 {
@@ -47,7 +47,7 @@ func getCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *confi
 	return Supplicant{"user", pamh, gargc, gargv, config}
 }
 
-func (s Supplicant) getUser() string {
+func (s Supplicant) userName() string {
 	var user *C.char
 	defer C.free(unsafe.Pointer(user))
 	if authUser(s.pamh, &user) {
@@ -56,16 +56,22 @@ func (s Supplicant) getUser() string {
 	return ""
 }
 
-func (s Sudo) getUser() string {
+func (s Sudo) userName() string {
 	if s.argc > 1 {
 		return s.argv[1]
 	}
 	return ""
 }
 
-func (s Supplicant) Auth(user string) C.int {
+func (s Supplicant) Auth(certifier Certifier) C.int {
 	var password *C.char
 	defer C.free(unsafe.Pointer(password))
+
+	user := certifier.userName()
+	if user == "" {
+		return C.PAM_USER_UNKNOWN
+	}
+
 	if !authPassword(s.pamh, &password) {
 		return C.PAM_AUTH_ERR
 	}

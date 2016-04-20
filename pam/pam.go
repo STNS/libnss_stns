@@ -20,13 +20,9 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 		return C.PAM_AUTHINFO_UNAVAIL
 	}
 
-	certifier := getCertifier(pamh, argc, argv, config)
+	certifier := NewCertifier(pamh, argc, argv, config)
 	if certifier != nil {
-		user := certifier.getUser()
-		if user == "" {
-			return C.PAM_USER_UNKNOWN
-		}
-		return certifier.Auth(user)
+		return certifier.Auth(certifier)
 	}
 
 	return C.PAM_AUTH_ERR

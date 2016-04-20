@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/STNS/stns"
 )
 
 /*
@@ -13,7 +13,7 @@ import (
 */
 import "C"
 
-var passwdList = attribute.AllAttribute{}
+var passwdList = stns.Attributes{}
 var passwdReadPos int
 
 type Passwd struct {
@@ -21,7 +21,7 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds attribute.AllAttribute) int {
+func (self Passwd) setCStruct(passwds stns.Attributes) int {
 
 	for n, p := range passwds {
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
@@ -55,26 +55,26 @@ passwd
 -------------------------------------------------------*/
 //export _nss_stns_getpwnam_r
 func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	return setResource(&Passwd{pwd, result}, "user", "name", C.GoString(name))
+	return set(&Passwd{pwd, result}, "user", "name", C.GoString(name))
 }
 
 //export _nss_stns_getpwuid_r
 func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	return setResource(&Passwd{pwd, result}, "user", "id", strconv.Itoa(int(uid)))
+	return set(&Passwd{pwd, result}, "user", "id", strconv.Itoa(int(uid)))
 }
 
 //export _nss_stns_setpwent
 func _nss_stns_setpwent() int {
-	return setList("user", passwdList, &passwdReadPos)
+	return initList("user", passwdList, &passwdReadPos)
 
 }
 
 //export _nss_stns_endpwent
 func _nss_stns_endpwent() {
-	resetList(passwdList, &passwdReadPos)
+	purgeList(passwdList, &passwdReadPos)
 }
 
 //export _nss_stns_getpwent_r
 func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
-	return setNextResource(&Passwd{pwd, result}, passwdList, &passwdReadPos)
+	return setByList(&Passwd{pwd, result}, passwdList, &passwdReadPos)
 }

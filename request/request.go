@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
 	"github.com/STNS/libnss_stns/settings"
@@ -83,20 +83,16 @@ func (r *Request) GetRaw() ([]byte, error) {
 				return body, nil
 			}
 
-		} else {
-			r.writeLockFile(endPoint)
-			continue
 		}
-
 	}
 	return nil, lastError
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
-	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
 	_, err := os.Stat(fileName)
 
-	// lockfile not  exists
+	// lockfile not exists
 	if err != nil {
 		return true
 	}
@@ -118,19 +114,18 @@ func (r *Request) checkLockFile(endPoint string) bool {
 	}
 
 	return false
-
 }
 
 func (r *Request) writeLockFile(endPoint string) {
-	fileName := "/tmp/libnss_stns." + GetMD5Hash(endPoint)
+	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
 
 	result := make([]byte, binary.MaxVarintLen64)
 	binary.PutVarint(result, time.Now().Unix())
 	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
-func (r *Request) Get() (attribute.AllAttribute, error) {
-	var attr attribute.AllAttribute
+func (r *Request) Get() (stns.Attributes, error) {
+	var attr stns.Attributes
 
 	body, err := r.GetRaw()
 
@@ -147,7 +142,7 @@ func (r *Request) Get() (attribute.AllAttribute, error) {
 	return attr, nil
 }
 
-func GetMD5Hash(text string) string {
+func (r *Request) GetMD5Hash(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))

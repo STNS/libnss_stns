@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/STNS/STNS/attribute"
+	"github.com/STNS/STNS/stns"
 )
 
 /*
@@ -14,7 +14,7 @@ import (
 */
 import "C"
 
-var groupList = attribute.AllAttribute{}
+var groupList = stns.Attributes{}
 var groupReadPos int
 
 type Group struct {
@@ -22,7 +22,7 @@ type Group struct {
 	result **C.struct_group
 }
 
-func (self Group) setCStruct(groups attribute.AllAttribute) int {
+func (self Group) setCStruct(groups stns.Attributes) int {
 	for n, g := range groups {
 		if g.Id != 0 {
 			self.grp.gr_gid = C.__gid_t(g.Id)
@@ -49,30 +49,27 @@ func (self Group) setCStruct(groups attribute.AllAttribute) int {
 	return NSS_STATUS_NOTFOUND
 }
 
-/*-------------------------------------------------------
-group
--------------------------------------------------------*/
 //export _nss_stns_getgrnam_r
 func _nss_stns_getgrnam_r(name *C.char, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return setResource(&Group{grp, result}, "group", "name", C.GoString(name))
+	return set(&Group{grp, result}, "group", "name", C.GoString(name))
 }
 
 //export _nss_stns_getgrgid_r
 func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return setResource(&Group{grp, result}, "group", "id", strconv.Itoa(int(gid)))
+	return set(&Group{grp, result}, "group", "id", strconv.Itoa(int(gid)))
 }
 
 //export _nss_stns_setgrent
 func _nss_stns_setgrent() int {
-	return setList("group", groupList, &groupReadPos)
+	return initList("group", groupList, &groupReadPos)
 }
 
 //export _nss_stns_endgrent
 func _nss_stns_endgrent() {
-	resetList(groupList, &groupReadPos)
+	purgeList(groupList, &groupReadPos)
 }
 
 //export _nss_stns_getgrent_r
 func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) int {
-	return setNextResource(&Group{grp, result}, groupList, &groupReadPos)
+	return setByList(&Group{grp, result}, groupList, &groupReadPos)
 }
