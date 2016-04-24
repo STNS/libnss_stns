@@ -7,7 +7,7 @@ libnss_stns is [STNS](https://github.com/pyama86/STNS) Client Module.
 * sudo auth wrapper
 
 ## diagram
-![diagram](https://cloud.githubusercontent.com/assets/8022082/14065462/37435f26-f465-11e5-9d3a-c25b81cf6ae1.png)
+![overview](https://cloud.githubusercontent.com/assets/8022082/14065462/37435f26-f465-11e5-9d3a-c25b81cf6ae1.png)
 
 ## install
 ## redhat/centos
@@ -109,8 +109,10 @@ $ echo 'session    required     pam_mkhomedir.so skel=/etc/skel/ umask=0022' >> 
 ```
 
 ### Sudo Password authentication by Pam
-STNS attribute
 
+![overview](https://cloud.githubusercontent.com/assets/8022082/14766700/e19c1ef0-0a4e-11e6-975b-1f5cbb4028c8.png)
+
+STNS configure
 ```toml
 [sudoers.example]
 password = "sha256hash"
