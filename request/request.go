@@ -8,11 +8,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -99,18 +101,20 @@ func (r *Request) checkLockFile(endPoint string) bool {
 
 	buff, err := ioutil.ReadFile(fileName)
 	if err != nil {
+		log.Println(err)
 		os.Remove(fileName)
 		return false
 	}
 
 	buf := bytes.NewBuffer(buff)
-	timeStamp, err := binary.ReadVarint(buf)
+	lastTime, err := binary.ReadVarint(buf)
 	if err != nil {
+		log.Println(err)
 		os.Remove(fileName)
 		return false
 	}
 
-	if time.Now().Unix() > timeStamp+settings.LOCK_TIME {
+	if time.Now().Unix() > lastTime+settings.LOCK_TIME || lastTime > time.Now().Unix()+settings.LOCK_TIME {
 		os.Remove(fileName)
 		return true
 	}
@@ -120,9 +124,11 @@ func (r *Request) checkLockFile(endPoint string) bool {
 
 func (r *Request) writeLockFile(endPoint string) {
 	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
+	now := time.Now()
+	log.Println("create lockfile:" + endPoint + " time:" + now.String() + " unix_time:" + strconv.FormatInt(now.Unix(), 10))
 
 	result := make([]byte, binary.MaxVarintLen64)
-	binary.PutVarint(result, time.Now().Unix())
+	binary.PutVarint(result, now.Unix())
 	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
@@ -135,10 +141,12 @@ func (r *Request) Get() (stns.Attributes, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(body, &attr)
+	if len(body) > 0 {
+		err = json.Unmarshal(body, &attr)
 
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return attr, nil
