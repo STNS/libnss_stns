@@ -99,12 +99,14 @@ func (r *Request) checkLockFile(endPoint string) bool {
 
 	buff, err := ioutil.ReadFile(fileName)
 	if err != nil {
+		os.Remove(fileName)
 		return false
 	}
 
 	buf := bytes.NewBuffer(buff)
 	timeStamp, err := binary.ReadVarint(buf)
 	if err != nil {
+		os.Remove(fileName)
 		return false
 	}
 
