@@ -1,3 +1,9 @@
+libnss-stns (0.1.0) STABLE; urgency=low
+
+  * It does not work well when the time is shifted at the time of OS start-up
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sun, 1 May 2016 16:45:00 +0000
+
 libnss-stns (0.0.9) STABLE; urgency=low
 
   * Update of the last time contained a bug
