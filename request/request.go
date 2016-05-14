@@ -7,6 +7,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -14,10 +16,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	stns_settings "github.com/STNS/STNS/settings"
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
@@ -39,7 +43,7 @@ func NewRequest(config *config.Config, paths ...string) (*Request, error) {
 	return &r, nil
 }
 
-func (r *Request) GetRaw() ([]byte, error) {
+func (r *Request) GetRawData() ([]byte, error) {
 	var lastError error
 	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(len(r.Config.ApiEndPoint))
@@ -81,13 +85,82 @@ func (r *Request) GetRaw() ([]byte, error) {
 				continue
 			}
 
-			if res.StatusCode == http.StatusOK {
-				return body, nil
+			switch res.StatusCode {
+			case http.StatusOK:
+				reg := regexp.MustCompile(`/v2[/]?$`)
+				switch {
+				// version1
+				case !reg.MatchString(endPoint):
+					buffer, err := r.migrateV2Format(body)
+					if err != nil {
+						lastError = err
+						continue
+					}
+					return buffer, nil
+				default:
+					buffer, err := r.checkV2Format(body)
+					if err != nil {
+						lastError = err
+						continue
+					}
+					return buffer, nil
+				}
+			// only direct return notfonud
+			case http.StatusNotFound:
+				return nil, fmt.Errorf("resource notfound: %s", url)
+			case http.StatusUnauthorized:
+				return nil, fmt.Errorf("authenticate error: %s", url)
+			default:
+				continue
 			}
-
 		}
 	}
 	return nil, lastError
+}
+
+func (r *Request) checkV2Format(body []byte) ([]byte, error) {
+	var res stns.ResponseFormat
+	err := json.Unmarshal(body, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	if res.MetaData == nil {
+		// may be v1 response
+		log.Println(settings.V2_FORMAT_ERROR)
+		return r.migrateV2Format(body)
+	}
+	return body, nil
+}
+
+func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
+	var attr stns.Attributes
+	err := json.Unmarshal(body, &attr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if attr == nil {
+		return nil, errors.New(settings.V2_FORMAT_ERROR)
+	}
+
+	mig := stns.ResponseFormat{
+		&stns.MetaData{
+			1.0,
+			false,
+			0,
+			stns_settings.SUCCESS,
+		},
+		&attr,
+	}
+
+	j, err := json.Marshal(mig)
+	if err != nil {
+		return nil, err
+	}
+
+	return j, nil
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
@@ -135,7 +208,7 @@ func (r *Request) writeLockFile(endPoint string) {
 func (r *Request) Get() (stns.Attributes, error) {
 	var attr stns.Attributes
 
-	body, err := r.GetRaw()
+	body, err := r.GetRawData()
 
 	if err != nil {
 		return nil, err

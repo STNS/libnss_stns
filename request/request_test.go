@@ -1,12 +1,14 @@
 package request
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/test"
 )
@@ -15,7 +17,7 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
-func TestRequest(t *testing.T) {
+func TestRequestV1ServerV1(t *testing.T) {
 	handler := test.GetHandler(t,
 		"/user/name/example",
 		`{
@@ -36,34 +38,122 @@ func TestRequest(t *testing.T) {
 
 	c := &config.Config{}
 	c.ApiEndPoint = []string{server.URL}
-	r, _ := NewRequest(c, "user", "name", "example")
 
-	users, _ := r.Get()
-	if 0 == len(users) {
-		t.Error("fetch error")
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 1.0)
+
+}
+
+func TestRequestV2ServerV1(t *testing.T) {
+	handler := test.GetHandler(t,
+		"/v2/user/name/example",
+		`{
+			"example": {
+				"id": 1,
+				"group_id": 2,
+				"directory": "/home/example",
+				"shell": "/bin/sh",
+				"keys": [
+					"test"
+				],
+				"password": "password"
+			}
+		}`,
+	)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL + "/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 1.0)
+}
+
+func TestRequestV2ServerV2(t *testing.T) {
+	handler := test.GetHandler(t,
+		"/v2/user/name/example",
+		`{
+			"metadata": {
+				"api_version": 2.0,
+				"salt_enable": false,
+				"stretching_count": 0,
+				"result": "success"
+			},
+			"items": {
+				"example": {
+					"id": 1,
+					"group_id": 2,
+					"directory": "/home/example",
+					"shell": "/bin/sh",
+					"keys": [
+						"test"
+					],
+					"password": "password"
+				}
+			}
+		}`,
+	)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL + "/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2.0)
+}
+
+func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+
+	var res stns.ResponseFormat
+	raw, err := r.GetRawData()
+	json.Unmarshal(raw, &res)
+
+	if err != nil || res.Items == nil || 0 == len(*res.Items) {
+		t.Errorf("fetch error %s", err)
 	}
 
-	for n, u := range users {
-		if n != "example" {
-			t.Error("unmatch name")
+	if err == nil {
+		// metadata
+		if res.MetaData.ApiVersion != apiVersion {
+			t.Error("unmatch api version")
 		}
-		if u.Id != 1 {
-			t.Error("unmatch id")
+
+		if res.MetaData.Salt {
+			t.Error("unmatch salt")
 		}
-		if u.GroupId != 2 {
-			t.Error("unmatch group")
+
+		if res.MetaData.Stretching != 0 {
+			t.Error("unmatch stretching")
 		}
-		if u.Directory != "/home/example" {
-			t.Error("unmatch direcotry")
+
+		if res.MetaData.Result != "success" {
+			t.Error("unmatch result")
 		}
-		if u.Shell != "/bin/sh" {
-			t.Error("unmatch shell")
-		}
-		if u.Keys[0] != "test" || len(u.Keys) != 1 {
-			t.Error("unmatch shell")
-		}
-		if u.Password != "password" {
-			t.Error("unmatch password")
+
+		for n, u := range *res.Items {
+			if n != "example" {
+				t.Error("unmatch name")
+			}
+			if u.Id != 1 {
+				t.Error("unmatch id")
+			}
+			if u.GroupId != 2 {
+				t.Error("unmatch group")
+			}
+			if u.Directory != "/home/example" {
+				t.Error("unmatch direcotry")
+			}
+			if u.Shell != "/bin/sh" {
+				t.Error("unmatch shell")
+			}
+			if u.Keys[0] != "test" || len(u.Keys) != 1 {
+				t.Error("unmatch shell")
+			}
+			if u.Password != "password" {
+				t.Error("unmatch password")
+			}
 		}
 	}
 
