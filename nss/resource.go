@@ -1,15 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
-	"os/exec"
 	"sort"
-	"strings"
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/request"
 )
 
 const NSS_STATUS_TRYAGAIN = -2
@@ -23,13 +21,6 @@ type LinuxResource interface {
 }
 
 func get(paths ...string) (stns.Attributes, error) {
-	path := strings.Join(paths, "/")
-
-	u, err := readCache(path)
-	if u != nil || err != nil {
-		return u, err
-	}
-
 	if conf == nil {
 		c, err := config.Load("/etc/stns/libnss_stns.conf")
 		if err != nil {
@@ -39,17 +30,24 @@ func get(paths ...string) (stns.Attributes, error) {
 		conf = c
 	}
 
-	// deault negative cache
-	writeCache(path, nil, errors.New(path+" is not fond"))
-	out, _ := exec.Command(conf.WrapperCommand, path).Output()
+	r, err := request.NewRequest(conf, paths...)
 
-	var attr stns.Attributes
-	err = json.Unmarshal(out, &attr)
+	u, err := readCache(r.ApiPath)
+	if u != nil || err != nil {
+		return u, err
+	}
+
+	// deault negative cache
+	writeCache(r.ApiPath, nil, errors.New(r.ApiPath+" is not fond"))
+	res, err := r.GetByWrapperCmd()
+
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
-	writeCache(path, attr, nil)
-	return attr, nil
+
+	writeCache(r.ApiPath, *res.Items, nil)
+	return *res.Items, nil
 }
 
 func set(linux LinuxResource, resource_type, column string, value string) int {

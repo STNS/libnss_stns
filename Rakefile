@@ -12,6 +12,11 @@ task "test" do
   docker_run("ubuntu", "x86", "test")
 end
 
+task :login do
+  sh "docker build --rm -f docker/tmp/ubuntu-x86-test -t stns:lib_stns ."
+  sh "docker run --rm -it -v \"$(pwd)\":/go/src/github.com/STNS/libnss_stns/ -t stns:lib_stns /bin/bash"
+end
+
 desc "make package all architecture"
 task "make_pkg" => %W(
   clean_pkg

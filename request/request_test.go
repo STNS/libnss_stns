@@ -170,7 +170,7 @@ func TestBasicAuth(t *testing.T) {
 	c.Password = "test_pass"
 	r, _ := NewRequest(c, "user", "name", "example")
 
-	users, _ := r.Get()
+	users, _ := r.GetRawData()
 	if 0 == len(users) {
 		t.Error("fetch error")
 	}
@@ -180,7 +180,7 @@ func TestBasicAuth(t *testing.T) {
 	e.User = "error_user"
 	e.Password = "error_pass"
 	r, _ = NewRequest(e, "user", "name", "example")
-	users, _ = r.Get()
+	users, _ = r.GetRawData()
 	if 0 != len(users) {
 		t.Error("fetch error")
 	}
@@ -196,7 +196,7 @@ func TestLockfile(t *testing.T) {
 	c.ApiEndPoint = []string{"example1", "example2"}
 	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
 
-	r.Get()
+	r.GetRawData()
 	lock1 := "/tmp/libnss_stns." + r.GetMD5Hash("example1")
 	lock2 := "/tmp/libnss_stns." + r.GetMD5Hash("example2")
 

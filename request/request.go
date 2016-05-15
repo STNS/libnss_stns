@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -38,11 +39,15 @@ func NewRequest(config *config.Config, paths ...string) (*Request, error) {
 	r := Request{}
 
 	r.Config = config
-	r.ApiPath = strings.Join(paths, "/")
-
+	r.SetPath(paths...)
 	return &r, nil
 }
 
+func (r *Request) SetPath(paths ...string) {
+	r.ApiPath = path.Clean(strings.Join(paths, "/"))
+}
+
+// only use wrapper command
 func (r *Request) GetRawData() ([]byte, error) {
 	var lastError error
 	rand.Seed(time.Now().UnixNano())
@@ -56,7 +61,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
-		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(path.Clean(r.ApiPath), "/")
+		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {
@@ -98,7 +103,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 					}
 					return buffer, nil
 				default:
-					buffer, err := r.checkV2Format(body)
+					buffer, err := r.normalizedV2Format(body)
 					if err != nil {
 						lastError = err
 						continue
@@ -118,7 +123,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 	return nil, lastError
 }
 
-func (r *Request) checkV2Format(body []byte) ([]byte, error) {
+func (r *Request) normalizedV2Format(body []byte) ([]byte, error) {
 	var res stns.ResponseFormat
 	err := json.Unmarshal(body, &res)
 	if err != nil {
@@ -205,8 +210,9 @@ func (r *Request) writeLockFile(endPoint string) {
 	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
-func (r *Request) Get() (stns.Attributes, error) {
-	var attr stns.Attributes
+// only use wrapper command
+func (r *Request) GetAttributes() (stns.Attributes, error) {
+	var res stns.ResponseFormat
 
 	body, err := r.GetRawData()
 
@@ -215,14 +221,28 @@ func (r *Request) Get() (stns.Attributes, error) {
 	}
 
 	if len(body) > 0 {
-		err = json.Unmarshal(body, &attr)
+		err = json.Unmarshal(body, &res)
 
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return attr, nil
+	return *res.Items, nil
+}
+
+func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
+	out, err := exec.Command(r.Config.WrapperCommand, r.ApiPath).Output()
+	if err != nil {
+		return stns.ResponseFormat{}, err
+	}
+
+	var res stns.ResponseFormat
+	err = json.Unmarshal(out, &res)
+	if err != nil {
+		return stns.ResponseFormat{}, err
+	}
+	return res, nil
 }
 
 func (r *Request) GetMD5Hash(text string) string {

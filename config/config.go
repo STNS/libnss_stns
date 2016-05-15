@@ -17,7 +17,7 @@ func Load(filePath string) (*Config, error) {
 	defaultConfig(&config)
 	_, err := toml.DecodeFile(filePath, &config)
 	if err != nil {
-		return &config, err
+		return nil, err
 	}
 	return &config, nil
 }
