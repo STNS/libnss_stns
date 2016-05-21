@@ -12,7 +12,7 @@ task "test" do
   docker_run("ubuntu", "x86", "test")
 end
 
-task :login do
+task :login => %w(test) do
   sh "docker build --rm -f docker/tmp/ubuntu-x86-test -t stns:lib_stns ."
   sh "docker run --rm -it -v \"$(pwd)\":/go/src/github.com/STNS/libnss_stns/ -t stns:lib_stns /bin/bash"
 end
@@ -74,9 +74,12 @@ end
   }
 ].each do |h|
   h[:arch].each_with_index do |arch,index|
-    task "#{h[:os]}_build_#{arch}" do
-      docker_run(h[:os], arch, "build")
-    end unless h[:os] == "centos"
+    unless h[:os] == "centos"
+      desc "#{h[:os]}_build_#{arch}"
+      task "#{h[:os]}_build_#{arch}" do
+        docker_run(h[:os], arch, "build")
+      end
+    end
 
     %w(pkg ci).each do |t|
       task "#{h[:os]}_#{t}_#{arch}" do
