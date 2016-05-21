@@ -103,12 +103,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 					}
 					return buffer, nil
 				default:
-					buffer, err := r.normalizedV2Format(body)
-					if err != nil {
-						lastError = err
-						continue
-					}
-					return buffer, nil
+					return body, nil
 				}
 			// only direct return notfonud
 			case http.StatusNotFound:
@@ -121,21 +116,6 @@ func (r *Request) GetRawData() ([]byte, error) {
 		}
 	}
 	return nil, lastError
-}
-
-func (r *Request) normalizedV2Format(body []byte) ([]byte, error) {
-	var res stns.ResponseFormat
-	err := json.Unmarshal(body, &res)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.MetaData == nil {
-		// may be v1 response
-		log.Println(settings.V2_FORMAT_ERROR)
-		return r.migrateV2Format(body)
-	}
-	return body, nil
 }
 
 func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
@@ -236,7 +216,6 @@ func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
 	if err != nil {
 		return stns.ResponseFormat{}, err
 	}
-
 	var res stns.ResponseFormat
 	err = json.Unmarshal(out, &res)
 	if err != nil {

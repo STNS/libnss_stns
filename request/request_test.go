@@ -44,32 +44,6 @@ func TestRequestV1ServerV1(t *testing.T) {
 
 }
 
-func TestRequestV2ServerV1(t *testing.T) {
-	handler := test.GetHandler(t,
-		"/v2/user/name/example",
-		`{
-			"example": {
-				"id": 1,
-				"group_id": 2,
-				"directory": "/home/example",
-				"shell": "/bin/sh",
-				"keys": [
-					"test"
-				],
-				"password": "password"
-			}
-		}`,
-	)
-	server := httptest.NewServer(http.HandlerFunc(handler))
-	defer server.Close()
-
-	c := &config.Config{}
-	c.ApiEndPoint = []string{server.URL + "/v2"}
-
-	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 1.0)
-}
-
 func TestRequestV2ServerV2(t *testing.T) {
 	handler := test.GetHandler(t,
 		"/v2/user/name/example",
@@ -104,8 +78,50 @@ func TestRequestV2ServerV2(t *testing.T) {
 	checkResponse(t, r, 2.0)
 }
 
-func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
+	// metadata
+	if res.MetaData.ApiVersion != apiVersion {
+		t.Error("unmatch api version")
+	}
 
+	if res.MetaData.Salt {
+		t.Error("unmatch salt")
+	}
+
+	if res.MetaData.Stretching != 0 {
+		t.Error("unmatch stretching")
+	}
+
+	if res.MetaData.Result != "success" {
+		t.Error("unmatch result")
+	}
+
+	for n, u := range *res.Items {
+		if n != "example" {
+			t.Error("unmatch name")
+		}
+		if u.Id != 1 {
+			t.Error("unmatch id")
+		}
+		if u.GroupId != 2 {
+			t.Error("unmatch group")
+		}
+		if u.Directory != "/home/example" {
+			t.Error("unmatch direcotry")
+		}
+		if u.Shell != "/bin/sh" {
+			t.Error("unmatch shell")
+		}
+		if u.Keys[0] != "test" || len(u.Keys) != 1 {
+			t.Error("unmatch shell")
+		}
+		if u.Password != "password" {
+			t.Error("unmatch password")
+		}
+	}
+}
+
+func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	var res stns.ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
@@ -113,50 +129,9 @@ func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	if err != nil || res.Items == nil || 0 == len(*res.Items) {
 		t.Errorf("fetch error %s", err)
 	}
-
 	if err == nil {
-		// metadata
-		if res.MetaData.ApiVersion != apiVersion {
-			t.Error("unmatch api version")
-		}
-
-		if res.MetaData.Salt {
-			t.Error("unmatch salt")
-		}
-
-		if res.MetaData.Stretching != 0 {
-			t.Error("unmatch stretching")
-		}
-
-		if res.MetaData.Result != "success" {
-			t.Error("unmatch result")
-		}
-
-		for n, u := range *res.Items {
-			if n != "example" {
-				t.Error("unmatch name")
-			}
-			if u.Id != 1 {
-				t.Error("unmatch id")
-			}
-			if u.GroupId != 2 {
-				t.Error("unmatch group")
-			}
-			if u.Directory != "/home/example" {
-				t.Error("unmatch direcotry")
-			}
-			if u.Shell != "/bin/sh" {
-				t.Error("unmatch shell")
-			}
-			if u.Keys[0] != "test" || len(u.Keys) != 1 {
-				t.Error("unmatch shell")
-			}
-			if u.Password != "password" {
-				t.Error("unmatch password")
-			}
-		}
+		checkAttribute(t, res, apiVersion)
 	}
-
 }
 
 func TestBasicAuth(t *testing.T) {
@@ -243,4 +218,13 @@ func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
 		io.WriteString(w, response.body)
 	}
 	return handler
+}
+
+func TestGetByWrapperCmd(t *testing.T) {
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"exmple"}
+	c.WrapperCommand = "./fixtures/bin/command_response_01"
+	r, _ := NewRequest(c, "user", "name", "example")
+	res, _ := r.GetByWrapperCmd()
+	checkAttribute(t, res, 2.0)
 }

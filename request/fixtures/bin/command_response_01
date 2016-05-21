@@ -1,0 +1,2 @@
+#!/bin/sh
+echo '{"metadata":{"api_version":2,"salt_enable":false,"stretching_count":0,"result":"success"},"items":{ "example": { "id": 1, "group_id": 2, "directory": "/home/example", "shell": "/bin/sh", "keys": [ "test" ], "password": "password" }}}'
