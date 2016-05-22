@@ -113,7 +113,7 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 			t.Error("unmatch shell")
 		}
 		if u.Keys[0] != "test" || len(u.Keys) != 1 {
-			t.Error("unmatch shell")
+			t.Error("unmatch keys")
 		}
 		if u.Password != "password" {
 			t.Error("unmatch password")

@@ -54,16 +54,9 @@ func checkPassword(config *config.Config, authType string, user string, password
 		hash = strings.ToLower(hashMethod([]byte(hash)))
 	}
 
-	r.SetPath("auth", authType, "name", user, hash)
-	ar, err := r.GetByWrapperCmd()
-	if err != nil {
-		log.Println(err)
-		return PAM_AUTHINFO_UNAVAIL
-	}
-
-	if ar.MetaData.Result == "success" {
+	if attr.Password == hash {
 		return PAM_SUCCESS
 	}
-	return PAM_AUTH_ERR
 
+	return PAM_AUTH_ERR
 }
