@@ -9,7 +9,7 @@ task :spec    => 'spec:all'
 
 desc "run unit test"
 task "test" do
-  docker_run("ubuntu", "x86", "test")
+  sh 'docker run --rm -it -v "$(pwd)":/go/src/github.com/STNS/libnss_stns -t pyama/stns:ubuntu-x86 /bin/bash'
 end
 
 task :login => %w(test) do

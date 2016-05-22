@@ -7,15 +7,11 @@ package main
 */
 import "C"
 import (
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
 	"unsafe"
 
 	"github.com/STNS/libnss_stns/config"
 )
 
-type HashMethod func([]byte) string
 type Certifier interface {
 	Auth(Certifier) C.int
 	userName() string
@@ -87,14 +83,4 @@ func GoStrings(length int, argv **C.char) []string {
 		return gostrings
 	}
 	return nil
-}
-
-func sha256Sum(data []byte) string {
-	bytes := sha256.Sum256(data)
-	return hex.EncodeToString(bytes[:])
-}
-
-func sha512Sum(data []byte) string {
-	bytes := sha512.Sum512(data)
-	return hex.EncodeToString(bytes[:])
 }

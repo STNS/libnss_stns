@@ -16,7 +16,7 @@ func TestAuthOk(t *testing.T) {
 func TestAuthNg(t *testing.T) {
 	config, _ := config.Load("./fixtures/auth_01.conf")
 
-	if checkPassword(config, "sudo", "example", "notmatch") != PAM_AUTHINFO_UNAVAIL {
+	if checkPassword(config, "sudo", "example", "notmatch") != PAM_AUTH_ERR {
 		t.Error("auth error auth ng")
 	}
 }

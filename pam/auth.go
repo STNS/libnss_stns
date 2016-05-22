@@ -6,6 +6,7 @@ import (
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/hash"
 	"github.com/STNS/libnss_stns/request"
 )
 
@@ -17,7 +18,6 @@ const (
 
 func checkPassword(config *config.Config, authType string, user string, password string) int {
 	var attr stns.Attribute
-	var salt string
 
 	r, err := request.NewRequest(config, authType, "name", user)
 	if err != nil {
@@ -36,25 +36,7 @@ func checkPassword(config *config.Config, authType string, user string, password
 		break
 	}
 
-	var hashMethod HashMethod
-	switch attr.HashType {
-	case "sha512":
-		hashMethod = sha512Sum
-	default:
-		hashMethod = sha256Sum
-	}
-
-	if res.MetaData.Salt {
-		salt += hashMethod([]byte(user))
-	}
-
-	hash := strings.ToLower(hashMethod([]byte(salt + password)))
-
-	for i := 0; i < res.MetaData.Stretching-1; i++ {
-		hash = strings.ToLower(hashMethod([]byte(hash)))
-	}
-
-	if attr.Password == hash {
+	if strings.ToLower(attr.Password) == hash.Calculate(attr.HashType, res.MetaData.Salt, user, password, res.MetaData.Stretching) {
 		return PAM_SUCCESS
 	}
 
