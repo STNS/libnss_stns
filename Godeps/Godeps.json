@@ -13,13 +13,13 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/settings",
-			"Comment": "v0.0-5-23-g0cb24ad",
-			"Rev": "0cb24add6de899bd53f64229561ee7666033570a"
+			"Comment": "v0.0-5-27-g8b650b5",
+			"Rev": "8b650b562cf9d18af7c041aafd559ae73ae6504d"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.0-5-23-g0cb24ad",
-			"Rev": "0cb24add6de899bd53f64229561ee7666033570a"
+			"Comment": "v0.0-5-27-g8b650b5",
+			"Rev": "8b650b562cf9d18af7c041aafd559ae73ae6504d"
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest",

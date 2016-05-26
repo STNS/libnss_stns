@@ -18,7 +18,7 @@ const (
 
 func checkPassword(config *config.Config, authType string, user string, password string) int {
 	var attr stns.Attribute
-
+	var hashType string
 	r, err := request.NewRequest(config, authType, "name", user)
 	if err != nil {
 		log.Println(err)
@@ -36,7 +36,13 @@ func checkPassword(config *config.Config, authType string, user string, password
 		break
 	}
 
-	if strings.ToLower(attr.Password) == hash.Calculate(attr.HashType, res.MetaData.Salt, user, password, res.MetaData.Stretching) {
+	if attr.HashType == "" {
+		hashType = res.MetaData.HashType
+	} else {
+		hashType = attr.HashType
+	}
+
+	if strings.ToLower(attr.Password) == hash.Calculate(hashType, res.MetaData.Salt, user, password, res.MetaData.Stretching) {
 		return PAM_SUCCESS
 	}
 

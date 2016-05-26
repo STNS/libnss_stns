@@ -135,6 +135,7 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 			1.0,
 			false,
 			0,
+			"sha256",
 			stns_settings.SUCCESS,
 		},
 		&attr,

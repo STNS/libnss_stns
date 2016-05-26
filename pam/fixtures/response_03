@@ -5,6 +5,7 @@ cat << EOS
     "api_version": 2.0,
     "salt_enable": false,
     "stretching_count": 3,
+    "hash_type": "sha256",
     "result": "success"
   },
   "items": {
