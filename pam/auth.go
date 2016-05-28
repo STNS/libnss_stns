@@ -24,7 +24,6 @@ func checkPassword(config *config.Config, authType string, user string, password
 		log.Println(err)
 		return PAM_AUTHINFO_UNAVAIL
 	}
-
 	res, err := r.GetByWrapperCmd()
 	if err != nil {
 		log.Println(err)

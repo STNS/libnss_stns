@@ -33,7 +33,7 @@ func TestStretching(t *testing.T) {
 	config, _ := config.Load("./fixtures/auth_03.conf")
 
 	if checkPassword(config, "sudo", "example", "test") != PAM_SUCCESS {
-		t.Error("auth error salt")
+		t.Error("auth error stretching")
 	}
 }
 
@@ -41,6 +41,18 @@ func TestException(t *testing.T) {
 	config, _ := config.Load("./fixtures/auth_04.conf")
 
 	if checkPassword(config, "sudo", "example", "test") != PAM_AUTHINFO_UNAVAIL {
-		t.Error("auth error salt")
+		t.Error("auth error exeption")
+	}
+}
+
+func TestHashType(t *testing.T) {
+	config, _ := config.Load("./fixtures/auth_05.conf")
+
+	if checkPassword(config, "sudo", "global", "test") != PAM_SUCCESS {
+		t.Error("auth error hash1")
+	}
+
+	if checkPassword(config, "sudo", "example", "test") != PAM_SUCCESS {
+		t.Error("auth error hash2")
 	}
 }
