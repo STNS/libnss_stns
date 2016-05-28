@@ -1,12 +1,14 @@
 package request
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/test"
 )
@@ -15,7 +17,7 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
-func TestRequest(t *testing.T) {
+func TestRequestV1ServerV1(t *testing.T) {
 	handler := test.GetHandler(t,
 		"/user/name/example",
 		`{
@@ -36,14 +38,65 @@ func TestRequest(t *testing.T) {
 
 	c := &config.Config{}
 	c.ApiEndPoint = []string{server.URL}
-	r, _ := NewRequest(c, "user", "name", "example")
 
-	users, _ := r.Get()
-	if 0 == len(users) {
-		t.Error("fetch error")
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 1.0)
+
+}
+
+func TestRequestV2ServerV2(t *testing.T) {
+	handler := test.GetHandler(t,
+		"/v2/user/name/example",
+		`{
+			"metadata": {
+				"api_version": 2.0,
+				"salt_enable": false,
+				"stretching_number": 0,
+				"result": "success"
+			},
+			"items": {
+				"example": {
+					"id": 1,
+					"group_id": 2,
+					"directory": "/home/example",
+					"shell": "/bin/sh",
+					"keys": [
+						"test"
+					],
+					"password": "password"
+				}
+			}
+		}`,
+	)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL + "/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2.0)
+}
+
+func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
+	// metadata
+	if res.MetaData.ApiVersion != apiVersion {
+		t.Error("unmatch api version")
 	}
 
-	for n, u := range users {
+	if res.MetaData.Salt {
+		t.Error("unmatch salt")
+	}
+
+	if res.MetaData.Stretching != 0 {
+		t.Error("unmatch stretching")
+	}
+
+	if res.MetaData.Result != "success" {
+		t.Error("unmatch result")
+	}
+
+	for n, u := range *res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
 		}
@@ -60,13 +113,25 @@ func TestRequest(t *testing.T) {
 			t.Error("unmatch shell")
 		}
 		if u.Keys[0] != "test" || len(u.Keys) != 1 {
-			t.Error("unmatch shell")
+			t.Error("unmatch keys")
 		}
 		if u.Password != "password" {
 			t.Error("unmatch password")
 		}
 	}
+}
 
+func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+	var res stns.ResponseFormat
+	raw, err := r.GetRawData()
+	json.Unmarshal(raw, &res)
+
+	if err != nil || res.Items == nil || 0 == len(*res.Items) {
+		t.Errorf("fetch error %s", err)
+	}
+	if err == nil {
+		checkAttribute(t, res, apiVersion)
+	}
 }
 
 func TestBasicAuth(t *testing.T) {
@@ -80,7 +145,7 @@ func TestBasicAuth(t *testing.T) {
 	c.Password = "test_pass"
 	r, _ := NewRequest(c, "user", "name", "example")
 
-	users, _ := r.Get()
+	users, _ := r.GetRawData()
 	if 0 == len(users) {
 		t.Error("fetch error")
 	}
@@ -90,7 +155,7 @@ func TestBasicAuth(t *testing.T) {
 	e.User = "error_user"
 	e.Password = "error_pass"
 	r, _ = NewRequest(e, "user", "name", "example")
-	users, _ = r.Get()
+	users, _ = r.GetRawData()
 	if 0 != len(users) {
 		t.Error("fetch error")
 	}
@@ -106,7 +171,7 @@ func TestLockfile(t *testing.T) {
 	c.ApiEndPoint = []string{"example1", "example2"}
 	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
 
-	r.Get()
+	r.GetRawData()
 	lock1 := "/tmp/libnss_stns." + r.GetMD5Hash("example1")
 	lock2 := "/tmp/libnss_stns." + r.GetMD5Hash("example2")
 
@@ -153,4 +218,13 @@ func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
 		io.WriteString(w, response.body)
 	}
 	return handler
+}
+
+func TestGetByWrapperCmd(t *testing.T) {
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"exmple"}
+	c.WrapperCommand = "./fixtures/bin/command_response_01"
+	r, _ := NewRequest(c, "user", "name", "example")
+	res, _ := r.GetByWrapperCmd()
+	checkAttribute(t, res, 2.0)
 }

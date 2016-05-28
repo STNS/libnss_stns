@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -49,8 +48,8 @@ func TestFetch(t *testing.T) {
 	defer notfoundServer.Close()
 
 	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
-	fmt.Println(Fetch(c, "/user/name/notfound"))
-	if !r.MatchString(Fetch(c, "/user/name/notfound")) {
+
+	if r.MatchString(Fetch(c, "/user/name/notfound")) {
 		t.Error("unmatch keys")
 	}
 }

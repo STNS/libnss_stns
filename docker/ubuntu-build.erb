@@ -2,7 +2,7 @@ FROM pyama/stns:ubuntu-<%= arch %>
 ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
 RUN godep restore
-CMD go build -o binary/libnss-stns.so -buildmode=c-shared nss/* && \
-go build -o binary/libpam-stns.so -buildmode=c-shared pam/* && \
+CMD go build -o binary/libnss-stns.so -buildmode=c-shared nss/*go && \
+go build -o binary/libpam-stns.so -buildmode=c-shared pam/*go && \
 go build -o binary/stns-query-wrapper cmd/query/stns-query-wrapper.go && \
 go build -o binary/stns-key-wrapper cmd/key/stns-key-wrapper.go

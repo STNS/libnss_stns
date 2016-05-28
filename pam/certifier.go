@@ -7,15 +7,9 @@ package main
 */
 import "C"
 import (
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
-	"log"
-	"strings"
 	"unsafe"
 
 	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/request"
 )
 
 type Certifier interface {
@@ -64,46 +58,19 @@ func (s Sudo) userName() string {
 }
 
 func (s Supplicant) Auth(certifier Certifier) C.int {
-	var password *C.char
-	defer C.free(unsafe.Pointer(password))
+	var cPassword *C.char
+	defer C.free(unsafe.Pointer(cPassword))
 
 	user := certifier.userName()
 	if user == "" {
 		return C.PAM_USER_UNKNOWN
 	}
 
-	if !authPassword(s.pamh, &password) {
+	if !authPassword(s.pamh, &cPassword) {
 		return C.PAM_AUTH_ERR
 	}
 
-	r, err := request.NewRequest(s.config, s.authType, "name", user)
-	if err != nil {
-		log.Println(err)
-		return C.PAM_AUTH_ERR
-	}
-
-	attr, err := r.Get()
-	if err != nil {
-		log.Println(err)
-		return C.PAM_AUTHINFO_UNAVAIL
-	}
-
-	if attr != nil {
-		for _, s := range attr {
-			var hash string
-			switch s.HashType {
-			case "sha512":
-				hash = strings.ToLower(sha512Sum([]byte(C.GoString(password))))
-			default:
-				hash = strings.ToLower(sha256Sum([]byte(C.GoString(password))))
-			}
-			if hash == strings.ToLower(s.Password) {
-				return C.PAM_SUCCESS
-			}
-
-		}
-	}
-	return C.PAM_AUTH_ERR
+	return C.int(checkPassword(s.config, s.authType, user, C.GoString(cPassword)))
 }
 
 func GoStrings(length int, argv **C.char) []string {
@@ -116,14 +83,4 @@ func GoStrings(length int, argv **C.char) []string {
 		return gostrings
 	}
 	return nil
-}
-
-func sha256Sum(data []byte) string {
-	bytes := sha256.Sum256(data)
-	return hex.EncodeToString(bytes[:])
-}
-
-func sha512Sum(data []byte) string {
-	bytes := sha512.Sum512(data)
-	return hex.EncodeToString(bytes[:])
 }

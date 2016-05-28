@@ -7,3 +7,6 @@ binary/*
 vendor/*
 docker/tmp/
 Gemfile.lock
+bin/*
+.bundle/config
+.rake_tasks

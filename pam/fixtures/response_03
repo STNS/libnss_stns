@@ -1,0 +1,27 @@
+#!/bin/sh
+cat << EOS
+{
+  "metadata": {
+    "api_version": 2.0,
+    "salt_enable": false,
+    "stretching_number": 3,
+    "hash_type": "sha256",
+    "result": "success"
+  },
+  "items": {
+    "example": {
+      "id": 1001,
+      "password": "2ace3a22375fdf5c60d78b612ccc70c88e31cfa7c3f9be023388980a2326f2fd",
+      "hash_type": "",
+      "group_id": 1001,
+      "directory": "/home/example",
+      "shell": "/bin/sh",
+      "gecos": "example",
+      "keys": [
+        "ssh-rsa xxxxxx"
+      ],
+      "link_users": null
+    }
+  }
+}
+EOS

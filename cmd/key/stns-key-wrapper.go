@@ -31,7 +31,7 @@ func Fetch(config *config.Config, name string) string {
 		log.Println(err)
 	}
 
-	users, err := r.Get()
+	users, err := r.GetAttributes()
 	if err != nil {
 		log.Println(err)
 	}

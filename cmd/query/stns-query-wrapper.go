@@ -28,7 +28,7 @@ func Fetch(config *config.Config, path string) string {
 		log.Fatal(err)
 	}
 
-	result, err := r.GetRaw()
+	result, err := r.GetRawData()
 	if err != nil {
 		log.Fatal(err)
 	}

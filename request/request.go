@@ -7,17 +7,22 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	stns_settings "github.com/STNS/STNS/settings"
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
@@ -34,12 +39,16 @@ func NewRequest(config *config.Config, paths ...string) (*Request, error) {
 	r := Request{}
 
 	r.Config = config
-	r.ApiPath = strings.Join(paths, "/")
-
+	r.SetPath(paths...)
 	return &r, nil
 }
 
-func (r *Request) GetRaw() ([]byte, error) {
+func (r *Request) SetPath(paths ...string) {
+	r.ApiPath = path.Clean(strings.Join(paths, "/"))
+}
+
+// only use wrapper command
+func (r *Request) GetRawData() ([]byte, error) {
 	var lastError error
 	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(len(r.Config.ApiEndPoint))
@@ -52,7 +61,7 @@ func (r *Request) GetRaw() ([]byte, error) {
 
 	for _, v := range perm {
 		endPoint := r.Config.ApiEndPoint[v]
-		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(path.Clean(r.ApiPath), "/")
+		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {
@@ -81,13 +90,63 @@ func (r *Request) GetRaw() ([]byte, error) {
 				continue
 			}
 
-			if res.StatusCode == http.StatusOK {
-				return body, nil
+			switch res.StatusCode {
+			case http.StatusOK:
+				reg := regexp.MustCompile(`/v2[/]?$`)
+				switch {
+				// version1
+				case !reg.MatchString(endPoint):
+					buffer, err := r.migrateV2Format(body)
+					if err != nil {
+						lastError = err
+						continue
+					}
+					return buffer, nil
+				default:
+					return body, nil
+				}
+			// only direct return notfonud
+			case http.StatusNotFound:
+				return nil, fmt.Errorf("resource notfound: %s", url)
+			case http.StatusUnauthorized:
+				return nil, fmt.Errorf("authenticate error: %s", url)
+			default:
+				continue
 			}
-
 		}
 	}
 	return nil, lastError
+}
+
+func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
+	var attr stns.Attributes
+	err := json.Unmarshal(body, &attr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if attr == nil {
+		return nil, errors.New(settings.V2_FORMAT_ERROR)
+	}
+
+	mig := stns.ResponseFormat{
+		&stns.MetaData{
+			1.0,
+			false,
+			0,
+			"sha256",
+			stns_settings.SUCCESS,
+		},
+		&attr,
+	}
+
+	j, err := json.Marshal(mig)
+	if err != nil {
+		return nil, err
+	}
+
+	return j, nil
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
@@ -132,24 +191,38 @@ func (r *Request) writeLockFile(endPoint string) {
 	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
-func (r *Request) Get() (stns.Attributes, error) {
-	var attr stns.Attributes
+// only use wrapper command
+func (r *Request) GetAttributes() (stns.Attributes, error) {
+	var res stns.ResponseFormat
 
-	body, err := r.GetRaw()
+	body, err := r.GetRawData()
 
 	if err != nil {
 		return nil, err
 	}
 
 	if len(body) > 0 {
-		err = json.Unmarshal(body, &attr)
+		err = json.Unmarshal(body, &res)
 
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return attr, nil
+	return *res.Items, nil
+}
+
+func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
+	out, err := exec.Command(r.Config.WrapperCommand, r.ApiPath).Output()
+	if err != nil {
+		return stns.ResponseFormat{}, err
+	}
+	var res stns.ResponseFormat
+	err = json.Unmarshal(out, &res)
+	if err != nil {
+		return stns.ResponseFormat{}, err
+	}
+	return res, nil
 }
 
 func (r *Request) GetMD5Hash(text string) string {
