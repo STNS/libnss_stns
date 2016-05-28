@@ -51,7 +51,7 @@ func TestRequestV2ServerV2(t *testing.T) {
 			"metadata": {
 				"api_version": 2.0,
 				"salt_enable": false,
-				"stretching_count": 0,
+				"stretching_number": 0,
 				"result": "success"
 			},
 			"items": {
