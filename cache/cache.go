@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/settings"
+	_gocache "github.com/patrickmn/go-cache"
 )
 
-var store map[string]*cacheObject
+var store *_gocache.Cache
 
 type cacheObject struct {
 	userGroup *stns.Attributes
@@ -20,35 +20,22 @@ type cacheObject struct {
 }
 
 func Read(path string) (stns.Attributes, error) {
-	m := sync.RWMutex{}
-	m.RLock()
-	defer m.RUnlock()
-
 	Init()
-
-	c, exist := store[path]
+	c, exist := store.Get(path)
 	if exist {
-		// cache expire 10 minute
-		if time.Now().Sub(c.createAt) > time.Minute*settings.CACHE_TIME {
-			delete(store, path)
-			return nil, nil
-		} else if c.err != nil {
-			return nil, c.err
+		co := c.(*cacheObject)
+		if co.err != nil {
+			return nil, co.err
 		} else {
-			return *c.userGroup, c.err
+			return *co.userGroup, co.err
 		}
 	}
 	return nil, nil
 }
 
 func Write(path string, attr stns.Attributes, err error) {
-	m := sync.Mutex{}
-	m.Lock()
-	defer m.Unlock()
-
 	Init()
-
-	store[path] = &cacheObject{&attr, time.Now(), err}
+	store.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
 func SaveResultList(resourceType string, list stns.Attributes) {
@@ -73,7 +60,7 @@ func LastResultList(resourceType string) *stns.Attributes {
 	return &attr
 }
 func Init() {
-	if len(store) == 0 {
-		store = map[string]*cacheObject{}
+	if store == nil {
+		store = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
 	}
 }
