@@ -39,6 +39,8 @@ install -d -m 755 %{buildroot}/%{_sysconfdir}/stns/
 install    -m 644 %{_sourcedir}/libnss_stns.conf %{buildroot}/%{_sysconfdir}/stns/libnss_stns.conf
 ln -fs /usr/%{_lib}/libnss_stns.so %{buildroot}/usr/%{_lib}/libnss_stns.so.2
 
+install -d -m 755 %{buildroot}/opt/libnss_stns
+
 %clean
 rm -rf %{_builddir}
 rm -rf %{buildroot}

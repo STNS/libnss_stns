@@ -150,7 +150,7 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
-	fileName := settings.TEMP_DIR + "/libnss_stns." + r.GetMD5Hash(endPoint)
+	fileName := settings.WORK_DIR + "/libnss_stns." + r.GetMD5Hash(endPoint)
 	_, err := os.Stat(fileName)
 
 	// lockfile not exists
@@ -182,7 +182,7 @@ func (r *Request) checkLockFile(endPoint string) bool {
 }
 
 func (r *Request) writeLockFile(endPoint string) {
-	fileName := settings.TEMP_DIR + "/libnss_stns." + r.GetMD5Hash(endPoint)
+	fileName := settings.WORK_DIR + "/libnss_stns." + r.GetMD5Hash(endPoint)
 	now := time.Now()
 	log.Println("create lockfile:" + endPoint + " time:" + now.String() + " unix_time:" + strconv.FormatInt(now.Unix(), 10))
 

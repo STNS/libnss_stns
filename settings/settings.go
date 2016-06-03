@@ -4,7 +4,7 @@ const (
 	HTTP_TIMEOUT = 3
 	LOCK_TIME    = 6
 	CACHE_TIME   = 10
-	CACHE_DIR    = "/var/tmp"
+	WORK_DIR     = "/opt/libnss_stns"
 )
 
 const (
