@@ -24,6 +24,5 @@ override_dh_auto_install:
 	install -d -m 755 debian/${package}/etc/stns/
 	install    -m 644 debian/libnss_stns.conf debian/${package}/etc/stns/libnss_stns.conf
 	install -d -m 755 debian/${package}/lib/$(DEB_HOST_MULTIARCH)/security
-	install -d -m 755 debian/${package}/opt/libnss_stns
 
 override_dh_usrlocal:
