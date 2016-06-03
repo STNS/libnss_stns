@@ -21,7 +21,7 @@ type Passwd struct {
 	result **C.struct_passwd
 }
 
-func (self Passwd) setCStruct(passwds stns.Attributes) int {
+func (self Passwd) setCStruct(passwds stns.Attributes) C.int {
 
 	for n, p := range passwds {
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
@@ -54,17 +54,17 @@ func (self Passwd) setCStruct(passwds stns.Attributes) int {
 passwd
 -------------------------------------------------------*/
 //export _nss_stns_getpwnam_r
-func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
+func _nss_stns_getpwnam_r(name *C.char, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) C.int {
 	return set(&Passwd{pwd, result}, "user", "name", C.GoString(name))
 }
 
 //export _nss_stns_getpwuid_r
-func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
+func _nss_stns_getpwuid_r(uid C.__uid_t, pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) C.int {
 	return set(&Passwd{pwd, result}, "user", "id", strconv.Itoa(int(uid)))
 }
 
 //export _nss_stns_setpwent
-func _nss_stns_setpwent() int {
+func _nss_stns_setpwent() C.int {
 	return initList("user", passwdList, &passwdReadPos)
 
 }
@@ -75,6 +75,6 @@ func _nss_stns_endpwent() {
 }
 
 //export _nss_stns_getpwent_r
-func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) int {
+func _nss_stns_getpwent_r(pwd *C.struct_passwd, buffer *C.char, bufsize C.size_t, result **C.struct_passwd) C.int {
 	return setByList(&Passwd{pwd, result}, passwdList, &passwdReadPos)
 }

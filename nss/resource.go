@@ -10,14 +10,20 @@ import (
 	"github.com/STNS/libnss_stns/request"
 )
 
-const NSS_STATUS_TRYAGAIN = -2
-const NSS_STATUS_SUCCESS = 1
-const NSS_STATUS_NOTFOUND = 0
+import "C"
+
+const (
+	NSS_STATUS_NOTFOUND = C.int(0)
+	NSS_STATUS_SUCCESS  = C.int(1)
+	NSS_STATUS_UNAVAIL  = C.int(2)
+	NSS_STATUS_TRYGAIN  = C.int(3)
+	LIST_EMPTY          = -1
+)
 
 var conf *config.Config
 
 type LinuxResource interface {
-	setCStruct(stns.Attributes) int
+	setCStruct(stns.Attributes) C.int
 }
 
 func get(paths ...string) (stns.Attributes, error) {
@@ -31,7 +37,6 @@ func get(paths ...string) (stns.Attributes, error) {
 	}
 
 	r, err := request.NewRequest(conf, paths...)
-
 	u, err := readCache(r.ApiPath)
 	if u != nil || err != nil {
 		return u, err
@@ -50,10 +55,10 @@ func get(paths ...string) (stns.Attributes, error) {
 	return *res.Items, nil
 }
 
-func set(linux LinuxResource, resource_type, column string, value string) int {
+func set(linux LinuxResource, resource_type, column string, value string) C.int {
 	resource, err := get(resource_type, column, value)
 	if err != nil {
-		return NSS_STATUS_TRYAGAIN
+		return NSS_STATUS_UNAVAIL
 	}
 
 	if len(resource) > 0 {
@@ -62,10 +67,10 @@ func set(linux LinuxResource, resource_type, column string, value string) int {
 	return NSS_STATUS_NOTFOUND
 }
 
-func setByList(linux LinuxResource, list stns.Attributes, position *int) int {
+func setByList(linux LinuxResource, list stns.Attributes, position *int) C.int {
 	keys := keys(list)
 L:
-	if *position != NSS_STATUS_TRYAGAIN && len(keys) > *position && keys[*position] != "" {
+	if *position != LIST_EMPTY && len(keys) > *position && keys[*position] != "" {
 		name := keys[*position]
 		resource := stns.Attributes{
 			name: list[name],
@@ -80,20 +85,20 @@ L:
 		}
 
 		return result
-	} else if *position == NSS_STATUS_TRYAGAIN {
-		return NSS_STATUS_TRYAGAIN
+	} else if *position == LIST_EMPTY {
+		return NSS_STATUS_UNAVAIL
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func initList(resource_type string, list stns.Attributes, position *int) int {
+func initList(resource_type string, list stns.Attributes, position *int) C.int {
 	// reset value
 	purgeList(list, position)
 
 	resource, err := get(resource_type, "list")
 	if err != nil {
-		*position = NSS_STATUS_TRYAGAIN
-		return NSS_STATUS_TRYAGAIN
+		*position = LIST_EMPTY
+		return NSS_STATUS_UNAVAIL
 	}
 
 	if len(resource) > 0 {

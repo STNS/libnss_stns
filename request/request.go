@@ -213,12 +213,24 @@ func (r *Request) GetAttributes() (stns.Attributes, error) {
 }
 
 func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
-	out, err := exec.Command(r.Config.WrapperCommand, r.ApiPath).Output()
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command(r.Config.WrapperCommand, r.ApiPath)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
 	if err != nil {
 		return stns.ResponseFormat{}, err
 	}
+
+	if len(stderr.Bytes()) > 0 {
+		return stns.ResponseFormat{}, fmt.Errorf("command error:%s", stderr.String())
+	}
+
 	var res stns.ResponseFormat
-	err = json.Unmarshal(out, &res)
+	err = json.Unmarshal(stdout.Bytes(), &res)
 	if err != nil {
 		return stns.ResponseFormat{}, err
 	}
