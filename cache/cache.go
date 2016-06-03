@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"sync"
 	"time"
 
@@ -53,7 +54,7 @@ func Write(path string, attr stns.Attributes, err error) {
 func SaveResultList(resourceType string, list stns.Attributes) {
 	j, err := json.Marshal(list)
 	if err != nil {
-		return
+		log.Println(err)
 	}
 	ioutil.WriteFile(settings.CACHE_DIR+"/.stns_"+resourceType+"_cache", j, 0644)
 }
@@ -62,12 +63,12 @@ func LastResultList(resourceType string) *stns.Attributes {
 	var attr stns.Attributes
 	f, err := ioutil.ReadFile(settings.CACHE_DIR + "/.stns_" + resourceType + "_cache")
 	if err != nil {
-		return nil
+		log.Println(err)
 	}
 
 	err = json.Unmarshal(f, &attr)
 	if err != nil {
-		return nil
+		log.Println(err)
 	}
 	return &attr
 }
