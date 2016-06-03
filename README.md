@@ -21,6 +21,10 @@ $ curl -fsSL https://repo.stns.jp/scripts/apt-repo.sh | sh
 $ apt-get install libnss-stns libpam-stns
 ```
 
+## upgrade
+
+__Since the cache is funny, nscd and crond want to restart__
+
 ## config
 * /etc/stns/libnss_stns.conf
 ```toml
