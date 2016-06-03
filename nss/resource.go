@@ -13,11 +13,12 @@ import (
 
 import "C"
 
+// http://www.gnu.org/software/libc/manual/html_node/NSS-Modules-Interface.html
 const (
-	NSS_STATUS_NOTFOUND = C.int(0)
 	NSS_STATUS_SUCCESS  = C.int(1)
-	NSS_STATUS_UNAVAIL  = C.int(2)
-	NSS_STATUS_TRYGAIN  = C.int(3)
+	NSS_STATUS_NOTFOUND = C.int(0)
+	NSS_STATUS_UNAVAIL  = C.int(-1)
+	NSS_STATUS_TRYGAIN  = C.int(-2)
 	LIST_EMPTY          = -1
 )
 
