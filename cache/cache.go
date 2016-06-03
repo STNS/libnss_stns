@@ -1,6 +1,8 @@
-package main
+package cache
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"sync"
 	"time"
 
@@ -16,12 +18,12 @@ type cacheObject struct {
 	err       error
 }
 
-func readCache(path string) (stns.Attributes, error) {
+func Read(path string) (stns.Attributes, error) {
 	m := sync.RWMutex{}
 	m.RLock()
 	defer m.RUnlock()
 
-	initCache()
+	Init()
 
 	c, exist := store[path]
 	if exist {
@@ -38,17 +40,38 @@ func readCache(path string) (stns.Attributes, error) {
 	return nil, nil
 }
 
-func writeCache(path string, attr stns.Attributes, err error) {
+func Write(path string, attr stns.Attributes, err error) {
 	m := sync.Mutex{}
 	m.Lock()
 	defer m.Unlock()
 
-	initCache()
+	Init()
 
 	store[path] = &cacheObject{&attr, time.Now(), err}
 }
 
-func initCache() {
+func SaveResultList(resourceType string, list stns.Attributes) {
+	j, err := json.Marshal(list)
+	if err != nil {
+		return
+	}
+	ioutil.WriteFile(settings.CACHE_DIR+"/.stns_"+resourceType+"_cache", j, 0644)
+}
+
+func LastResultList(resourceType string) *stns.Attributes {
+	var attr stns.Attributes
+	f, err := ioutil.ReadFile(settings.CACHE_DIR + "/.stns_" + resourceType + "_cache")
+	if err != nil {
+		return nil
+	}
+
+	err = json.Unmarshal(f, &attr)
+	if err != nil {
+		return nil
+	}
+	return &attr
+}
+func Init() {
 	if len(store) == 0 {
 		store = map[string]*cacheObject{}
 	}
