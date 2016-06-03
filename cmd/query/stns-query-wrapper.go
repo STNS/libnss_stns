@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"os"
-	"regexp"
 
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
@@ -19,12 +18,7 @@ func main() {
 		if err == nil {
 			os.Stdout.Write([]byte(raw + "\n"))
 		} else {
-			reg := regexp.MustCompile(`resource notfound`)
-			if reg.MatchString(err.Error()) {
-				os.Stdout.Write([]byte(""))
-			} else {
-				os.Stderr.Write([]byte(err.Error() + "\n"))
-			}
+			os.Stderr.Write([]byte(err.Error() + "\n"))
 		}
 	}
 }
