@@ -43,12 +43,12 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 	if err != nil {
 		log.Println(err)
 	}
-	ioutil.WriteFile(settings.CACHE_DIR+"/.stns_"+resourceType+"_cache", j, 0644)
+	ioutil.WriteFile(settings.TEMP_DIR+"/.stns_"+resourceType+"_cache", j, 0644)
 }
 
 func LastResultList(resourceType string) *stns.Attributes {
 	var attr stns.Attributes
-	f, err := ioutil.ReadFile(settings.CACHE_DIR + "/.stns_" + resourceType + "_cache")
+	f, err := ioutil.ReadFile(settings.TEMP_DIR + "/.stns_" + resourceType + "_cache")
 	if err != nil {
 		log.Println(err)
 	}
