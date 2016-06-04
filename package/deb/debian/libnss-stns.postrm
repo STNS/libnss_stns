@@ -2,5 +2,5 @@
 set -e
 
 if [ "$1" = "purge" ]; then
-  rm -rf /opt/libnss_stns
+  rm -rf /var/lib/libnss_stns
 fi
