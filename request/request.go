@@ -53,8 +53,8 @@ func (r *Request) GetRawData() ([]byte, error) {
 	rch := make(chan []byte, len(r.Config.ApiEndPoint))
 	ech := make(chan error, len(r.Config.ApiEndPoint))
 
-	for _, endPoint := range r.Config.ApiEndPoint {
-		go func() {
+	for _, e := range r.Config.ApiEndPoint {
+		go func(endPoint string) {
 			url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
 			req, err := http.NewRequest("GET", url, nil)
 			if err != nil {
@@ -82,7 +82,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 						reg := regexp.MustCompile(`/v2[/]?$`)
 						switch {
 						// version1
-						case !reg.MatchString(endPoint):
+						case !reg.MatchString(e):
 							buffer, err := r.migrateV2Format(body)
 							if err != nil {
 								ech <- err
@@ -107,7 +107,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 					}
 				},
 			)
-		}()
+		}(e)
 	}
 
 	var cnt int
