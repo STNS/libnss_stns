@@ -53,7 +53,7 @@ rm -rf %{buildroot}
 /usr/%{_lib}/libnss_stns.so.2
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf
 
-%dir /opt/libnss_stns
+%dir /var/lib/libnss_stns
 
 %files -n libpam-stns
 /%{_lib}/security/libpam_stns.so
