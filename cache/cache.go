@@ -11,7 +11,8 @@ import (
 	_gocache "github.com/patrickmn/go-cache"
 )
 
-var store *_gocache.Cache
+var store = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
+var workDir = settings.WORK_DIR
 
 type cacheObject struct {
 	userGroup *stns.Attributes
@@ -19,8 +20,11 @@ type cacheObject struct {
 	err       error
 }
 
+func SetWorkDir(path string) {
+	workDir = path
+}
+
 func Read(path string) (stns.Attributes, error) {
-	Init()
 	c, exist := store.Get(path)
 	if exist {
 		co := c.(*cacheObject)
@@ -34,7 +38,6 @@ func Read(path string) (stns.Attributes, error) {
 }
 
 func Write(path string, attr stns.Attributes, err error) {
-	Init()
 	store.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
@@ -42,15 +45,17 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 	j, err := json.Marshal(list)
 	if err != nil {
 		log.Println(err)
+		return
 	}
-	ioutil.WriteFile(settings.WORK_DIR+"/.libnss_stns_"+resourceType+"_cache", j, 0644)
+	ioutil.WriteFile(workDir+"/.libnss_stns_"+resourceType+"_cache", j, 0644)
 }
 
 func LastResultList(resourceType string) *stns.Attributes {
 	var attr stns.Attributes
-	f, err := ioutil.ReadFile(settings.WORK_DIR + "/.libnss_stns_" + resourceType + "_cache")
+	f, err := ioutil.ReadFile(workDir + "/.libnss_stns_" + resourceType + "_cache")
 	if err != nil {
 		log.Println(err)
+		return &attr
 	}
 
 	err = json.Unmarshal(f, &attr)
@@ -58,9 +63,4 @@ func LastResultList(resourceType string) *stns.Attributes {
 		log.Println(err)
 	}
 	return &attr
-}
-func Init() {
-	if store == nil {
-		store = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
-	}
 }
