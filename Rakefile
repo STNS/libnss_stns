@@ -9,7 +9,7 @@ task :spec    => 'spec:all'
 
 desc "run unit test"
 task "test" do
-  sh 'docker run --rm -it -v "$(pwd)":/go/src/github.com/STNS/libnss_stns -t pyama/stns:ubuntu-x86 /bin/bash'
+  sh 'docker run --rm -it -v "$(pwd)":/go/src/github.com/STNS/libnss_stns -w /go/src/github.com/STNS/libnss_stns -t pyama/stns:ubuntu-x86 /bin/bash'
 end
 
 desc "make package all architecture"
