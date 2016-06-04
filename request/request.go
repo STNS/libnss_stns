@@ -4,23 +4,20 @@ import (
 	"bytes"
 	"crypto/md5"
 	"crypto/tls"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"math/rand"
 	"net"
 	"net/http"
-	"os"
 	"os/exec"
 	"path"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/net/context"
 
 	stns_settings "github.com/STNS/STNS/settings"
 	"github.com/STNS/STNS/stns"
@@ -55,73 +52,106 @@ func (r *Request) SetWorkDir(path string) {
 
 // only use wrapper command
 func (r *Request) GetRawData() ([]byte, error) {
-	var lastError error
-	rand.Seed(time.Now().UnixNano())
-	perm := rand.Perm(len(r.Config.ApiEndPoint))
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
-	http.DefaultTransport.(*http.Transport).Dial = (&net.Dialer{
-		Timeout:   settings.HTTP_TIMEOUT * time.Second,
-		KeepAlive: 30 * time.Second,
-	}).Dial
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	for _, v := range perm {
-		endPoint := r.Config.ApiEndPoint[v]
-		url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
-		req, err := http.NewRequest("GET", url, nil)
+	rch := make(chan []byte, len(r.Config.ApiEndPoint))
+	ech := make(chan error, len(r.Config.ApiEndPoint))
 
-		if err != nil {
-			lastError = err
-			continue
-		}
-
-		if r.Config.User != "" && r.Config.Password != "" {
-			req.SetBasicAuth(r.Config.User, r.Config.Password)
-		}
-
-		if r.checkLockFile(endPoint) {
-			res, err := http.DefaultClient.Do(req)
-
+	for _, endPoint := range r.Config.ApiEndPoint {
+		go func() {
+			url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
+			req, err := http.NewRequest("GET", url, nil)
 			if err != nil {
-				r.writeLockFile(endPoint)
-				lastError = err
-				continue
+				ech <- err
+				return
 			}
 
-			defer res.Body.Close()
-			body, err := ioutil.ReadAll(res.Body)
-
-			if err != nil {
-				lastError = err
-				continue
+			if r.Config.User != "" && r.Config.Password != "" {
+				req.SetBasicAuth(r.Config.User, r.Config.Password)
 			}
 
-			switch res.StatusCode {
-			case http.StatusOK:
-				reg := regexp.MustCompile(`/v2[/]?$`)
-				switch {
-				// version1
-				case !reg.MatchString(endPoint):
-					buffer, err := r.migrateV2Format(body)
+			r.httpDo(
+				ctx,
+				req,
+				func(res *http.Response, err error) {
 					if err != nil {
-						lastError = err
-						continue
+						ech <- err
+						return
 					}
-					return buffer, nil
-				default:
-					return body, nil
-				}
-			// only direct return notfonud
-			case http.StatusNotFound:
-				return nil, fmt.Errorf("resource notfound: %s", url)
-			case http.StatusUnauthorized:
-				return nil, fmt.Errorf("authenticate error: %s", url)
-			default:
-				continue
+					defer res.Body.Close()
+					body, err := ioutil.ReadAll(res.Body)
+
+					switch res.StatusCode {
+					case http.StatusOK:
+						reg := regexp.MustCompile(`/v2[/]?$`)
+						switch {
+						// version1
+						case !reg.MatchString(endPoint):
+							buffer, err := r.migrateV2Format(body)
+							if err != nil {
+								ech <- err
+								return
+							}
+							rch <- buffer
+							return
+						default:
+							rch <- body
+							return
+						}
+					case http.StatusNotFound:
+						ech <- fmt.Errorf("resource notfound: %s", url)
+						return
+
+					case http.StatusUnauthorized:
+						ech <- fmt.Errorf("authenticate error: %s", url)
+						return
+					default:
+						ech <- fmt.Errorf("error: %s", url)
+						return
+					}
+				},
+			)
+		}()
+	}
+
+	var cnt int
+	for {
+		select {
+		case r := <-rch:
+			return r, nil
+		case e := <-ech:
+			cnt++
+			if cnt == len(r.Config.ApiEndPoint) {
+				return nil, e
 			}
 		}
 	}
-	return nil, lastError
+}
+
+func (r *Request) httpDo(
+	ctx context.Context,
+	req *http.Request,
+	f func(*http.Response, error),
+) {
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
+		Dial: (&net.Dialer{
+			Timeout:   settings.HTTP_TIMEOUT * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+	}
+
+	client := &http.Client{Transport: tr}
+
+	go func() { f(client.Do(req)) }()
+	select {
+	case <-ctx.Done():
+		tr.CancelRequest(req)
+		return
+	}
 }
 
 func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
@@ -153,48 +183,6 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 	}
 
 	return j, nil
-}
-
-func (r *Request) checkLockFile(endPoint string) bool {
-	fileName := workDir + "/libnss_stns." + r.GetMD5Hash(endPoint)
-	_, err := os.Stat(fileName)
-
-	// lockfile not exists
-	if err != nil {
-		return true
-	}
-
-	buff, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Println(err)
-		os.Remove(fileName)
-		return false
-	}
-
-	buf := bytes.NewBuffer(buff)
-	lastTime, err := binary.ReadVarint(buf)
-	if err != nil {
-		log.Println(err)
-		os.Remove(fileName)
-		return false
-	}
-
-	if time.Now().Unix() > lastTime+settings.LOCK_TIME || lastTime > time.Now().Unix()+settings.LOCK_TIME {
-		os.Remove(fileName)
-		return true
-	}
-
-	return false
-}
-
-func (r *Request) writeLockFile(endPoint string) {
-	fileName := workDir + "/libnss_stns." + r.GetMD5Hash(endPoint)
-	now := time.Now()
-	log.Println("create lockfile:" + endPoint + " time:" + now.String() + " unix_time:" + strconv.FormatInt(now.Unix(), 10))
-
-	result := make([]byte, binary.MaxVarintLen64)
-	binary.PutVarint(result, now.Unix())
-	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
 func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {

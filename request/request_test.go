@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/STNS/STNS/stns"
@@ -45,29 +44,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 }
 
 func TestRequestV2ServerV2(t *testing.T) {
-	handler := test.GetHandler(t,
-		"/v2/user/name/example",
-		`{
-			"metadata": {
-				"api_version": 2.0,
-				"salt_enable": false,
-				"stretching_number": 0,
-				"result": "success"
-			},
-			"items": {
-				"example": {
-					"id": 1,
-					"group_id": 2,
-					"directory": "/home/example",
-					"shell": "/bin/sh",
-					"keys": [
-						"test"
-					],
-					"password": "password"
-				}
-			}
-		}`,
-	)
+	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example())
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
@@ -76,6 +53,51 @@ func TestRequestV2ServerV2(t *testing.T) {
 
 	r, _ := NewRequest(c, "user", "name", "example")
 	checkResponse(t, r, 2.0)
+}
+
+func TestFailOver(t *testing.T) {
+	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example())
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"http://localhost:1000", server.URL + "/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2.0)
+}
+
+func TestRefused(t *testing.T) {
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"http://localhost:1000"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	_, err := r.GetRawData()
+	if err == nil {
+		t.Error("errot test refused")
+	}
+}
+func getV2Example() string {
+	return `{
+		"metadata": {
+			"api_version": 2.0,
+			"salt_enable": false,
+			"stretching_number": 0,
+			"result": "success"
+		},
+		"items": {
+			"example": {
+				"id": 1,
+				"group_id": 2,
+				"directory": "/home/example",
+				"shell": "/bin/sh",
+				"keys": [
+					"test"
+				],
+				"password": "password"
+			}
+		}
+	}`
 }
 
 func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
@@ -160,31 +182,6 @@ func TestBasicAuth(t *testing.T) {
 		t.Error("fetch error")
 	}
 
-}
-
-func TestLockfile(t *testing.T) {
-	handler := test.GetHandler(t, "dummy", "dummy")
-	server := httptest.NewServer(http.HandlerFunc(handler))
-	defer server.Close()
-
-	c := &config.Config{}
-	c.ApiEndPoint = []string{"example1", "example2"}
-	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
-	r.SetWorkDir("/tmp")
-
-	r.GetRawData()
-	lock1 := "/tmp/libnss_stns." + r.GetMD5Hash("example1")
-	lock2 := "/tmp/libnss_stns." + r.GetMD5Hash("example2")
-
-	_, err := os.Stat(lock1)
-	if err != nil {
-		t.Error("not exist lock file 1" + err.Error())
-	}
-
-	_, err = os.Stat(lock2)
-	if err != nil {
-		t.Error("not exist lock file 2")
-	}
 }
 
 func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
