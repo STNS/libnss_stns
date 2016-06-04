@@ -1,3 +1,9 @@
+libnss-stns (0.1.2) STABLE; urgency=low
+
+  * fix Negative cash at the time of restart
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sat, 1 Jun 2016 4:30:00 +0000
+
 libnss-stns (0.1.1) STABLE; urgency=low
 
   * Go 1.6.2
