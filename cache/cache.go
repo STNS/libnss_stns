@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/STNS/STNS/stns"
@@ -47,7 +48,12 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		log.Println(err)
 		return
 	}
-	ioutil.WriteFile(workDir+"/.libnss_stns_"+resourceType+"_cache", j, 0644)
+
+	if err := os.MkdirAll(workDir, 0777); err != nil {
+		log.Println(err)
+		return
+	}
+	ioutil.WriteFile(workDir+"/.libnss_stns_"+resourceType+"_cache", j, 0777)
 }
 
 func LastResultList(resourceType string) *stns.Attributes {

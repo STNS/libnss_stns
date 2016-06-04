@@ -49,7 +49,7 @@ files.each_with_index do |f,i|
   end unless i == 2
 end
 
-describe file("/opt/libnss_stns") do
+describe file("/var/lib/libnss_stns") do
   it { should be_directory }
   it { should be_mode(777) }
   it { should be_owned_by('root') }

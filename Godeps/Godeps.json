@@ -34,6 +34,10 @@
 		{
 			"ImportPath": "github.com/patrickmn/go-cache",
 			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "3e8a7b0329d536af18e227bb21b6da4d1dbbe180"
 		}
 	]
 }

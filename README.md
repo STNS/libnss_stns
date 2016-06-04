@@ -40,7 +40,11 @@ wrapper_path = "/usr/local/bin/stns-query-wrapper"
 # stns-key-wrapper on failure , this try chain_ssh_wrapper command
 chain_ssh_wrapper = "/usr/libexec/openssh/ssh-ldap-wrapper"
 
+# https ssl verify
 ssl_verify = true
+
+# wrapper command timeout
+request_timeout = 3
 ```
 
 * /etc/nsswitch.conf
