@@ -51,6 +51,7 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 
 	if err := os.MkdirAll(workDir, 0777); err != nil {
 		log.Println(err)
+		return
 	}
 	ioutil.WriteFile(workDir+"/.libnss_stns_"+resourceType+"_cache", j, 0777)
 }

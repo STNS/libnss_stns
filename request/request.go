@@ -26,8 +26,6 @@ import (
 	"github.com/STNS/libnss_stns/settings"
 )
 
-var workDir = settings.WORK_DIR
-
 type Request struct {
 	ApiPath string
 	Config  *config.Config
@@ -44,10 +42,6 @@ func NewRequest(config *config.Config, paths ...string) (*Request, error) {
 
 func (r *Request) SetPath(paths ...string) {
 	r.ApiPath = path.Clean(strings.Join(paths, "/"))
-}
-
-func (r *Request) SetWorkDir(path string) {
-	workDir = path
 }
 
 // only use wrapper command
@@ -139,7 +133,7 @@ func (r *Request) httpDo(
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
 		Dial: (&net.Dialer{
-			Timeout:   r.Config.RequestTimeOut * time.Second,
+			Timeout:   time.Duration(r.Config.RequestTimeOut) * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).Dial,
 	}
