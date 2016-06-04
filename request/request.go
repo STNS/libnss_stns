@@ -139,7 +139,7 @@ func (r *Request) httpDo(
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
 		Dial: (&net.Dialer{
-			Timeout:   settings.HTTP_TIMEOUT * time.Second,
+			Timeout:   r.Config.RequestTimeOut * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).Dial,
 	}
