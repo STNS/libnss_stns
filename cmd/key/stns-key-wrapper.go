@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
 	"github.com/STNS/libnss_stns/request"
@@ -25,19 +27,29 @@ func main() {
 }
 
 func Fetch(config *config.Config, name string) string {
-	userKeys := ""
+	var res stns.ResponseFormat
+	var userKeys string
+
 	r, err := request.NewRequest(config, "user", "name", name)
 	if err != nil {
 		log.Println(err)
 	}
 
-	users, err := r.GetAttributes()
+	body, err := r.GetRawData()
 	if err != nil {
 		log.Println(err)
 	}
 
-	if users != nil {
-		for _, u := range users {
+	if len(body) > 0 {
+		err = json.Unmarshal(body, &res)
+
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	if *res.Items != nil {
+		for _, u := range *res.Items {
 			if len(u.Keys) > 0 {
 				userKeys += strings.Join(u.Keys, "\n") + "\n"
 			}

@@ -14,7 +14,7 @@ type Shadow struct {
 	result **C.struct_spwd
 }
 
-func (self Shadow) setCStruct(shadows stns.Attributes) int {
+func (self Shadow) setCStruct(shadows stns.Attributes) C.int {
 	for n, _ := range shadows {
 		self.spwd.sp_namp = C.CString(n)
 		self.spwd.sp_pwdp = C.CString("!!")
@@ -35,12 +35,12 @@ shadow
 -------------------------------------------------------*/
 
 //export _nss_stns_getspnam_r
-func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
+func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) C.int {
 	return set(&Shadow{spwd, result}, "user", "name", C.GoString(name))
 }
 
 //export _nss_stns_setspent
-func _nss_stns_setspent() int {
+func _nss_stns_setspent() C.int {
 	return initList("user", shadowList, &shadowReadPos)
 }
 
@@ -50,6 +50,6 @@ func _nss_stns_endspent() {
 }
 
 //export _nss_stns_getspent_r
-func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) int {
+func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) C.int {
 	return setByList(&Shadow{spwd, result}, shadowList, &shadowReadPos)
 }

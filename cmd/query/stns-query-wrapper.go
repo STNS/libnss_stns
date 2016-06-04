@@ -2,8 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
+	"os"
 
 	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/logger"
@@ -15,23 +14,26 @@ func main() {
 	config, err := config.Load("/etc/stns/libnss_stns.conf")
 	if err == nil {
 		flag.Parse()
-		if raw := Fetch(config, flag.Arg(0)); raw != "" {
-			fmt.Println(raw)
+		raw, err := Fetch(config, flag.Arg(0))
+		if err == nil {
+			os.Stdout.Write([]byte(raw + "\n"))
+		} else {
+			os.Stderr.Write([]byte(err.Error() + "\n"))
 		}
 	}
 }
 
-func Fetch(config *config.Config, path string) string {
+func Fetch(config *config.Config, path string) (string, error) {
 	r, err := request.NewRequest(config, path)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	result, err := r.GetRawData()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return string(result)
+	return string(result), nil
 }

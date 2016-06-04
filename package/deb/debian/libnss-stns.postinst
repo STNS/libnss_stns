@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+
+mkdir -p /opt/libnss_stns
+chmod 777 /opt/libnss_stns

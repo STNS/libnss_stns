@@ -170,6 +170,7 @@ func TestLockfile(t *testing.T) {
 	c := &config.Config{}
 	c.ApiEndPoint = []string{"example1", "example2"}
 	r, _ := NewRequest(c, "dummy", "dummy", "dummy")
+	r.SetWorkDir("/tmp")
 
 	r.GetRawData()
 	lock1 := "/tmp/libnss_stns." + r.GetMD5Hash("example1")
@@ -177,7 +178,7 @@ func TestLockfile(t *testing.T) {
 
 	_, err := os.Stat(lock1)
 	if err != nil {
-		t.Error("not exist lock file 1")
+		t.Error("not exist lock file 1" + err.Error())
 	}
 
 	_, err = os.Stat(lock2)

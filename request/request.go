@@ -29,6 +29,8 @@ import (
 	"github.com/STNS/libnss_stns/settings"
 )
 
+var workDir = settings.WORK_DIR
+
 type Request struct {
 	ApiPath string
 	Config  *config.Config
@@ -45,6 +47,10 @@ func NewRequest(config *config.Config, paths ...string) (*Request, error) {
 
 func (r *Request) SetPath(paths ...string) {
 	r.ApiPath = path.Clean(strings.Join(paths, "/"))
+}
+
+func (r *Request) SetWorkDir(path string) {
+	workDir = path
 }
 
 // only use wrapper command
@@ -150,7 +156,7 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 }
 
 func (r *Request) checkLockFile(endPoint string) bool {
-	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
+	fileName := workDir + "/libnss_stns." + r.GetMD5Hash(endPoint)
 	_, err := os.Stat(fileName)
 
 	// lockfile not exists
@@ -182,7 +188,7 @@ func (r *Request) checkLockFile(endPoint string) bool {
 }
 
 func (r *Request) writeLockFile(endPoint string) {
-	fileName := "/tmp/libnss_stns." + r.GetMD5Hash(endPoint)
+	fileName := workDir + "/libnss_stns." + r.GetMD5Hash(endPoint)
 	now := time.Now()
 	log.Println("create lockfile:" + endPoint + " time:" + now.String() + " unix_time:" + strconv.FormatInt(now.Unix(), 10))
 
@@ -191,34 +197,25 @@ func (r *Request) writeLockFile(endPoint string) {
 	ioutil.WriteFile(fileName, result, os.ModePerm)
 }
 
-// only use wrapper command
-func (r *Request) GetAttributes() (stns.Attributes, error) {
-	var res stns.ResponseFormat
-
-	body, err := r.GetRawData()
-
-	if err != nil {
-		return nil, err
-	}
-
-	if len(body) > 0 {
-		err = json.Unmarshal(body, &res)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return *res.Items, nil
-}
-
 func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
-	out, err := exec.Command(r.Config.WrapperCommand, r.ApiPath).Output()
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd := exec.Command(r.Config.WrapperCommand, r.ApiPath)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
 	if err != nil {
 		return stns.ResponseFormat{}, err
 	}
+
+	if len(stderr.Bytes()) > 0 {
+		return stns.ResponseFormat{}, fmt.Errorf("command error:%s", stderr.String())
+	}
+
 	var res stns.ResponseFormat
-	err = json.Unmarshal(out, &res)
+	err = json.Unmarshal(stdout.Bytes(), &res)
 	if err != nil {
 		return stns.ResponseFormat{}, err
 	}

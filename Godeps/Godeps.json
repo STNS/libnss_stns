@@ -30,6 +30,10 @@
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest/trie",
 			"Comment": "v3.3.1",
 			"Rev": "37ad7dc626602a8355801da6acd85155655520f8"
+		},
+		{
+			"ImportPath": "github.com/patrickmn/go-cache",
+			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
 		}
 	]
 }

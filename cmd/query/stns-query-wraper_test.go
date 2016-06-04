@@ -32,8 +32,8 @@ func TestFetch(t *testing.T) {
 
 	r := regexp.MustCompile(`example`)
 	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
-
-	if !r.MatchString(Fetch(c, "/user/name/example")) {
+	out, _ := Fetch(c, "/user/name/example")
+	if !r.MatchString(out) {
 		t.Error("unmatch response")
 	}
 
@@ -49,7 +49,8 @@ func TestFetch(t *testing.T) {
 
 	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
 
-	if r.MatchString(Fetch(c, "/user/name/notfound")) {
+	out, _ = Fetch(c, "/user/name/notfound")
+	if r.MatchString(out) {
 		t.Error("unmatch keys")
 	}
 }
