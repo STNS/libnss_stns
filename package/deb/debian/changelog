@@ -1,9 +1,3 @@
-libnss-stns (0.1.3) STABLE; urgency=low
-
-  * unused lock file
-
- -- pyama86 <www.kazu.com@gmail.com>  Sat, 2 Jun 2016 1:30:00 +0000
-
 libnss-stns (0.1.2) STABLE; urgency=low
 
   * fix Negative cash at the time of restart
