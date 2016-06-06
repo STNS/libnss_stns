@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"sort"
+	"strconv"
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/cache"
@@ -28,7 +29,7 @@ type LinuxResource interface {
 	setCStruct(stns.Attributes) C.int
 }
 
-func get(paths ...string) (stns.Attributes, error) {
+func get(resourceType, column, value string) (stns.Attributes, error) {
 	if conf == nil {
 		c, err := config.Load("/etc/stns/libnss_stns.conf")
 		if err != nil {
@@ -38,7 +39,7 @@ func get(paths ...string) (stns.Attributes, error) {
 		conf = c
 	}
 
-	r, err := request.NewRequest(conf, paths...)
+	r, err := request.NewRequest(conf, resourceType, column, value)
 	u, err := cache.Read(r.ApiPath)
 	if u != nil || err != nil {
 		return u, err
@@ -53,18 +54,25 @@ func get(paths ...string) (stns.Attributes, error) {
 		return nil, err
 	}
 
+	if column == "id" {
+		cache.WriteMinId(resourceType, res.MetaData.MinId)
+	}
+
 	cache.Write(r.ApiPath, *res.Items, nil)
 	return *res.Items, nil
 }
 
-func set(linux LinuxResource, resourceType, column string, value string) C.int {
-	resource, err := get(resourceType, column, value)
-	if err != nil {
-		return NSS_STATUS_UNAVAIL
-	}
+func set(linux LinuxResource, resourceType, column, value string) C.int {
+	id, _ := strconv.Atoi(value)
+	if column != "id" || (column == "id" && cache.ReadMinId(resourceType) >= id) {
+		resource, err := get(resourceType, column, value)
+		if err != nil {
+			return NSS_STATUS_UNAVAIL
+		}
 
-	if len(resource) > 0 {
-		return linux.setCStruct(resource)
+		if len(resource) > 0 {
+			return linux.setCStruct(resource)
+		}
 	}
 	return NSS_STATUS_NOTFOUND
 }
@@ -99,7 +107,7 @@ func initList(resourceType string, list stns.Attributes, position *int) C.int {
 	// reset value
 	purgeList(list, position)
 
-	attr, err = get(resourceType, "list")
+	attr, err = get(resourceType, "list", "")
 
 	if err != nil {
 		// When the error refers to the last result.

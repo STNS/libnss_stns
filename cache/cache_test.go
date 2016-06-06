@@ -47,3 +47,10 @@ func TestSaveLoad(t *testing.T) {
 		t.Error("save load error1")
 	}
 }
+
+func TestWriteReadMinId(t *testing.T) {
+	WriteMinId("test", 100)
+	if ReadMinId("test") != 100 {
+		t.Error("min id error1")
+	}
+}
