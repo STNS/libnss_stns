@@ -82,7 +82,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 						reg := regexp.MustCompile(`/v2[/]?$`)
 						switch {
 						// version1
-						case !reg.MatchString(e):
+						case !reg.MatchString(endPoint):
 							buffer, err := r.migrateV2Format(body)
 							if err != nil {
 								ech <- err
