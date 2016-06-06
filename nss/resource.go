@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sort"
 	"strconv"
@@ -33,7 +34,6 @@ func get(resourceType, column, value string) (stns.Attributes, error) {
 	if conf == nil {
 		c, err := config.Load("/etc/stns/libnss_stns.conf")
 		if err != nil {
-			log.Print(err)
 			return nil, err
 		}
 		conf = c
@@ -50,7 +50,6 @@ func get(resourceType, column, value string) (stns.Attributes, error) {
 	res, err := r.GetByWrapperCmd()
 
 	if err != nil {
-		log.Print(err)
 		return nil, err
 	}
 
@@ -58,15 +57,19 @@ func get(resourceType, column, value string) (stns.Attributes, error) {
 		cache.WriteMinId(resourceType, res.MetaData.MinId)
 	}
 
+	if res.Items == nil {
+		return nil, fmt.Errorf("resource notfound %s/%s/%s", resourceType, column, value)
+	}
 	cache.Write(r.ApiPath, *res.Items, nil)
 	return *res.Items, nil
 }
 
 func set(linux LinuxResource, resourceType, column, value string) C.int {
 	id, _ := strconv.Atoi(value)
-	if column != "id" || (column == "id" && cache.ReadMinId(resourceType) >= id) {
+	if column != "id" || (column == "id" && cache.ReadMinId(resourceType) <= id) {
 		resource, err := get(resourceType, column, value)
 		if err != nil {
+			log.Print(err)
 			return NSS_STATUS_UNAVAIL
 		}
 
@@ -110,6 +113,7 @@ func initList(resourceType string, list stns.Attributes, position *int) C.int {
 	attr, err = get(resourceType, "list", "")
 
 	if err != nil {
+		log.Print(err)
 		// When the error refers to the last result.
 		// This is supposed to when the server is restarted
 		attr = *cache.LastResultList(resourceType)
