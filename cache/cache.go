@@ -53,7 +53,16 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		log.Println(err)
 		return
 	}
-	ioutil.WriteFile(workDir+"/.libnss_stns_"+resourceType+"_cache", j, 0777)
+	f := workDir + "/.libnss_stns_" + resourceType + "_cache"
+
+	if err := ioutil.WriteFile(f, j, os.ModePerm); err != nil {
+		log.Println(err)
+		return
+	}
+
+	if err := os.Chmod(f, 0777); err != nil {
+		log.Println(err)
+	}
 }
 
 func LastResultList(resourceType string) *stns.Attributes {
