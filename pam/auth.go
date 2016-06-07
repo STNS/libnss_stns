@@ -30,6 +30,11 @@ func checkPassword(config *config.Config, authType string, user string, password
 		return PAM_AUTHINFO_UNAVAIL
 	}
 
+	if res.Items == nil {
+		log.Printf("resource notfound %s/%s", authType, user)
+		return PAM_AUTHINFO_UNAVAIL
+	}
+
 	for _, a := range *res.Items {
 		attr = *a
 		break
