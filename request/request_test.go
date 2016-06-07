@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -22,7 +23,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 		`{
 			"example": {
 				"id": 1,
-				"group_id": 2,
+			"group_id": 2,
 				"directory": "/home/example",
 				"shell": "/bin/sh",
 				"keys": [
@@ -31,6 +32,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 				"password": "password"
 			}
 		}`,
+		200,
 	)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
@@ -44,7 +46,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 }
 
 func TestRequestV2ServerV2(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example())
+	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
@@ -55,8 +57,35 @@ func TestRequestV2ServerV2(t *testing.T) {
 	checkResponse(t, r, 2.0)
 }
 
+func TestRequestV2NotFound(t *testing.T) {
+	handler := test.GetHandler(t, "/v2/user/name/example", `{
+	"metadata": {
+		"api_version": 2.0,
+		"salt_enable": false,
+		"stretching_number": 0,
+		"result": "success"
+	},
+	"items": null
+	}`,
+		404,
+	)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &config.Config{}
+	c.ApiEndPoint = []string{server.URL + "/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	var res stns.ResponseFormat
+	raw, err := r.GetRawData()
+	json.Unmarshal(raw, &res)
+	if err != nil {
+		t.Errorf("fetch error %s", err)
+	}
+}
+
 func TestFailOver(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example())
+	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
@@ -118,6 +147,10 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 		t.Error("unmatch result")
 	}
 
+	if res.MetaData.MinId != 0 {
+		t.Error("unmatch min id")
+	}
+
 	for n, u := range *res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
@@ -147,7 +180,6 @@ func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	var res stns.ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
-
 	if err != nil || res.Items == nil || 0 == len(*res.Items) {
 		t.Errorf("fetch error %s", err)
 	}
@@ -225,4 +257,17 @@ func TestGetByWrapperCmd(t *testing.T) {
 	r, _ := NewRequest(c, "user", "name", "example")
 	res, _ := r.GetByWrapperCmd()
 	checkAttribute(t, res, 2.0)
+}
+
+func TestGetByWrapperCmd404(t *testing.T) {
+	c := &config.Config{}
+	c.ApiEndPoint = []string{"exmple"}
+	c.WrapperCommand = "./fixtures/bin/command_response_02"
+	r, _ := NewRequest(c, "user", "name", "example")
+	res, err := r.GetByWrapperCmd()
+	fmt.Println(res.MetaData)
+	fmt.Println(err)
+	if err != nil {
+		t.Errorf("fetch error %s", err)
+	}
 }

@@ -76,9 +76,8 @@ func (r *Request) GetRawData() ([]byte, error) {
 					}
 					defer res.Body.Close()
 					body, err := ioutil.ReadAll(res.Body)
-
 					switch res.StatusCode {
-					case http.StatusOK:
+					case http.StatusOK, http.StatusNotFound:
 						reg := regexp.MustCompile(`/v2[/]?$`)
 						switch {
 						// version1
@@ -94,10 +93,6 @@ func (r *Request) GetRawData() ([]byte, error) {
 							rch <- body
 							return
 						}
-					case http.StatusNotFound:
-						ech <- fmt.Errorf("resource notfound: %s", url)
-						return
-
 					case http.StatusUnauthorized:
 						ech <- fmt.Errorf("authenticate error: %s", url)
 						return
@@ -167,6 +162,7 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 			0,
 			"sha256",
 			stns_settings.SUCCESS,
+			0,
 		},
 		&attr,
 	}

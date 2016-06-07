@@ -10,7 +10,7 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
-func GetHandler(t *testing.T, path string, responseBody string) http.HandlerFunc {
+func GetHandler(t *testing.T, path string, responseBody string, responseCode int) http.HandlerFunc {
 	response := &Response{
 		path:        path,
 		contenttype: "application/json",
@@ -21,9 +21,9 @@ func GetHandler(t *testing.T, path string, responseBody string) http.HandlerFunc
 		if g, w := r.URL.Path, response.path; g != w {
 			t.Errorf("request got path %s, want %s", g, w)
 		}
-
 		// Send response.
 		w.Header().Set("Content-Type", response.contenttype)
+		w.WriteHeader(responseCode)
 		io.WriteString(w, response.body)
 	}
 	return handler

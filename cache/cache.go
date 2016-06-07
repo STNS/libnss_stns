@@ -42,6 +42,19 @@ func Write(path string, attr stns.Attributes, err error) {
 	store.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
+func ReadMinId(resourceType string) int {
+	n, exist := store.Get(resourceType + "_min_id")
+	if exist {
+		id := n.(int)
+		return id
+	}
+	return 0
+}
+
+func WriteMinId(resourceType string, id int) {
+	store.Set(resourceType+"_min_id", id, _gocache.DefaultExpiration)
+}
+
 func SaveResultList(resourceType string, list stns.Attributes) {
 	j, err := json.Marshal(list)
 	if err != nil {
