@@ -94,7 +94,7 @@ func (n *Nss) Set(s SetNss, entry, presult interface{}) int {
 
 func (n *Nss) SetByList(s SetNss, entry, presult interface{}, list stns.Attributes, position *int) int {
 	keys := n.keys(list)
-L:
+
 	if len(keys) > *position && keys[*position] != "" {
 		name := keys[*position]
 		resource := stns.Attributes{
@@ -104,9 +104,8 @@ L:
 		*position++
 		result := s(resource, entry, presult)
 
-		// lack of data
 		if result == NSS_STATUS_NOTFOUND {
-			goto L
+			return NSS_STATUS_NOTFOUND
 		}
 
 		return result
