@@ -1,4 +1,4 @@
-package hash
+package libstns
 
 import (
 	"crypto/sha256"

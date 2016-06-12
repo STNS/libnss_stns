@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/libstns"
 	"github.com/STNS/libnss_stns/test"
 )
 
@@ -32,11 +32,12 @@ func TestFetchKey(t *testing.T) {
 				]
 			}
 		}`,
+		200,
 	)
 	successServer := httptest.NewServer(http.HandlerFunc(successHandler))
 	defer successServer.Close()
 
-	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
+	c := &libstns.Config{ApiEndPoint: []string{successServer.URL}}
 
 	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
@@ -54,11 +55,12 @@ func TestFetchKey(t *testing.T) {
 				"keys": []
 			}
 		}`,
+		404,
 	)
 	nokeyServer := httptest.NewServer(http.HandlerFunc(nokeyHandler))
 	defer nokeyServer.Close()
 
-	c = &config.Config{ApiEndPoint: []string{nokeyServer.URL}}
+	c = &libstns.Config{ApiEndPoint: []string{nokeyServer.URL}}
 	if "" != Fetch(c, "example") {
 		t.Error("unmatch keys by nokey")
 	}
@@ -68,19 +70,20 @@ func TestFetchKey(t *testing.T) {
 		"/user/name/notfound",
 		`{
 		}`,
+		404,
 	)
 
 	notfoundServer := httptest.NewServer(http.HandlerFunc(notfoundHandler))
 	defer notfoundServer.Close()
 
-	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
+	c = &libstns.Config{ApiEndPoint: []string{notfoundServer.URL}}
 
 	if "" != Fetch(c, "notfound") {
 		t.Error("unmatch keys")
 	}
 
 	// fail over
-	c = &config.Config{ApiEndPoint: []string{"", successServer.URL}}
+	c = &libstns.Config{ApiEndPoint: []string{"", successServer.URL}}
 
 	if "test key1\ntest key2\n" != Fetch(c, "example") {
 		t.Error("unmatch keys")
@@ -90,7 +93,7 @@ func TestFetchKey(t *testing.T) {
 	{
 		defer useTestBins(t)()
 
-		c = &config.Config{ApiEndPoint: []string{successServer.URL}, ChainSshWrapper: "get-external-keys"}
+		c = &libstns.Config{ApiEndPoint: []string{successServer.URL}, ChainSshWrapper: "get-external-keys"}
 		if "test key1\ntest key2\nexternal key1\nexternal key2\n" != Fetch(c, "example") {
 			t.Errorf("unmatch keys: '%#v'", Fetch(c, "example"))
 		}

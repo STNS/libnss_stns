@@ -1,10 +1,10 @@
 package main
 
-import "github.com/STNS/libnss_stns/logger"
+import "github.com/STNS/libnss_stns/libstns"
 
 func main() {
 }
 
 func init() {
-	logger.Setlog()
+	libstns.Setlog()
 }

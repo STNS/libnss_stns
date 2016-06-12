@@ -5,9 +5,7 @@ import (
 	"strings"
 
 	"github.com/STNS/STNS/stns"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/hash"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 const (
@@ -16,10 +14,10 @@ const (
 	PAM_SUCCESS          = 0
 )
 
-func checkPassword(config *config.Config, authType string, user string, password string) int {
+func checkPassword(config *libstns.Config, authType string, user string, password string) int {
 	var attr stns.Attribute
 	var hashType string
-	r, err := request.NewRequest(config, authType, "name", user)
+	r, err := libstns.NewRequest(config, authType, "name", user)
 	if err != nil {
 		log.Println(err)
 		return PAM_AUTHINFO_UNAVAIL
@@ -46,7 +44,7 @@ func checkPassword(config *config.Config, authType string, user string, password
 		hashType = attr.HashType
 	}
 
-	if strings.ToLower(attr.Password) == hash.Calculate(hashType, res.MetaData.Salt, user, password, res.MetaData.Stretching) {
+	if strings.ToLower(attr.Password) == libstns.Calculate(hashType, res.MetaData.Salt, user, password, res.MetaData.Stretching) {
 		return PAM_SUCCESS
 	}
 

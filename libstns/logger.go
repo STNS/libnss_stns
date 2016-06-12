@@ -1,4 +1,4 @@
-package logger
+package libstns
 
 import (
 	"log"

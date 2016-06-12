@@ -9,7 +9,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 type Certifier interface {
@@ -22,14 +22,14 @@ type Supplicant struct {
 	pamh     *C.pam_handle_t
 	argc     int
 	argv     []string
-	config   *config.Config
+	config   *libstns.Config
 }
 
 type Sudo struct {
 	*Supplicant
 }
 
-func NewCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *config.Config) Certifier {
+func NewCertifier(pamh *C.pam_handle_t, argc C.int, argv **C.char, config *libstns.Config) Certifier {
 	gargc := int(argc)
 	gargv := GoStrings(gargc, argv)
 	if gargc > 0 {

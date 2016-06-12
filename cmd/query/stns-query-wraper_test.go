@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/STNS/libnss_stns/config"
+	"github.com/STNS/libnss_stns/libstns"
 	"github.com/STNS/libnss_stns/test"
 )
 
@@ -26,12 +26,13 @@ func TestFetch(t *testing.T) {
 				]
 			}
 		}`,
+		200,
 	)
 	successServer := httptest.NewServer(http.HandlerFunc(successHandler))
 	defer successServer.Close()
 
 	r := regexp.MustCompile(`example`)
-	c := &config.Config{ApiEndPoint: []string{successServer.URL}}
+	c := &libstns.Config{ApiEndPoint: []string{successServer.URL}}
 	out, _ := Fetch(c, "/user/name/example")
 	if !r.MatchString(out) {
 		t.Error("unmatch response")
@@ -43,11 +44,12 @@ func TestFetch(t *testing.T) {
 		"/user/name/notfound",
 		`{
 		}`,
+		404,
 	)
 	notfoundServer := httptest.NewServer(http.HandlerFunc(notfoundHandler))
 	defer notfoundServer.Close()
 
-	c = &config.Config{ApiEndPoint: []string{notfoundServer.URL}}
+	c = &libstns.Config{ApiEndPoint: []string{notfoundServer.URL}}
 
 	out, _ = Fetch(c, "/user/name/notfound")
 	if r.MatchString(out) {

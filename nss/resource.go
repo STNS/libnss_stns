@@ -9,8 +9,7 @@ import (
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/cache"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 import "C"
@@ -24,7 +23,7 @@ const (
 	LIST_EMPTY          = -1
 )
 
-var conf *config.Config
+var conf *libstns.Config
 
 type LinuxResource interface {
 	setCStruct(stns.Attributes) C.int
@@ -32,14 +31,14 @@ type LinuxResource interface {
 
 func get(resourceType, column, value string) (stns.Attributes, error) {
 	if conf == nil {
-		c, err := config.Load("/etc/stns/libnss_stns.conf")
+		c, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 		if err != nil {
 			return nil, err
 		}
 		conf = c
 	}
 
-	r, err := request.NewRequest(conf, resourceType, column, value)
+	r, err := libstns.NewRequest(conf, resourceType, column, value)
 	u, err := cache.Read(r.ApiPath)
 	if u != nil || err != nil {
 		return u, err

@@ -1,4 +1,4 @@
-package config
+package libstns
 
 import (
 	"github.com/BurntSushi/toml"
@@ -15,7 +15,7 @@ type Config struct {
 	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
 }
 
-func Load(filePath string) (*Config, error) {
+func LoadConfig(filePath string) (*Config, error) {
 	var config Config
 
 	defaultConfig(&config)

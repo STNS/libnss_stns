@@ -1,10 +1,8 @@
-package request
+package libstns
 
 import (
 	"bytes"
-	"crypto/md5"
 	"crypto/tls"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,27 +19,20 @@ import (
 
 	stns_settings "github.com/STNS/STNS/settings"
 	"github.com/STNS/STNS/stns"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
 	"github.com/STNS/libnss_stns/settings"
 )
 
 type Request struct {
 	ApiPath string
-	Config  *config.Config
+	Config  *Config
 }
 
-func NewRequest(config *config.Config, paths ...string) (*Request, error) {
-	logger.Setlog()
-	r := Request{}
-
-	r.Config = config
-	r.SetPath(paths...)
+func NewRequest(config *Config, paths ...string) (*Request, error) {
+	r := Request{
+		ApiPath: path.Clean(strings.Join(paths, "/")),
+		Config:  config,
+	}
 	return &r, nil
-}
-
-func (r *Request) SetPath(paths ...string) {
-	r.ApiPath = path.Clean(strings.Join(paths, "/"))
 }
 
 // only use wrapper command
@@ -198,10 +189,4 @@ func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
 		return stns.ResponseFormat{}, err
 	}
 	return res, nil
-}
-
-func (r *Request) GetMD5Hash(text string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(text))
-	return hex.EncodeToString(hasher.Sum(nil))
 }

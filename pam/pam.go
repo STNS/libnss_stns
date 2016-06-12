@@ -7,14 +7,12 @@ import "C"
 import (
 	"log"
 
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 //export pam_sm_authenticate
 func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C.char) C.int {
-	logger.Setlog()
-	config, err := config.Load("/etc/stns/libnss_stns.conf")
+	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Println(err)
 		return C.PAM_AUTHINFO_UNAVAIL
@@ -34,4 +32,8 @@ func pam_sm_setcred(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C.char
 }
 
 func main() {
+}
+
+func init() {
+	libstns.Setlog()
 }

@@ -10,14 +10,12 @@ import (
 	"strings"
 
 	"github.com/STNS/STNS/stns"
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 func main() {
-	logger.Setlog()
-	config, err := config.Load("/etc/stns/libnss_stns.conf")
+	libstns.Setlog()
+	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err == nil {
 		flag.Parse()
 		if raw := Fetch(config, flag.Arg(0)); raw != "" {
@@ -26,11 +24,11 @@ func main() {
 	}
 }
 
-func Fetch(config *config.Config, name string) string {
+func Fetch(config *libstns.Config, name string) string {
 	var res stns.ResponseFormat
 	var userKeys string
 
-	r, err := request.NewRequest(config, "user", "name", name)
+	r, err := libstns.NewRequest(config, "user", "name", name)
 	if err != nil {
 		log.Println(err)
 	}
