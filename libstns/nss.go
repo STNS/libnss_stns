@@ -23,103 +23,100 @@ const (
 	NSS_LIST_PURGE  = 1
 )
 
-type SetNss func(stns.Attributes, interface{}, interface{}) int
-
 type Nss struct {
 	config  *Config
-	request *Request
 	rtype   string
-	column  string
-	value   string
+	list    stns.Attributes
+	listPos *int
 }
 
-func NewNss(r, c, v string) (*Nss, error) {
-	config, err := LoadConfig("/etc/stns/libnss_stns.conf")
-	if err != nil {
-		return nil, err
-	}
+type NssEntry interface {
+	Set(stns.Attributes) int
+}
 
-	req, err := NewRequest(config, r, c, v)
-	if err != nil {
-		return nil, err
-	}
-
+func NewNss(config *Config, rtype string, list stns.Attributes, position *int) (*Nss, error) {
 	return &Nss{
 		config:  config,
-		request: req,
-		rtype:   r,
-		column:  c,
-		value:   v,
+		rtype:   rtype,
+		list:    list,
+		listPos: position,
 	}, nil
 }
-func (n *Nss) Get() (stns.Attributes, error) {
-	u, err := cache.Read(n.request.ApiPath)
+
+func (n *Nss) Get(column, value string) (stns.Attributes, error) {
+	req, err := NewRequest(n.config, n.rtype, column, value)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := cache.Read(req.ApiPath)
 	if u != nil || err != nil {
 		return u, err
 	}
 
-	res, err := n.request.GetByWrapperCmd()
+	res, err := req.GetByWrapperCmd()
 
 	if err != nil {
 		return nil, err
 	}
 
-	if n.column == "id" {
+	if column == "id" {
 		cache.WriteMinId(n.rtype, res.MetaData.MinId)
 	}
 
 	if res.Items == nil {
-		return nil, fmt.Errorf("resource notfound %s/%s/%s", n.rtype, n.column, n.value)
+		return nil, fmt.Errorf("resource notfound %s/%s/%s", n.rtype, column, value)
 	}
 
-	cache.Write(n.request.ApiPath, *res.Items, nil)
+	cache.Write(req.ApiPath, *res.Items, nil)
 	return *res.Items, nil
 }
 
-func (n *Nss) Set(s SetNss, entry, presult interface{}) int {
-	id, _ := strconv.Atoi(n.column)
-	if n.column != "id" || (n.column == "id" && cache.ReadMinId(n.rtype) <= id) {
-		resource, err := n.Get()
+func (n *Nss) Set(s NssEntry, column, value string) int {
+	id, _ := strconv.Atoi(column)
+	if column != "id" || (column == "id" && cache.ReadMinId(n.rtype) <= id) {
+		resource, err := n.Get(column, value)
 		if err != nil {
 			log.Print(err)
 			return NSS_STATUS_UNAVAIL
 		}
 
 		if len(resource) > 0 {
-			return s(resource, entry, presult)
+			return s.Set(resource)
 		}
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func (n *Nss) SetByList(s SetNss, entry, presult interface{}, list stns.Attributes, position *int) int {
-	keys := n.keys(list)
-
-	if len(keys) > *position && keys[*position] != "" {
-		name := keys[*position]
+func (n *Nss) SetByList(s NssEntry) int {
+	keys := n.keys()
+L:
+	if len(keys) > *n.listPos && keys[*n.listPos] != "" {
+		name := keys[*n.listPos]
 		resource := stns.Attributes{
-			name: list[name],
+			name: n.list[name],
 		}
 
-		*position++
-		result := s(resource, entry, presult)
+		*n.listPos++
+		result := s.Set(resource)
 
+		// lack of data in list
+		// 構造体の項目が不足している場合があるため、配列全て処理を行う
 		if result == NSS_STATUS_NOTFOUND {
-			return NSS_STATUS_NOTFOUND
+			goto L
 		}
-
 		return result
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func (n *Nss) PresetList(list stns.Attributes, position *int) int {
+func (n *Nss) PresetList() int {
 	var attr stns.Attributes
 	var err error
 	// reset value
-	n.PurgeList(list, position)
+	n.PurgeList()
 
-	attr, err = n.Get()
+	attr, err = n.Get("list", "")
 
 	if err != nil {
 		log.Print(err)
@@ -135,23 +132,23 @@ func (n *Nss) PresetList(list stns.Attributes, position *int) int {
 C:
 	if len(attr) > 0 {
 		for k, v := range attr {
-			list[k] = v
+			n.list[k] = v
 		}
 		return NSS_STATUS_SUCCESS
 	}
 	return NSS_STATUS_NOTFOUND
 }
 
-func (n *Nss) PurgeList(list stns.Attributes, position *int) {
-	*position = 0
-	for k, _ := range list {
-		delete(list, k)
+func (n *Nss) PurgeList() {
+	*n.listPos = 0
+	for k, _ := range n.list {
+		delete(n.list, k)
 	}
 }
 
-func (n *Nss) keys(list stns.Attributes) []string {
+func (n *Nss) keys() []string {
 	ks := []string{}
-	for k, _ := range list {
+	for k, _ := range n.list {
 		ks = append(ks, k)
 
 	}

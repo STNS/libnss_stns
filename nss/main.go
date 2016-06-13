@@ -4,42 +4,71 @@ import (
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/libstns"
 )
+
 import "C"
 
 func main() {
 }
 
+var pwdNss, grpNss, spwdNss *libstns.Nss
+
+var pwdList = stns.Attributes{}
+var pwdReadPos int
+
+var grpList = stns.Attributes{}
+var grpReadPos int
+
+var spwdList = stns.Attributes{}
+var spwdReadPos int
+
 func init() {
 	libstns.Setlog()
+	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
+	if err != nil {
+		return
+	}
+
+	var e error
+	pwdNss, e = libstns.NewNss(config, "user", pwdList, &pwdReadPos)
+	if e != nil {
+		return
+	}
+
+	grpNss, e = libstns.NewNss(config, "group", grpList, &grpReadPos)
+	if e != nil {
+		return
+	}
+
+	spwdNss, e = libstns.NewNss(config, "user", spwdList, &spwdReadPos)
+	if e != nil {
+		return
+	}
 }
 
-func set(s libstns.SetNss, entry, presult interface{}, r, c, v string) C.int {
-	nss, err := libstns.NewNss(r, c, v)
-	if err != nil {
+func set(n *libstns.Nss, e libstns.NssEntry, column, value string) C.int {
+	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
-	return C.int(nss.Set(s, entry, presult))
+	return C.int(n.Set(e, column, value))
 }
 
-func setByList(s libstns.SetNss, entry, presult interface{}, list stns.Attributes, position *int) C.int {
-	nss, err := libstns.NewNss("", "", "")
-	if err != nil {
+func setByList(n *libstns.Nss, e libstns.NssEntry) C.int {
+	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
-	return C.int(nss.SetByList(s, entry, presult, list, position))
+	return C.int(n.SetByList(e))
 }
 
-func initList(list stns.Attributes, position *int, r string, mode int) C.int {
-	nss, err := libstns.NewNss(r, "list", "")
-	if err != nil {
+func initList(n *libstns.Nss, mode int) C.int {
+	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
 
 	switch mode {
 	case libstns.NSS_LIST_PRESET:
-		return C.int(nss.PresetList(list, position))
+		return C.int(n.PresetList())
 	case libstns.NSS_LIST_PURGE:
-		nss.PurgeList(list, position)
+		n.PurgeList()
 		return C.int(libstns.NSS_STATUS_SUCCESS)
 	}
 	return libstns.NSS_STATUS_NOTFOUND

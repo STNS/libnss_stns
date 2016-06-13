@@ -15,17 +15,17 @@ import (
 */
 import "C"
 
-var groupList = stns.Attributes{}
-var groupReadPos int
+type Group struct {
+	grp    *C.struct_group
+	result **C.struct_group
+}
 
-func setGroup(groups stns.Attributes, g, r interface{}) int {
-	grp := g.(*C.struct_group)
-
+func (s Group) Set(groups stns.Attributes) int {
 	for n, g := range groups {
 		if g.Id != 0 {
-			grp.gr_gid = C.__gid_t(g.Id)
-			grp.gr_name = C.CString(n)
-			grp.gr_passwd = C.CString("x")
+			s.grp.gr_gid = C.__gid_t(g.Id)
+			s.grp.gr_name = C.CString(n)
+			s.grp.gr_passwd = C.CString("x")
 
 			if g.Group != nil && !reflect.ValueOf(g.Group).IsNil() {
 				work := make([]*C.char, len(g.Users)+1)
@@ -34,13 +34,13 @@ func setGroup(groups stns.Attributes, g, r interface{}) int {
 						work[i] = C.CString(u)
 					}
 				}
-				grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+				s.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 			} else {
 				work := make([]*C.char, 1)
-				grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
+				s.grp.gr_mem = (**C.char)(unsafe.Pointer(&work[0]))
 			}
 
-			r = &grp
+			s.result = &s.grp
 			return libstns.NSS_STATUS_SUCCESS
 		}
 	}
@@ -49,25 +49,28 @@ func setGroup(groups stns.Attributes, g, r interface{}) int {
 
 //export _nss_stns_getgrnam_r
 func _nss_stns_getgrnam_r(name *C.char, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) C.int {
-	return set(setGroup, grp, result, "group", "name", C.GoString(name))
+	g := Group{grp, result}
+	return set(grpNss, g, "name", C.GoString(name))
 }
 
 //export _nss_stns_getgrgid_r
 func _nss_stns_getgrgid_r(gid C.__gid_t, grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) C.int {
-	return set(setGroup, grp, result, "group", "id", strconv.Itoa(int(gid)))
+	g := Group{grp, result}
+	return set(grpNss, g, "id", strconv.Itoa(int(gid)))
 }
 
 //export _nss_stns_setgrent
 func _nss_stns_setgrent() C.int {
-	return initList(groupList, &groupReadPos, "group", libstns.NSS_LIST_PRESET)
+	return initList(grpNss, libstns.NSS_LIST_PRESET)
 }
 
 //export _nss_stns_endgrent
 func _nss_stns_endgrent() {
-	initList(groupList, &groupReadPos, "group", libstns.NSS_LIST_PURGE)
+	initList(grpNss, libstns.NSS_LIST_PURGE)
 }
 
 //export _nss_stns_getgrent_r
 func _nss_stns_getgrent_r(grp *C.struct_group, buffer *C.char, bufsize C.size_t, result **C.struct_group) C.int {
-	return setByList(setGroup, grp, result, groupList, &groupReadPos)
+	g := Group{grp, result}
+	return setByList(grpNss, g)
 }
