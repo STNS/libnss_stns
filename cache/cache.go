@@ -73,9 +73,7 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		return
 	}
 
-	if err := os.Chmod(f, 0777); err != nil {
-		log.Println(err)
-	}
+	os.Chmod(f, 0777)
 }
 
 func LastResultList(resourceType string) *stns.Attributes {
@@ -91,4 +89,8 @@ func LastResultList(resourceType string) *stns.Attributes {
 		log.Println(err)
 	}
 	return &attr
+}
+
+func Flush() {
+	store.Flush()
 }

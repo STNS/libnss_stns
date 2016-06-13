@@ -2,7 +2,6 @@ package libstns
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -19,18 +18,7 @@ type Response struct {
 func TestRequestV1ServerV1(t *testing.T) {
 	handler := test.GetHandler(t,
 		"/user/name/example",
-		`{
-			"example": {
-				"id": 1,
-			"group_id": 2,
-				"directory": "/home/example",
-				"shell": "/bin/sh",
-				"keys": [
-					"test"
-				],
-				"password": "password"
-			}
-		}`,
+		test.GetV1Example(),
 		200,
 	)
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -45,7 +33,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 }
 
 func TestRequestV2ServerV2(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
@@ -84,7 +72,7 @@ func TestRequestV2NotFound(t *testing.T) {
 }
 
 func TestFailOver(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
@@ -105,28 +93,6 @@ func TestRefused(t *testing.T) {
 		t.Error("errot test refused")
 	}
 }
-func getV2Example() string {
-	return `{
-		"metadata": {
-			"api_version": 2.0,
-			"salt_enable": false,
-			"stretching_number": 0,
-			"result": "success"
-		},
-		"items": {
-			"example": {
-				"id": 1,
-				"group_id": 2,
-				"directory": "/home/example",
-				"shell": "/bin/sh",
-				"keys": [
-					"test"
-				],
-				"password": "password"
-			}
-		}
-	}`
-}
 
 func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 	// metadata
@@ -146,18 +112,20 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 		t.Error("unmatch result")
 	}
 
-	if res.MetaData.MinId != 0 {
-		t.Error("unmatch min id")
+	if res.MetaData.ApiVersion == 2.0 {
+		if res.MetaData.MinId != 1000 {
+			t.Errorf("unmatch min id %d", res.MetaData.MinId)
+		}
 	}
 
 	for n, u := range *res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
 		}
-		if u.Id != 1 {
+		if u.Id != 2000 {
 			t.Error("unmatch id")
 		}
-		if u.GroupId != 2 {
+		if u.GroupId != 3000 {
 			t.Error("unmatch group")
 		}
 		if u.Directory != "/home/example" {
@@ -263,9 +231,7 @@ func TestGetByWrapperCmd404(t *testing.T) {
 	c.ApiEndPoint = []string{"exmple"}
 	c.WrapperCommand = "./fixtures/bin/command_response_02"
 	r, _ := NewRequest(c, "user", "name", "example")
-	res, err := r.GetByWrapperCmd()
-	fmt.Println(res.MetaData)
-	fmt.Println(err)
+	_, err := r.GetByWrapperCmd()
 	if err != nil {
 		t.Errorf("fetch error %s", err)
 	}

@@ -48,14 +48,12 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	u, err := cache.Read(req.ApiPath)
 	if u != nil || err != nil {
 		return u, err
 	}
 
 	res, err := req.GetByWrapperCmd()
-
 	if err != nil {
 		return nil, err
 	}
