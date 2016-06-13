@@ -141,9 +141,7 @@ C:
 
 func (n *Nss) PurgeList() {
 	*n.listPos = 0
-	for k, _ := range n.list {
-		delete(n.list, k)
-	}
+	n.list = stns.Attributes{}
 }
 
 func (n *Nss) keys() []string {
