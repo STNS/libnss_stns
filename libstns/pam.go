@@ -17,24 +17,25 @@ const (
 )
 
 type Pam struct {
-	config *Config
-	argc   int
-	argv   []string
+	config   *Config
+	AuthType string
+	argc     int
+	argv     []string
 }
 
 func NewPam(config *Config, argc int, argv []string) *Pam {
-	return &Pam{
-		config: config,
-		argc:   argc,
-		argv:   argv,
+	var u string
+	u = "user"
+	if argc > 0 {
+		u = argv[0]
 	}
-}
 
-func (p *Pam) AuthType() string {
-	if p.argc > 0 {
-		return p.argv[0]
+	return &Pam{
+		config:   config,
+		AuthType: u,
+		argc:     argc,
+		argv:     argv,
 	}
-	return "user"
 }
 
 func (p *Pam) SudoUser() string {
@@ -45,7 +46,7 @@ func (p *Pam) SudoUser() string {
 }
 
 func (p *Pam) PasswordAuth(user string, password string) int {
-	r, err := NewRequest(p.config, p.AuthType(), "name", user)
+	r, err := NewRequest(p.config, p.AuthType, "name", user)
 	if err != nil {
 		log.Println(err)
 		return PAM_AUTHINFO_UNAVAIL

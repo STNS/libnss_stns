@@ -3,8 +3,6 @@ package main
 /*
 #include <stdlib.h>
 #include <security/pam_appl.h>
-#include <security/pam_appl.h>
-#include <security/pam_modules.h>
 
 */
 import "C"
@@ -37,7 +35,7 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 	if pam.AuthType == "user" {
 		var cuser *C.char
 		defer C.free(unsafe.Pointer(cuser))
-		if getUserName(s.pamh, &cuser) {
+		if getUserName(pamh, &cuser) {
 			user = C.GoString(cuser)
 		} else {
 			return C.PAM_USER_UNKNOWN
@@ -50,10 +48,10 @@ func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 
 	var cPassword *C.char
 	defer C.free(unsafe.Pointer(cPassword))
-	if !getPassword(s.pamh, &cPassword) {
+	if !getPassword(pamh, &cPassword) {
 		return C.PAM_AUTH_ERR
 	}
-	return C.int(p.PasswordAuth(user, C.GoString(cPassword)))
+	return C.int(pam.PasswordAuth(user, C.GoString(cPassword)))
 }
 
 //export pam_sm_setcred
