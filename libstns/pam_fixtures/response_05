@@ -20,7 +20,8 @@ cat << EOS
       "keys": [
         "ssh-rsa xxxxxx"
       ],
-      "link_users": null
+      "link_users": null,
+      "hash_type": ""
     }
   }
 }

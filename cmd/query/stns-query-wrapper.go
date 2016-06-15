@@ -4,14 +4,12 @@ import (
 	"flag"
 	"os"
 
-	"github.com/STNS/libnss_stns/config"
-	"github.com/STNS/libnss_stns/logger"
-	"github.com/STNS/libnss_stns/request"
+	"github.com/STNS/libnss_stns/libstns"
 )
 
 func main() {
-	logger.Setlog()
-	config, err := config.Load("/etc/stns/libnss_stns.conf")
+	libstns.Setlog()
+	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err == nil {
 		flag.Parse()
 		raw, err := Fetch(config, flag.Arg(0))
@@ -23,8 +21,8 @@ func main() {
 	}
 }
 
-func Fetch(config *config.Config, path string) (string, error) {
-	r, err := request.NewRequest(config, path)
+func Fetch(config *libstns.Config, path string) (string, error) {
+	r, err := libstns.NewRequest(config, path)
 
 	if err != nil {
 		return "", err

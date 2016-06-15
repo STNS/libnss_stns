@@ -1,4 +1,4 @@
-package config
+package libstns
 
 import (
 	"io/ioutil"
@@ -21,7 +21,7 @@ func TestLoadConfig(t *testing.T) {
 	configFile.Close()
 	defer os.Remove(configFile.Name())
 
-	config, err := Load(configFile.Name())
+	config, err := LoadConfig(configFile.Name())
 	test.AssertNoError(t, err)
 	test.Assert(t, config.ApiEndPoint[0] == "is string", "ng api endpoint")
 	test.Assert(t, config.ApiEndPoint[1] == "is string", "ng api endpoint")

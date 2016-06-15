@@ -4,52 +4,50 @@ package main
 #include <shadow.h>
 */
 import "C"
-import "github.com/STNS/STNS/stns"
-
-var shadowList = stns.Attributes{}
-var shadowReadPos int
+import (
+	"github.com/STNS/STNS/stns"
+	"github.com/STNS/libnss_stns/libstns"
+)
 
 type Shadow struct {
 	spwd   *C.struct_spwd
 	result **C.struct_spwd
 }
 
-func (self Shadow) setCStruct(shadows stns.Attributes) C.int {
+func (s Shadow) Set(shadows stns.Attributes) int {
 	for n, _ := range shadows {
-		self.spwd.sp_namp = C.CString(n)
-		self.spwd.sp_pwdp = C.CString("!!")
-		self.spwd.sp_lstchg = -1
-		self.spwd.sp_min = -1
-		self.spwd.sp_max = -1
-		self.spwd.sp_warn = -1
-		self.spwd.sp_inact = -1
-		self.spwd.sp_expire = -1
-		self.result = &self.spwd
-		return NSS_STATUS_SUCCESS
+		s.spwd.sp_namp = C.CString(n)
+		s.spwd.sp_pwdp = C.CString("!!")
+		s.spwd.sp_lstchg = -1
+		s.spwd.sp_min = -1
+		s.spwd.sp_max = -1
+		s.spwd.sp_warn = -1
+		s.spwd.sp_inact = -1
+		s.spwd.sp_expire = -1
+		s.result = &s.spwd
+		return libstns.NSS_STATUS_SUCCESS
 	}
-	return NSS_STATUS_NOTFOUND
+	return libstns.NSS_STATUS_NOTFOUND
 }
-
-/*-------------------------------------------------------
-shadow
--------------------------------------------------------*/
 
 //export _nss_stns_getspnam_r
 func _nss_stns_getspnam_r(name *C.char, spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) C.int {
-	return set(&Shadow{spwd, result}, "user", "name", C.GoString(name))
+	s := Shadow{spwd, result}
+	return set(spwdNss, s, "name", C.GoString(name))
 }
 
 //export _nss_stns_setspent
 func _nss_stns_setspent() C.int {
-	return initList("user", shadowList, &shadowReadPos)
+	return initList(spwdNss, libstns.NSS_LIST_PRESET)
 }
 
 //export _nss_stns_endspent
 func _nss_stns_endspent() {
-	purgeList(shadowList, &shadowReadPos)
+	initList(spwdNss, libstns.NSS_LIST_PURGE)
 }
 
 //export _nss_stns_getspent_r
 func _nss_stns_getspent_r(spwd *C.struct_spwd, buffer *C.char, bufsize C.size_t, result **C.struct_spwd) C.int {
-	return setByList(&Shadow{spwd, result}, shadowList, &shadowReadPos)
+	s := Shadow{spwd, result}
+	return setByList(spwdNss, s)
 }

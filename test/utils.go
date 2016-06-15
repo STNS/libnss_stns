@@ -40,3 +40,42 @@ func Assert(t *testing.T, ok bool, msg string) {
 		t.Error(msg)
 	}
 }
+
+func GetV1Example() string {
+	return `{
+		"example": {
+			"id": 2000,
+		"group_id": 3000,
+			"directory": "/home/example",
+			"shell": "/bin/sh",
+			"keys": [
+				"test"
+			],
+			"password": "password"
+		}
+	}`
+}
+func GetV2Example() string {
+	return `{
+		"metadata": {
+			"api_version": 2.0,
+			"salt_enable": false,
+			"stretching_number": 0,
+			"result": "success",
+			"min_id": 2000
+		},
+		"items": {
+			"example": {
+				"id": 2000,
+				"group_id": 3000,
+				"directory": "/home/example",
+				"shell": "/bin/sh",
+				"keys": [
+					"test"
+				],
+				"password": "password"
+			}
+		}
+	}`
+
+}

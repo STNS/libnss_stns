@@ -1,15 +1,13 @@
-package request
+package libstns
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/STNS/STNS/stns"
-	"github.com/STNS/libnss_stns/config"
 	"github.com/STNS/libnss_stns/test"
 )
 
@@ -20,24 +18,13 @@ type Response struct {
 func TestRequestV1ServerV1(t *testing.T) {
 	handler := test.GetHandler(t,
 		"/user/name/example",
-		`{
-			"example": {
-				"id": 1,
-			"group_id": 2,
-				"directory": "/home/example",
-				"shell": "/bin/sh",
-				"keys": [
-					"test"
-				],
-				"password": "password"
-			}
-		}`,
+		test.GetV1Example(),
 		200,
 	)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{server.URL}
 
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -46,11 +33,11 @@ func TestRequestV1ServerV1(t *testing.T) {
 }
 
 func TestRequestV2ServerV2(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -72,7 +59,7 @@ func TestRequestV2NotFound(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -85,11 +72,11 @@ func TestRequestV2NotFound(t *testing.T) {
 }
 
 func TestFailOver(t *testing.T) {
-	handler := test.GetHandler(t, "/v2/user/name/example", getV2Example(), 200)
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{"http://localhost:1000", server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -97,7 +84,7 @@ func TestFailOver(t *testing.T) {
 }
 
 func TestRefused(t *testing.T) {
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{"http://localhost:1000"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -105,28 +92,6 @@ func TestRefused(t *testing.T) {
 	if err == nil {
 		t.Error("errot test refused")
 	}
-}
-func getV2Example() string {
-	return `{
-		"metadata": {
-			"api_version": 2.0,
-			"salt_enable": false,
-			"stretching_number": 0,
-			"result": "success"
-		},
-		"items": {
-			"example": {
-				"id": 1,
-				"group_id": 2,
-				"directory": "/home/example",
-				"shell": "/bin/sh",
-				"keys": [
-					"test"
-				],
-				"password": "password"
-			}
-		}
-	}`
 }
 
 func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
@@ -147,18 +112,20 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 		t.Error("unmatch result")
 	}
 
-	if res.MetaData.MinId != 0 {
-		t.Error("unmatch min id")
+	if res.MetaData.ApiVersion == 2.0 {
+		if res.MetaData.MinId != 2000 {
+			t.Errorf("unmatch min id %d", res.MetaData.MinId)
+		}
 	}
 
 	for n, u := range *res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
 		}
-		if u.Id != 1 {
+		if u.Id != 2000 {
 			t.Error("unmatch id")
 		}
-		if u.GroupId != 2 {
+		if u.GroupId != 3000 {
 			t.Error("unmatch group")
 		}
 		if u.Directory != "/home/example" {
@@ -193,7 +160,7 @@ func TestBasicAuth(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	defer server.Close()
 
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{server.URL}
 	c.User = "test_user"
 	c.Password = "test_pass"
@@ -204,7 +171,7 @@ func TestBasicAuth(t *testing.T) {
 		t.Error("fetch error")
 	}
 
-	e := &config.Config{}
+	e := &Config{}
 	e.ApiEndPoint = []string{server.URL}
 	e.User = "error_user"
 	e.Password = "error_pass"
@@ -251,7 +218,7 @@ func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
 }
 
 func TestGetByWrapperCmd(t *testing.T) {
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{"exmple"}
 	c.WrapperCommand = "./fixtures/bin/command_response_01"
 	r, _ := NewRequest(c, "user", "name", "example")
@@ -260,13 +227,11 @@ func TestGetByWrapperCmd(t *testing.T) {
 }
 
 func TestGetByWrapperCmd404(t *testing.T) {
-	c := &config.Config{}
+	c := &Config{}
 	c.ApiEndPoint = []string{"exmple"}
 	c.WrapperCommand = "./fixtures/bin/command_response_02"
 	r, _ := NewRequest(c, "user", "name", "example")
-	res, err := r.GetByWrapperCmd()
-	fmt.Println(res.MetaData)
-	fmt.Println(err)
+	_, err := r.GetByWrapperCmd()
 	if err != nil {
 		t.Errorf("fetch error %s", err)
 	}
