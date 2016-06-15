@@ -62,7 +62,7 @@ func GetV2Example() string {
 			"salt_enable": false,
 			"stretching_number": 0,
 			"result": "success",
-			"min_id": 1000
+			"min_id": 2000
 		},
 		"items": {
 			"example": {

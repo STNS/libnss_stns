@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo '{"metadata":{"api_version":2,"salt_enable":false,"stretching_count":0,"result":"success", "min_id": 1000},"items":{"example":{"id":2000,"password":"password","hash_type":"","group_id":3000,"directory":"/home/example","shell":"/bin/sh","gecos":"example","keys":["test"],"link_users":null}}}'
+echo '{"metadata":{"api_version":2,"salt_enable":false,"stretching_count":0,"result":"success", "min_id": 2000},"items":{"example":{"id":2000,"password":"password","hash_type":"","group_id":3000,"directory":"/home/example","shell":"/bin/sh","gecos":"example","keys":["test"],"link_users":null}}}'

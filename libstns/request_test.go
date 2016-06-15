@@ -113,7 +113,7 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 	}
 
 	if res.MetaData.ApiVersion == 2.0 {
-		if res.MetaData.MinId != 1000 {
+		if res.MetaData.MinId != 2000 {
 			t.Errorf("unmatch min id %d", res.MetaData.MinId)
 		}
 	}
