@@ -12,7 +12,9 @@ import (
 	_gocache "github.com/patrickmn/go-cache"
 )
 
-var store = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
+var attrStore = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
+var lockStore = _gocache.New(time.Minute*settings.LOCK_TIME, 60*time.Second)
+
 var workDir = settings.WORK_DIR
 
 type cacheObject struct {
@@ -26,7 +28,7 @@ func SetWorkDir(path string) {
 }
 
 func Read(path string) (stns.Attributes, error) {
-	c, exist := store.Get(path)
+	c, exist := attrStore.Get(path)
 	if exist {
 		co := c.(*cacheObject)
 		if co.err != nil {
@@ -39,11 +41,11 @@ func Read(path string) (stns.Attributes, error) {
 }
 
 func Write(path string, attr stns.Attributes, err error) {
-	store.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
+	attrStore.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
 func ReadMinId(resourceType string) int {
-	n, exist := store.Get(resourceType + "_min_id")
+	n, exist := attrStore.Get(resourceType + "_min_id")
 	if exist {
 		id := n.(int)
 		return id
@@ -52,7 +54,7 @@ func ReadMinId(resourceType string) int {
 }
 
 func WriteMinId(resourceType string, id int) {
-	store.Set(resourceType+"_min_id", id, _gocache.DefaultExpiration)
+	attrStore.Set(resourceType+"_min_id", id, _gocache.DefaultExpiration)
 }
 
 func SaveResultList(resourceType string, list stns.Attributes) {
@@ -91,6 +93,34 @@ func LastResultList(resourceType string) *stns.Attributes {
 	return &attr
 }
 
+func LockEndPoint(path string) {
+	lockStore.Set(path+"_lock", true, _gocache.DefaultExpiration)
+	err := lockStore.SaveFile(settings.LOCK_FILE)
+	if err != nil {
+		log.Printf("lock file write error:%s", err.Error())
+	}
+}
+
+func IsLockEndPoint(path string) bool {
+	_, e1 := lockStore.Get(path + "_lock")
+	if e1 {
+		return true
+	} else {
+		err := lockStore.LoadFile(settings.LOCK_FILE)
+		if err != nil {
+			log.Printf("lock file read write error:%s", err.Error())
+			return false
+		}
+
+		_, e2 := lockStore.Get(path + "_lock")
+		if e2 {
+			return true
+		}
+	}
+	return false
+}
+
 func Flush() {
-	store.Flush()
+	attrStore.Flush()
+	lockStore.Flush()
 }
