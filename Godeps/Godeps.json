@@ -13,13 +13,13 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/settings",
-			"Comment": "v0.1-0-6-g3992a97",
-			"Rev": "3992a97e9902312456f815b6b912a4e41cf93888"
+			"Comment": "v0.1-1-8-g7b6fc23",
+			"Rev": "7b6fc23febb43d0f370658855ea9870df6cc64c8"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.1-0-6-g3992a97",
-			"Rev": "3992a97e9902312456f815b6b912a4e41cf93888"
+			"Comment": "v0.1-1-8-g7b6fc23",
+			"Rev": "7b6fc23febb43d0f370658855ea9870df6cc64c8"
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest",
@@ -32,8 +32,8 @@
 			"Rev": "37ad7dc626602a8355801da6acd85155655520f8"
 		},
 		{
-			"ImportPath": "github.com/patrickmn/go-cache",
-			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
+			"ImportPath": "github.com/pyama86/go-cache",
+			"Rev": "5c290c8c42f48aa529a18a6225382e1b1ee601a1"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",

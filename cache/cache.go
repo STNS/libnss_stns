@@ -9,11 +9,11 @@ import (
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/settings"
-	_gocache "github.com/patrickmn/go-cache"
+	_gocache "github.com/pyama86/go-cache"
 )
 
-var attrStore = _gocache.New(time.Minute*settings.CACHE_TIME, 60*time.Second)
-var lockStore = _gocache.New(time.Minute*settings.LOCK_TIME, 60*time.Second)
+var attrStore = _gocache.New(time.Second*settings.CACHE_TIME, 60*time.Second)
+var lockStore = _gocache.New(time.Second*settings.LOCK_TIME, 60*time.Second)
 
 var workDir = settings.WORK_DIR
 
@@ -95,10 +95,13 @@ func LastResultList(resourceType string) *stns.Attributes {
 
 func LockEndPoint(path string) {
 	lockStore.Set(path+"_lock", true, _gocache.DefaultExpiration)
+
 	err := lockStore.SaveFile(settings.LOCK_FILE)
 	if err != nil {
 		log.Printf("lock file write error:%s", err.Error())
 	}
+
+	os.Chmod(settings.LOCK_FILE, 0777)
 }
 
 func IsLockEndPoint(path string) bool {
