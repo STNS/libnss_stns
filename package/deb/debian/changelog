@@ -1,3 +1,9 @@
+libnss-stns (0.1.5) STABLE; urgency=low
+
+  * Lock Api If request have time-out
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sum, 19 Jun 2016 18:10:00 +0000
+
 libnss-stns (0.1.4) STABLE; urgency=low
 
   * suppress noise query
