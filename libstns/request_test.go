@@ -71,6 +71,19 @@ func TestRequestV2NotFound(t *testing.T) {
 	}
 }
 
+func TestRequestV2TimeOut(t *testing.T) {
+	c := &Config{}
+	c.ApiEndPoint = []string{"http://10.1.1.1/v2"}
+	c.RequestTimeOut = 1
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	r.GetRawData()
+	_, err := r.GetRawData()
+	if err.Error() != "endpoint http://10.1.1.1/v2 is locked" {
+		t.Errorf("fetch timeout error %s", err.Error())
+	}
+}
+
 func TestFailOver(t *testing.T) {
 	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -91,67 +104,6 @@ func TestRefused(t *testing.T) {
 	_, err := r.GetRawData()
 	if err == nil {
 		t.Error("errot test refused")
-	}
-}
-
-func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
-	// metadata
-	if res.MetaData.ApiVersion != apiVersion {
-		t.Error("unmatch api version")
-	}
-
-	if res.MetaData.Salt {
-		t.Error("unmatch salt")
-	}
-
-	if res.MetaData.Stretching != 0 {
-		t.Error("unmatch stretching")
-	}
-
-	if res.MetaData.Result != "success" {
-		t.Error("unmatch result")
-	}
-
-	if res.MetaData.ApiVersion == 2.0 {
-		if res.MetaData.MinId != 2000 {
-			t.Errorf("unmatch min id %d", res.MetaData.MinId)
-		}
-	}
-
-	for n, u := range *res.Items {
-		if n != "example" {
-			t.Error("unmatch name")
-		}
-		if u.Id != 2000 {
-			t.Error("unmatch id")
-		}
-		if u.GroupId != 3000 {
-			t.Error("unmatch group")
-		}
-		if u.Directory != "/home/example" {
-			t.Error("unmatch direcotry")
-		}
-		if u.Shell != "/bin/sh" {
-			t.Error("unmatch shell")
-		}
-		if u.Keys[0] != "test" || len(u.Keys) != 1 {
-			t.Error("unmatch keys")
-		}
-		if u.Password != "password" {
-			t.Error("unmatch password")
-		}
-	}
-}
-
-func checkResponse(t *testing.T, r *Request, apiVersion float64) {
-	var res stns.ResponseFormat
-	raw, err := r.GetRawData()
-	json.Unmarshal(raw, &res)
-	if err != nil || res.Items == nil || 0 == len(*res.Items) {
-		t.Errorf("fetch error %s", err)
-	}
-	if err == nil {
-		checkAttribute(t, res, apiVersion)
 	}
 }
 
@@ -234,5 +186,65 @@ func TestGetByWrapperCmd404(t *testing.T) {
 	_, err := r.GetByWrapperCmd()
 	if err != nil {
 		t.Errorf("fetch error %s", err)
+	}
+}
+func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
+	// metadata
+	if res.MetaData.ApiVersion != apiVersion {
+		t.Error("unmatch api version")
+	}
+
+	if res.MetaData.Salt {
+		t.Error("unmatch salt")
+	}
+
+	if res.MetaData.Stretching != 0 {
+		t.Error("unmatch stretching")
+	}
+
+	if res.MetaData.Result != "success" {
+		t.Error("unmatch result")
+	}
+
+	if res.MetaData.ApiVersion == 2.0 {
+		if res.MetaData.MinId != 2000 {
+			t.Errorf("unmatch min id %d", res.MetaData.MinId)
+		}
+	}
+
+	for n, u := range *res.Items {
+		if n != "example" {
+			t.Error("unmatch name")
+		}
+		if u.Id != 2000 {
+			t.Error("unmatch id")
+		}
+		if u.GroupId != 3000 {
+			t.Error("unmatch group")
+		}
+		if u.Directory != "/home/example" {
+			t.Error("unmatch direcotry")
+		}
+		if u.Shell != "/bin/sh" {
+			t.Error("unmatch shell")
+		}
+		if u.Keys[0] != "test" || len(u.Keys) != 1 {
+			t.Error("unmatch keys")
+		}
+		if u.Password != "password" {
+			t.Error("unmatch password")
+		}
+	}
+}
+
+func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+	var res stns.ResponseFormat
+	raw, err := r.GetRawData()
+	json.Unmarshal(raw, &res)
+	if err != nil || res.Items == nil || 0 == len(*res.Items) {
+		t.Errorf("fetch error %s", err)
+	}
+	if err == nil {
+		checkAttribute(t, res, apiVersion)
 	}
 }

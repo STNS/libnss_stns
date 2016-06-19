@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"path"
 	"regexp"
@@ -19,6 +20,7 @@ import (
 
 	stns_settings "github.com/STNS/STNS/settings"
 	"github.com/STNS/STNS/stns"
+	"github.com/STNS/libnss_stns/cache"
 	"github.com/STNS/libnss_stns/settings"
 )
 
@@ -46,8 +48,13 @@ func (r *Request) GetRawData() ([]byte, error) {
 
 	for _, e := range r.Config.ApiEndPoint {
 		go func(endPoint string) {
-			url := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
-			req, err := http.NewRequest("GET", url, nil)
+			if cache.IsLockEndPoint(endPoint) {
+				ech <- fmt.Errorf("endpoint %s is locked", endPoint)
+				return
+			}
+
+			u := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
+			req, err := http.NewRequest("GET", u, nil)
 			if err != nil {
 				ech <- err
 				return
@@ -62,6 +69,9 @@ func (r *Request) GetRawData() ([]byte, error) {
 				req,
 				func(res *http.Response, err error) {
 					if err != nil {
+						if _, ok := err.(*url.Error); ok {
+							cache.LockEndPoint(endPoint)
+						}
 						ech <- err
 						return
 					}
@@ -85,10 +95,10 @@ func (r *Request) GetRawData() ([]byte, error) {
 							return
 						}
 					case http.StatusUnauthorized:
-						ech <- fmt.Errorf("authenticate error: %s", url)
+						ech <- fmt.Errorf("authenticate error: %s", u)
 						return
 					default:
-						ech <- fmt.Errorf("error: %s", url)
+						ech <- fmt.Errorf("error: %s", u)
 						return
 					}
 				},
@@ -115,7 +125,6 @@ func (r *Request) httpDo(
 	req *http.Request,
 	f func(*http.Response, error),
 ) {
-
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
 		Dial: (&net.Dialer{

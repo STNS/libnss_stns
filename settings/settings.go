@@ -2,7 +2,9 @@ package settings
 
 const (
 	HTTP_TIMEOUT = 3
-	CACHE_TIME   = 10
+	CACHE_TIME   = 60
+	LOCK_TIME    = 10
+	LOCK_FILE    = "/tmp/.libstns_lock"
 	WORK_DIR     = "/var/lib/libnss_stns"
 )
 

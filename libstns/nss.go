@@ -44,15 +44,21 @@ func NewNss(config *Config, rtype string, list stns.Attributes, position *int) (
 }
 
 func (n *Nss) Get(column, value string) (stns.Attributes, error) {
+	ne := fmt.Errorf("resource notfound %s/%s/%s", n.rtype, column, value)
+
 	req, err := NewRequest(n.config, n.rtype, column, value)
 	if err != nil {
 		return nil, err
 	}
+
 	u, err := cache.Read(req.ApiPath)
+
 	if u != nil || err != nil {
 		return u, err
 	}
 
+	// default negative cache
+	cache.Write(req.ApiPath, nil, ne)
 	res, err := req.GetByWrapperCmd()
 	if err != nil {
 		return nil, err
@@ -63,7 +69,7 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 	}
 
 	if res.Items == nil {
-		return nil, fmt.Errorf("resource notfound %s/%s/%s", n.rtype, column, value)
+		return nil, ne
 	}
 
 	cache.Write(req.ApiPath, *res.Items, nil)
