@@ -111,7 +111,6 @@ func IsLockEndPoint(path string) bool {
 	} else {
 		err := lockStore.LoadFile(settings.LOCK_FILE)
 		if err != nil {
-			log.Printf("lock file read write error:%s", err.Error())
 			return false
 		}
 
