@@ -5,14 +5,30 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/STNS/STNS/stns"
+	"github.com/STNS/libnss_stns/cache"
 	"github.com/STNS/libnss_stns/test"
 )
 
 type Response struct {
 	path, query, contenttype, body string
+}
+
+func TestRequestProxyByEnv(t *testing.T) {
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	os.Setenv("HTTP_PROXY", server.URL+"/v2")
+	defer server.Close()
+	defer os.Setenv("HTTP_PROXY", "")
+
+	c := &Config{}
+	c.ApiEndPoint = []string{"http://unservice_env/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2.0)
 }
 
 func TestRequestV1ServerV1(t *testing.T) {
@@ -83,7 +99,6 @@ func TestRequestV2TimeOut(t *testing.T) {
 		t.Errorf("fetch timeout error %s", err.Error())
 	}
 }
-
 func TestFailOver(t *testing.T) {
 	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -134,7 +149,6 @@ func TestBasicAuth(t *testing.T) {
 	}
 
 }
-
 func getBasicAuthHandler(t *testing.T, name string) http.HandlerFunc {
 	response := &Response{
 		path:        "/user/name/" + name,
@@ -177,7 +191,6 @@ func TestGetByWrapperCmd(t *testing.T) {
 	res, _ := r.GetByWrapperCmd()
 	checkAttribute(t, res, 2.0)
 }
-
 func TestGetByWrapperCmd404(t *testing.T) {
 	c := &Config{}
 	c.ApiEndPoint = []string{"exmple"}
@@ -188,6 +201,21 @@ func TestGetByWrapperCmd404(t *testing.T) {
 		t.Errorf("fetch error %s", err)
 	}
 }
+
+func TestRequestProxyByConfig(t *testing.T) {
+	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+
+	c.HttpProxy = server.URL + "/v2"
+	c.ApiEndPoint = []string{"http://unservice_config/v2"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2.0)
+}
+
 func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 	// metadata
 	if res.MetaData.ApiVersion != apiVersion {
@@ -238,6 +266,7 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 }
 
 func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+	cache.Flush()
 	var res stns.ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
