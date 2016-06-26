@@ -39,13 +39,14 @@ func NewRequest(config *Config, paths ...string) (*Request, error) {
 
 // only use wrapper command
 func (r *Request) GetRawData() ([]byte, error) {
+	if len(r.Config.ApiEndPoint) == 0 {
+		return nil, errors.New("endpoint not defined")
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	rch := make(chan []byte, len(r.Config.ApiEndPoint))
 	ech := make(chan error, len(r.Config.ApiEndPoint))
-
 	for _, e := range r.Config.ApiEndPoint {
 		go func(endPoint string) {
 			if cache.IsLockEndPoint(endPoint) {
