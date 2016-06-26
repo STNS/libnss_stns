@@ -13,6 +13,7 @@ type Config struct {
 	SslVerify       bool     `toml:"ssl_verify"`
 	WrapperCommand  string   `toml:"wrapper_path"`
 	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
+	HttpProxy       string   `toml:"http_proxy"`
 }
 
 func LoadConfig(filePath string) (*Config, error) {
