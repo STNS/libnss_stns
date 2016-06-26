@@ -1,3 +1,9 @@
+libnss-stns (0.1.7) STABLE; urgency=low
+
+  * Add parameter Proxy url
+
+ -- pyama86 <www.kazu.com@gmail.com>  Sun, 26 Jun 2016 23:00:00 +0000
+
 libnss-stns (0.1.6) STABLE; urgency=low
 
   * Respect proxy env on create http.Transport(udzura)
