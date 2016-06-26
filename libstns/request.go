@@ -125,8 +125,17 @@ func (r *Request) httpDo(
 	req *http.Request,
 	f func(*http.Response, error),
 ) {
+	var p func(*http.Request) (*url.URL, error)
+	p = http.ProxyFromEnvironment
+	if r.Config.HttpProxy != "" {
+		proxyUrl, err := url.Parse(r.Config.HttpProxy)
+		if err == nil {
+			p = http.ProxyURL(proxyUrl)
+		}
+	}
+
 	tr := &http.Transport{
-		Proxy:           http.ProxyFromEnvironment,
+		Proxy:           p,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
 		Dial: (&net.Dialer{
 			Timeout:   time.Duration(r.Config.RequestTimeOut) * time.Second,
