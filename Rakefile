@@ -12,6 +12,12 @@ task "test" do
   sh 'docker run --rm -it -v "$(pwd)":/go/src/github.com/STNS/libnss_stns -w /go/src/github.com/STNS/libnss_stns -t pyama/stns:ubuntu-x86 /bin/bash'
 end
 
+desc "make centos5 package"
+task "make_centos5_pkg" => [:clean_bin, :ubuntu_build_x86] do
+  sh "docker build -f docker/centos5-pkg -t stns:cent5 ."
+  sh "docker run -v \"$(pwd)\"/binary:/go/src/github.com/STNS/libnss_stns/binary stns:cent5"
+end
+
 desc "make package all architecture"
 task "make_pkg" => %W(
   clean_pkg
