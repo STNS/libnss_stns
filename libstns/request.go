@@ -56,6 +56,11 @@ func (r *Request) GetRawData() ([]byte, error) {
 
 			u := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
 			req, err := http.NewRequest("GET", u, nil)
+
+			for k, v := range r.Config.RequestHeader {
+				req.Header.Add(k, v)
+			}
+
 			if err != nil {
 				ech <- err
 				return

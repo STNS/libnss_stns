@@ -6,14 +6,15 @@ import (
 )
 
 type Config struct {
-	ApiEndPoint     []string `toml:"api_end_point"`
-	RequestTimeOut  int      `toml:"request_timeout"`
-	User            string   `toml:"user"`
-	Password        string   `toml:"password"`
-	SslVerify       bool     `toml:"ssl_verify"`
-	WrapperCommand  string   `toml:"wrapper_path"`
-	ChainSshWrapper string   `toml:"chain_ssh_wrapper"`
-	HttpProxy       string   `toml:"http_proxy"`
+	ApiEndPoint     []string          `toml:"api_end_point"`
+	RequestTimeOut  int               `toml:"request_timeout"`
+	User            string            `toml:"user"`
+	Password        string            `toml:"password"`
+	SslVerify       bool              `toml:"ssl_verify"`
+	WrapperCommand  string            `toml:"wrapper_path"`
+	ChainSshWrapper string            `toml:"chain_ssh_wrapper"`
+	HttpProxy       string            `toml:"http_proxy"`
+	RequestHeader   map[string]string `toml:"request_header"`
 }
 
 func LoadConfig(filePath string) (*Config, error) {

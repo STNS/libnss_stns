@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/STNS/STNS/stns"
@@ -276,4 +277,24 @@ func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	if err == nil {
 		checkAttribute(t, res, apiVersion)
 	}
+}
+
+func TestRequestHeader(t *testing.T) {
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		apiKey := r.Header.Get("x-api-key")
+		if !strings.Contains(apiKey, "test") {
+			t.Errorf("unmatch header  error %s", apiKey)
+		}
+	})
+
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL}
+	c.RequestHeader = map[string]string{"x-api-key": "test"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	r.GetRawData()
 }
