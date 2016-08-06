@@ -13,13 +13,13 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/settings",
-			"Comment": "v0.1-1-8-g7b6fc23",
-			"Rev": "7b6fc23febb43d0f370658855ea9870df6cc64c8"
+			"Comment": "v0.1-3-6-g9ef4bef",
+			"Rev": "9ef4bef00a31a183fb9e8f5b6a5c0ae4303baf70"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.1-1-8-g7b6fc23",
-			"Rev": "7b6fc23febb43d0f370658855ea9870df6cc64c8"
+			"Comment": "v0.1-3-6-g9ef4bef",
+			"Rev": "9ef4bef00a31a183fb9e8f5b6a5c0ae4303baf70"
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest",
@@ -30,6 +30,30 @@
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest/trie",
 			"Comment": "v3.3.1",
 			"Rev": "37ad7dc626602a8355801da6acd85155655520f8"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt/apr1_crypt",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt/common",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt/md5_crypt",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt/sha256_crypt",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
+		},
+		{
+			"ImportPath": "github.com/kless/osutil/user/crypt/sha512_crypt",
+			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
 		},
 		{
 			"ImportPath": "github.com/pyama86/go-cache",

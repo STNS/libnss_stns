@@ -223,14 +223,6 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 		t.Error("unmatch api version")
 	}
 
-	if res.MetaData.Salt {
-		t.Error("unmatch salt")
-	}
-
-	if res.MetaData.Stretching != 0 {
-		t.Error("unmatch stretching")
-	}
-
 	if res.MetaData.Result != "success" {
 		t.Error("unmatch result")
 	}
