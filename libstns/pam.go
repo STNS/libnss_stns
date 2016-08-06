@@ -1,13 +1,15 @@
 package libstns
 
 import (
-	"crypto/sha256"
-	"crypto/sha512"
-	"encoding/hex"
 	"log"
 	"strings"
 
 	"github.com/STNS/STNS/stns"
+	"github.com/kless/osutil/user/crypt"
+	"github.com/kless/osutil/user/crypt/apr1_crypt"
+	"github.com/kless/osutil/user/crypt/md5_crypt"
+	"github.com/kless/osutil/user/crypt/sha256_crypt"
+	"github.com/kless/osutil/user/crypt/sha512_crypt"
 )
 
 const (
@@ -68,51 +70,26 @@ func (p *Pam) PasswordAuth(user string, password string) int {
 		break
 	}
 
-	var hashType string
-	hashType = attr.HashType
-
-	if hashType == "" {
-		hashType = res.MetaData.HashType
+	if strings.Count(attr.Password, "$") != 3 {
+		return PAM_AUTHINFO_UNAVAIL
 	}
 
-	if strings.ToLower(attr.Password) == p.GenerateHash(hashType, user, password, res.MetaData.Salt, res.MetaData.Stretching) {
+	var c crypt.Crypter
+	switch {
+	case strings.HasPrefix(attr.Password, sha512_crypt.MagicPrefix):
+		c = sha512_crypt.New()
+	case strings.HasPrefix(attr.Password, sha256_crypt.MagicPrefix):
+		c = sha256_crypt.New()
+	case strings.HasPrefix(attr.Password, md5_crypt.MagicPrefix):
+		c = md5_crypt.New()
+	case strings.HasPrefix(attr.Password, apr1_crypt.MagicPrefix):
+		c = apr1_crypt.New()
+	}
+
+	err = c.Verify(attr.Password, []byte(password))
+	if err == nil {
 		return PAM_SUCCESS
 	}
 
 	return PAM_AUTH_ERR
-}
-
-type HashMethod func([]byte) string
-
-func (p *Pam) sha256Sum(data []byte) string {
-	bytes := sha256.Sum256(data)
-	return hex.EncodeToString(bytes[:])
-}
-
-func (p *Pam) sha512Sum(data []byte) string {
-	bytes := sha512.Sum512(data)
-	return hex.EncodeToString(bytes[:])
-}
-
-func (p *Pam) GenerateHash(hashType, user, password string, salt bool, strething int) string {
-	var m HashMethod
-	var h string
-
-	switch hashType {
-	case "sha512":
-		m = p.sha512Sum
-	default:
-		m = p.sha256Sum
-	}
-
-	if salt {
-		h = m([]byte(user))
-	}
-
-	h = strings.ToLower(m([]byte(h + password)))
-
-	for i := 0; i < strething; i++ {
-		h = strings.ToLower(m([]byte(h)))
-	}
-	return h
 }
