@@ -171,9 +171,6 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 	mig := stns.ResponseFormat{
 		&stns.MetaData{
 			1.0,
-			false,
-			0,
-			"sha256",
 			stns_settings.SUCCESS,
 			0,
 		},
