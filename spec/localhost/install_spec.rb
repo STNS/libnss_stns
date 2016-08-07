@@ -6,6 +6,25 @@ describe file("/etc/stns/libnss_stns.conf") do
   it { should be_grouped_into('root') }
 end
 
+describe file("/usr/lib/stns") do
+  it { should be_directory }
+  it { should be_mode(700) }
+  it { should be_owned_by('root') }
+  it { should be_grouped_into('root') }
+end
+
+describe file("/usr/lib/stns/stns-key-wrapper") do
+  it { should be_mode(755) }
+  it { should be_owned_by('root') }
+  it { should be_grouped_into('root') }
+end
+
+describe file("/usr/local/bin/stns-key-wrapper") do
+  it { should be_symlink }
+  it { should be_owned_by('root') }
+  it { should be_grouped_into('root') }
+end
+
 files = if os[:family] == 'redhat'
   if i386?
     %w(

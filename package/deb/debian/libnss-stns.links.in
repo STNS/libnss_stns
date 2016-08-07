@@ -1,1 +1,2 @@
 /usr/lib/@DEB_HOST_MULTIARCH@/libnss_stns.so /lib/@DEB_HOST_MULTIARCH@/libnss_stns.so.2
+/usr/lib/stns/stns-key-wrapper /usr/local/bin/stns-key-wrapper
