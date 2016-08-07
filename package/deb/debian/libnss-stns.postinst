@@ -3,3 +3,4 @@ set -e
 
 mkdir -p /var/lib/libnss_stns
 chmod 777 /var/lib/libnss_stns
+chmod 700 /usr/lib/stns
