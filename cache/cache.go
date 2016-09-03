@@ -80,15 +80,19 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 
 func LastResultList(resourceType string) *stns.Attributes {
 	var attr stns.Attributes
-	f, err := ioutil.ReadFile(workDir + "/.libnss_stns_" + resourceType + "_cache")
-	if err != nil {
-		log.Println(err)
-		return &attr
-	}
+	f := workDir + "/.libnss_stns_" + resourceType + "_cache"
 
-	err = json.Unmarshal(f, &attr)
-	if err != nil {
-		log.Println(err)
+	if _, err := os.Stat(f); err == nil {
+		f, err := ioutil.ReadFile(f)
+		if err != nil {
+			log.Println(err)
+			return &attr
+		}
+
+		err = json.Unmarshal(f, &attr)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	return &attr
 }
