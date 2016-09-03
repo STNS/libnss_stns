@@ -174,7 +174,7 @@ func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
 			stns_settings.SUCCESS,
 			0,
 		},
-		&attr,
+		attr,
 	}
 
 	j, err := json.Marshal(mig)

@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/STNS/libnss_stns",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v66",
+	"GodepVersion": "v74",
 	"Packages": [
 		"./..."
 	],
@@ -13,13 +13,13 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/settings",
-			"Comment": "v0.1-3-6-g9ef4bef",
-			"Rev": "9ef4bef00a31a183fb9e8f5b6a5c0ae4303baf70"
+			"Comment": "v0.2-1-2-gb13fce6",
+			"Rev": "b13fce62ae4afc33250b36a2e3abd99db23615db"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.1-3-6-g9ef4bef",
-			"Rev": "9ef4bef00a31a183fb9e8f5b6a5c0ae4303baf70"
+			"Comment": "v0.2-1-2-gb13fce6",
+			"Rev": "b13fce62ae4afc33250b36a2e3abd99db23615db"
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest",

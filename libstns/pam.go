@@ -65,7 +65,7 @@ func (p *Pam) PasswordAuth(user string, password string) int {
 	}
 
 	var attr stns.Attribute
-	for _, a := range *res.Items {
+	for _, a := range res.Items {
 		attr = *a
 		break
 	}

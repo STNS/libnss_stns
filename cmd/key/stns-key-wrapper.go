@@ -47,7 +47,7 @@ func Fetch(config *libstns.Config, name string) string {
 	}
 
 	if res.Items != nil {
-		for _, u := range *res.Items {
+		for _, u := range res.Items {
 			if len(u.Keys) > 0 {
 				userKeys += strings.Join(u.Keys, "\n") + "\n"
 			}
