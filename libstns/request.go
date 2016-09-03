@@ -3,13 +3,16 @@ package libstns
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"path"
 	"regexp"
@@ -131,13 +134,16 @@ func (r *Request) httpDo(
 	req *http.Request,
 	f func(*http.Response, error),
 ) {
+
+	tc := r.TlsConfig()
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: !r.Config.SslVerify},
+		TLSClientConfig: tc,
 		Dial: (&net.Dialer{
 			Timeout:   time.Duration(r.Config.RequestTimeOut) * time.Second,
 			KeepAlive: 30 * time.Second,
 		}).Dial,
 	}
+
 	tr.Proxy = http.ProxyFromEnvironment
 	if r.Config.HttpProxy != "" {
 		proxyUrl, err := url.Parse(r.Config.HttpProxy)
@@ -154,6 +160,50 @@ func (r *Request) httpDo(
 		tr.CancelRequest(req)
 		return
 	}
+}
+
+func (r *Request) TlsConfig() *tls.Config {
+	tc := &tls.Config{InsecureSkipVerify: !r.Config.SslVerify}
+
+	if r.TlsKeysExists() {
+		cert, err := tls.LoadX509KeyPair(r.Config.TlsCert, r.Config.TlsKey)
+		if err != nil {
+			log.Println(err)
+			goto ret
+		}
+
+		if _, err := os.Stat(r.Config.TlsCa); err == nil {
+			// Load CA cert
+			caCert, err := ioutil.ReadFile(r.Config.TlsCa)
+			if err != nil {
+				log.Println(err)
+				goto ret
+			}
+			caPool := x509.NewCertPool()
+			caPool.AppendCertsFromPEM(caCert)
+
+			tc.Certificates = []tls.Certificate{cert}
+			tc.RootCAs = caPool
+
+			tc.BuildNameToCertificate()
+		}
+
+	}
+ret:
+	return tc
+}
+
+func (r *Request) TlsKeysExists() bool {
+	if r.Config.TlsCert != "" && r.Config.TlsKey != "" {
+		for _, v := range []string{r.Config.TlsCert, r.Config.TlsKey} {
+			if _, err := os.Stat(v); err != nil {
+				log.Println(err)
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
