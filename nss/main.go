@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/libstns"
 )
@@ -23,6 +25,12 @@ var spwdReadPos int
 
 func init() {
 	libstns.Setlog()
+
+	if !libstns.NicReady() {
+		log.Println("does not have a valid network interface")
+		return
+	}
+
 	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		return
