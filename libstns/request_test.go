@@ -233,7 +233,7 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 		}
 	}
 
-	for n, u := range *res.Items {
+	for n, u := range res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
 		}
@@ -263,7 +263,7 @@ func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	var res stns.ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
-	if err != nil || res.Items == nil || 0 == len(*res.Items) {
+	if err != nil || res.Items == nil || 0 == len(res.Items) {
 		t.Errorf("fetch error %s", err)
 	}
 	if err == nil {

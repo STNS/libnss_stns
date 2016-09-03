@@ -72,8 +72,8 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 		return nil, ne
 	}
 
-	cache.Write(req.ApiPath, *res.Items, nil)
-	return *res.Items, nil
+	cache.Write(req.ApiPath, res.Items, nil)
+	return res.Items, nil
 }
 
 func (n *Nss) Set(s NssEntry, column, value string) int {
