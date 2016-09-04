@@ -23,7 +23,6 @@ func init() {
 //export pam_sm_authenticate
 func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C.char) C.int {
 	if !libstns.NicReady() {
-		log.Println("does not have a valid network interface")
 		return C.PAM_AUTHINFO_UNAVAIL
 	}
 

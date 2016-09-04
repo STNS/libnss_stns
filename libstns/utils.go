@@ -1,18 +1,14 @@
 package libstns
 
-import "net"
+import (
+	"net"
+	"strings"
+)
 
 func NicReady() bool {
-	is, err := net.Interfaces()
-	if err != nil {
+	i, err := net.InterfaceByIndex(0)
+	if err != nil || !strings.Contains(i.Flags.String(), "up") {
 		return false
 	}
-
-	for _, i := range is {
-		if i.Name[0:2] == "lo" || i.Flags&(1<<uint(0)) == 0 {
-			continue
-		}
-		return true
-	}
-	return false
+	return true
 }
