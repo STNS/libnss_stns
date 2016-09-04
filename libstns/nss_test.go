@@ -33,7 +33,7 @@ func TestGetSuccess(t *testing.T) {
 
 	list := stns.Attributes{}
 	pos := 0
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 
 	a, err := n.Get("id", "2000")
 
@@ -71,7 +71,7 @@ func TestGetNotFound(t *testing.T) {
 
 	list := stns.Attributes{}
 	pos := 0
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 
 	a, err := n.Get("id", "2000")
 	if a != nil {
@@ -93,7 +93,7 @@ func TestSetSuccess(t *testing.T) {
 
 	d := Dummy{t}
 
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 	if n.Set(d, "name", "example") != NSS_STATUS_SUCCESS {
 		t.Error("set error 1")
 	}
@@ -110,7 +110,7 @@ func TestSetNotFound(t *testing.T) {
 
 	d := Dummy{t}
 
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 	r := n.Set(d, "name", "example")
 	if r != NSS_STATUS_UNAVAIL {
 		t.Errorf("set notfound error response:%d", r)
@@ -135,7 +135,7 @@ func TestSetByList(t *testing.T) {
 
 	d := Dummy{t}
 
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 
 	s := n.SetByList(d)
 	if s != NSS_STATUS_SUCCESS {
@@ -156,7 +156,7 @@ func TestPresetAndPurgeList(t *testing.T) {
 
 	list := stns.Attributes{}
 	pos := 0
-	n, _ := NewNss(c, "user", list, &pos)
+	n := NewNss(c, "user", list, &pos)
 	// preset
 	{
 		n.PresetList()

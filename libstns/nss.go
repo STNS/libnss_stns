@@ -15,7 +15,7 @@ const (
 	NSS_STATUS_SUCCESS  = 1
 	NSS_STATUS_NOTFOUND = 0
 	NSS_STATUS_UNAVAIL  = -1
-	NSS_STATUS_TRYGAIN  = -2
+	NSS_STATUS_TRYAGAIN = -2
 )
 
 const (
@@ -34,13 +34,13 @@ type NssEntry interface {
 	Set(stns.Attributes) int
 }
 
-func NewNss(config *Config, rtype string, list stns.Attributes, position *int) (*Nss, error) {
+func NewNss(config *Config, rtype string, list stns.Attributes, position *int) *Nss {
 	return &Nss{
 		config:  config,
 		rtype:   rtype,
 		list:    list,
 		listPos: position,
-	}, nil
+	}
 }
 
 func (n *Nss) Get(column, value string) (stns.Attributes, error) {

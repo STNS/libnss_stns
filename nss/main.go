@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/libstns"
 )
@@ -24,10 +22,7 @@ var spwdList = stns.Attributes{}
 var spwdReadPos int
 
 func init() {
-	libstns.Setlog()
-
 	if !libstns.NicReady() {
-		log.Println("does not have a valid network interface")
 		return
 	}
 
@@ -36,38 +31,42 @@ func init() {
 		return
 	}
 
-	var e error
-	pwdNss, e = libstns.NewNss(config, "user", pwdList, &pwdReadPos)
-	if e != nil {
-		return
-	}
+	pwdNss = libstns.NewNss(config, "user", pwdList, &pwdReadPos)
+	grpNss = libstns.NewNss(config, "group", grpList, &grpReadPos)
+	spwdNss = libstns.NewNss(config, "user", spwdList, &spwdReadPos)
 
-	grpNss, e = libstns.NewNss(config, "group", grpList, &grpReadPos)
-	if e != nil {
-		return
-	}
-
-	spwdNss, e = libstns.NewNss(config, "user", spwdList, &spwdReadPos)
-	if e != nil {
-		return
-	}
+	libstns.Setlog()
 }
 
 func set(n *libstns.Nss, e libstns.NssEntry, column, value string) C.int {
+	if !libstns.NicReady() {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
+	}
+
 	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
+
 	return C.int(n.Set(e, column, value))
 }
 
 func setByList(n *libstns.Nss, e libstns.NssEntry) C.int {
+	if !libstns.NicReady() {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
+	}
+
 	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
+
 	return C.int(n.SetByList(e))
 }
 
 func initList(n *libstns.Nss, mode int) C.int {
+	if !libstns.NicReady() {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
+	}
+
 	if n == nil {
 		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
@@ -79,5 +78,5 @@ func initList(n *libstns.Nss, mode int) C.int {
 		n.PurgeList()
 		return C.int(libstns.NSS_STATUS_SUCCESS)
 	}
-	return libstns.NSS_STATUS_NOTFOUND
+	return C.int(libstns.NSS_STATUS_NOTFOUND)
 }
