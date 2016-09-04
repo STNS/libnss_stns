@@ -36,21 +36,10 @@ func init() {
 		return
 	}
 
-	var e error
-	pwdNss, e = libstns.NewNss(config, "user", pwdList, &pwdReadPos)
-	if e != nil {
-		return
-	}
+	pwdNss = libstns.NewNss(config, "user", pwdList, &pwdReadPos)
+	grpNss = libstns.NewNss(config, "group", grpList, &grpReadPos)
+	spwdNss = libstns.NewNss(config, "user", spwdList, &spwdReadPos)
 
-	grpNss, e = libstns.NewNss(config, "group", grpList, &grpReadPos)
-	if e != nil {
-		return
-	}
-
-	spwdNss, e = libstns.NewNss(config, "user", spwdList, &spwdReadPos)
-	if e != nil {
-		return
-	}
 }
 
 func set(n *libstns.Nss, e libstns.NssEntry, column, value string) C.int {
