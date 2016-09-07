@@ -6,13 +6,16 @@ import (
 	"github.com/shirou/gopsutil/host"
 )
 
-func AfterOsBoot() bool {
-	_, err := os.FindProcess(1)
+func AfterOsBoot() int {
+	host, err := host.Info()
+
 	if err != nil {
-		host, err := host.Info()
-		if err != nil || (host.PlatformFamily == "debian" && (os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon")) {
-			return false
-		}
+		return NSS_STATUS_UNAVAIL
 	}
-	return true
+
+	if host.PlatformFamily == "debian" && (os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon") {
+		return NSS_STATUS_NOTFOUND
+	}
+
+	return NSS_STATUS_SUCCESS
 }

@@ -22,7 +22,7 @@ var spwdList = stns.Attributes{}
 var spwdReadPos int
 
 func init() {
-	if pwdNss == nil && grpNss == nil && spwdNss == nil && libstns.AfterOsBoot() {
+	if libstns.AfterOsBoot() == libstns.NSS_STATUS_SUCCESS {
 		libstns.Setlog()
 		config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 		if err != nil {
@@ -35,24 +35,36 @@ func init() {
 }
 
 func set(n *libstns.Nss, e libstns.NssEntry, column, value string) C.int {
-	if !libstns.AfterOsBoot() || n == nil {
-		return C.int(libstns.NSS_STATUS_NOTFOUND)
+	a := libstns.AfterOsBoot()
+	if a != libstns.NSS_STATUS_SUCCESS {
+		return C.int(a)
+	}
+	if n == nil {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
 
 	return C.int(n.Set(e, column, value))
 }
 
 func setByList(n *libstns.Nss, e libstns.NssEntry) C.int {
-	if !libstns.AfterOsBoot() || n == nil {
-		return C.int(libstns.NSS_STATUS_NOTFOUND)
+	a := libstns.AfterOsBoot()
+	if a != libstns.NSS_STATUS_SUCCESS {
+		return C.int(a)
+	}
+	if n == nil {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
 
 	return C.int(n.SetByList(e))
 }
 
 func initList(n *libstns.Nss, mode int) C.int {
-	if !libstns.AfterOsBoot() || n == nil {
-		return C.int(libstns.NSS_STATUS_NOTFOUND)
+	a := libstns.AfterOsBoot()
+	if a != libstns.NSS_STATUS_SUCCESS {
+		return C.int(a)
+	}
+	if n == nil {
+		return C.int(libstns.NSS_STATUS_UNAVAIL)
 	}
 
 	switch mode {
