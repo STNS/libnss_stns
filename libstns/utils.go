@@ -1,18 +1,12 @@
 package libstns
 
-import "net"
+import "os"
 
-func NicReady() bool {
-	is, err := net.Interfaces()
-	if err != nil {
+func AfterOsBoot() bool {
+	// mount check
+	_, err := os.FindProcess(1)
+	if err != nil || os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon" {
 		return false
 	}
-
-	for _, i := range is {
-		if i.Name[0:2] == "lo" || i.Flags&(1<<uint(0)) == 0 {
-			continue
-		}
-		return true
-	}
-	return false
+	return true
 }
