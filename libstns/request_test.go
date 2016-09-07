@@ -290,3 +290,34 @@ func TestRequestHeader(t *testing.T) {
 	r, _ := NewRequest(c, "user", "name", "example")
 	r.GetRawData()
 }
+
+func TestTlsAuth(t *testing.T) {
+	c := &Config{}
+	c.TlsCa = "./fixtures/keys/test.pem"
+	c.SslVerify = false
+	r, _ := NewRequest(c, "user", "name", "example")
+
+	if r.TlsConfig().InsecureSkipVerify == false {
+		t.Error("tls auth error 1")
+	}
+
+	if r.TlsConfig().RootCAs != nil {
+		t.Error("tls auth error 2")
+	}
+
+	c.TlsCert = "./fixtures/keys/test.crt"
+	c.TlsKey = "./fixtures/keys/test.key"
+	r, _ = NewRequest(c, "user", "name", "example")
+
+	if r.TlsConfig().RootCAs == nil {
+		t.Error("tls auth error 3")
+	}
+
+	c.TlsCert = "./fixtures/keys/not_exists.crt"
+	c.TlsKey = "./fixtures/keys/test.key"
+	r, _ = NewRequest(c, "user", "name", "example")
+
+	if r.TlsConfig().RootCAs != nil {
+		t.Error("tls auth error 4")
+	}
+}

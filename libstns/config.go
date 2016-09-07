@@ -16,6 +16,9 @@ type Config struct {
 	ChainSshWrapper string            `toml:"chain_ssh_wrapper"`
 	HttpProxy       string            `toml:"http_proxy"`
 	RequestHeader   map[string]string `toml:"request_header"`
+	TlsCa           string            `toml:"tls_ca"`
+	TlsCert         string            `toml:"tls_cert"`
+	TlsKey          string            `toml:"tls_key"`
 }
 
 func LoadConfig(filePath string) (*Config, error) {
