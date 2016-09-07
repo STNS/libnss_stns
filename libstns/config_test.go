@@ -15,5 +15,5 @@ func TestLoadConfig(t *testing.T) {
 	test.Assert(t, config.TlsCa == "ca.pem", "unmatch tls ca")
 	test.Assert(t, config.TlsCert == "tls.crt", "unmatch tls crt")
 	test.Assert(t, config.TlsKey == "tls.key", "unmatch tls key")
-
+	test.Assert(t, config.RequestRetry == 3, "ng request retry")
 }

@@ -1,18 +1,21 @@
 package libstns
 
-import "net"
+import (
+	"os"
 
-func NicReady() bool {
-	is, err := net.Interfaces()
+	"github.com/shirou/gopsutil/host"
+)
+
+func AfterOsBoot() int {
+	host, err := host.Info()
+
 	if err != nil {
-		return false
+		return NSS_STATUS_UNAVAIL
 	}
 
-	for _, i := range is {
-		if i.Name[0:2] == "lo" || i.Flags&(1<<uint(0)) == 0 {
-			continue
-		}
-		return true
+	if host.PlatformFamily == "debian" && (os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon") {
+		return NSS_STATUS_NOTFOUND
 	}
-	return false
+
+	return NSS_STATUS_SUCCESS
 }

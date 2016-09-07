@@ -42,10 +42,23 @@ func NewRequest(config *Config, paths ...string) (*Request, error) {
 
 // only use wrapper command
 func (r *Request) GetRawData() ([]byte, error) {
+	var b []byte
+	var e error
+
 	if len(r.Config.ApiEndPoint) == 0 {
 		return nil, errors.New("endpoint not defined")
 	}
 
+	for i := 0; i < r.Config.RequestRetry; i++ {
+		b, e = r.request()
+		if e == nil {
+			break
+		}
+	}
+	return b, e
+}
+
+func (r *Request) request() ([]byte, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	rch := make(chan []byte, len(r.Config.ApiEndPoint))
@@ -78,7 +91,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 				req,
 				func(res *http.Response, err error) {
 					if err != nil {
-						if _, ok := err.(*url.Error); ok {
+						if _, ok := err.(*url.Error); ok && len(r.Config.ApiEndPoint) != 1 {
 							cache.LockEndPoint(endPoint)
 						}
 						ech <- err
@@ -127,8 +140,8 @@ func (r *Request) GetRawData() ([]byte, error) {
 			}
 		}
 	}
-}
 
+}
 func (r *Request) httpDo(
 	ctx context.Context,
 	req *http.Request,
