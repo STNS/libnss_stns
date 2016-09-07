@@ -1,12 +1,21 @@
 package libstns
 
-import "os"
+import (
+	"os"
 
-func AfterOsBoot() bool {
-	// mount check
-	_, err := os.FindProcess(1)
-	if err != nil || os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon" {
-		return false
+	"github.com/shirou/gopsutil/host"
+)
+
+func AfterOsBoot() int {
+	host, err := host.Info()
+
+	if err != nil {
+		return NSS_STATUS_UNAVAIL
 	}
-	return true
+
+	if host.PlatformFamily == "debian" && (os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon") {
+		return NSS_STATUS_NOTFOUND
+	}
+
+	return NSS_STATUS_SUCCESS
 }
