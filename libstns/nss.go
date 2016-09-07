@@ -34,13 +34,13 @@ type NssEntry interface {
 	Set(stns.Attributes) int
 }
 
-func NewNss(config *Config, rtype string, list stns.Attributes, position *int) (*Nss, error) {
+func NewNss(config *Config, rtype string, list stns.Attributes, position *int) *Nss {
 	return &Nss{
 		config:  config,
 		rtype:   rtype,
 		list:    list,
 		listPos: position,
-	}, nil
+	}
 }
 
 func (n *Nss) Get(column, value string) (stns.Attributes, error) {
