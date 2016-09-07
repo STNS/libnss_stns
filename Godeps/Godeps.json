@@ -8,8 +8,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.2.0",
-			"Rev": "bbd5bb678321a0d6e58f1099321dfa73391c1b6f"
+			"Comment": "v0.2.0-9-gf0aeabc",
+			"Rev": "f0aeabca5a127c4078abb8c8d64298b147264b55"
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/settings",
@@ -23,13 +23,18 @@
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest",
-			"Comment": "v3.3.1",
-			"Rev": "37ad7dc626602a8355801da6acd85155655520f8"
+			"Comment": "v3.3.1-5-gcfd0da1",
+			"Rev": "cfd0da14df1db088980175e1c3c7e77c11b90718"
 		},
 		{
 			"ImportPath": "github.com/ant0ine/go-json-rest/rest/trie",
-			"Comment": "v3.3.1",
-			"Rev": "37ad7dc626602a8355801da6acd85155655520f8"
+			"Comment": "v3.3.1-5-gcfd0da1",
+			"Rev": "cfd0da14df1db088980175e1c3c7e77c11b90718"
+		},
+		{
+			"ImportPath": "github.com/godbus/dbus",
+			"Comment": "v4.0.0-10-g9998ce8",
+			"Rev": "9998ce8520caaa4a287fa5122ecb5d1ca1aeaede"
 		},
 		{
 			"ImportPath": "github.com/kless/osutil/user/crypt",
@@ -61,7 +66,7 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "3e8a7b0329d536af18e227bb21b6da4d1dbbe180"
+			"Rev": "4d38db76854b199960801a1734443fd02870d7e1"
 		}
 	]
 }
