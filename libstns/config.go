@@ -8,6 +8,7 @@ import (
 type Config struct {
 	ApiEndPoint     []string          `toml:"api_end_point"`
 	RequestTimeOut  int               `toml:"request_timeout"`
+	RequestRetry    int               `toml:"retry_request"`
 	User            string            `toml:"user"`
 	Password        string            `toml:"password"`
 	SslVerify       bool              `toml:"ssl_verify"`
@@ -30,6 +31,7 @@ func LoadConfig(filePath string) (*Config, error) {
 
 func defaultConfig(config *Config) {
 	config.RequestTimeOut = settings.HTTP_TIMEOUT
+	config.RequestRetry = 1
 	config.WrapperCommand = "/usr/local/bin/stns-query-wrapper"
 	config.ApiEndPoint = []string{"http://localhost:1104"}
 }
