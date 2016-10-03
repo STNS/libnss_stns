@@ -15,5 +15,5 @@ Pre-Depends: ${misc:Pre-Depends}
 Package: libpam-stns
 Architecture: any
 Description: simple toml name service pam module
-Depends: dpkg-dev
+Depends: ${misc:Depends}
 Pre-Depends: ${misc:Pre-Depends}
