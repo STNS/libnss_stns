@@ -1,7 +1,9 @@
 package libstns
 
 import (
+	"net"
 	"os"
+	"strings"
 
 	"github.com/shirou/gopsutil/host"
 )
@@ -11,7 +13,7 @@ func AfterOsBoot() int {
 		return NSS_STATUS_UNAVAIL
 	}
 
-	if os.Args[0] == "/sbin/init" || os.Args[0] == "dbus-daemon" {
+	if strings.HasSuffix(pn, "/sbin/init") {
 		host, err := host.Info()
 
 		if err != nil {
@@ -22,5 +24,21 @@ func AfterOsBoot() int {
 			return NSS_STATUS_NOTFOUND
 		}
 	}
+
+	pn := os.Args[0]
+	if strings.HasSuffix(pn, "dbus-daemon") {
+		interfaces, err := net.Interfaces()
+
+		if err != nil {
+			return NSS_STATUS_UNAVAIL
+		}
+
+		for _, i := range interfaces {
+			if strings.Contains(i.Flags.String(), "up") {
+				return NSS_STATUS_SUCCESS
+			}
+		}
+	}
+
 	return NSS_STATUS_SUCCESS
 }
