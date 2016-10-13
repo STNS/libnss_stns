@@ -18,15 +18,28 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
+func TestRequestV2TimeOut(t *testing.T) {
+	c := &Config{}
+	c.ApiEndPoint = []string{"http://10.1.1.1/v2"}
+	c.RequestTimeOut = 1
+	r, _ := NewRequest(c, "user", "name", "example")
+	_, err := r.GetRawData()
+
+	if err.Error() != "Get http://10.1.1.1/v2/user/name/example: dial tcp 10.1.1.1:80: i/o timeout" {
+		t.Errorf("fetch timeout error %s", err.Error())
+	}
+}
+
 func TestRequestProxyByEnv(t *testing.T) {
 	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
 	os.Setenv("HTTP_PROXY", server.URL+"/v2")
+
 	defer server.Close()
-	defer os.Setenv("HTTP_PROXY", "")
+	defer os.Unsetenv("HTTP_PROXY")
 
 	c := &Config{}
-	c.ApiEndPoint = []string{"http://unservice_env/v2"}
+	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
 	checkResponse(t, r, 2.0)
@@ -88,18 +101,6 @@ func TestRequestV2NotFound(t *testing.T) {
 	}
 }
 
-func TestRequestV2TimeOut(t *testing.T) {
-	c := &Config{}
-	c.ApiEndPoint = []string{"http://10.1.1.1/v2"}
-	c.RequestTimeOut = 1
-
-	r, _ := NewRequest(c, "user", "name", "example")
-	r.GetRawData()
-	_, err := r.GetRawData()
-	if err.Error() != "endpoint http://10.1.1.1/v2 is locked" {
-		t.Errorf("fetch timeout error %s", err.Error())
-	}
-}
 func TestFailOver(t *testing.T) {
 	handler := test.GetHandler(t, "/v2/user/name/example", test.GetV2Example(), 200)
 	server := httptest.NewServer(http.HandlerFunc(handler))
@@ -261,11 +262,13 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 func checkResponse(t *testing.T, r *Request, apiVersion float64) {
 	cache.Flush()
 	var res stns.ResponseFormat
+
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
 	if err != nil || res.Items == nil || 0 == len(res.Items) {
 		t.Errorf("fetch error %s", err)
 	}
+
 	if err == nil {
 		checkAttribute(t, res, apiVersion)
 	}
