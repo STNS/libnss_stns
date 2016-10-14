@@ -1,10 +1,3 @@
-libnss-stns (0.2.3) STABLE; urgency=low
-
-  * Correct libpam-stns dependencies in debian package @hanazuki
-  * Fix dbus error @pyama86
-
- -- pyama86 <>  Fri, 14 Oct 2016 18:00:00 +0000
-
 libnss-stns (0.2.2) STABLE; urgency=low
 
   * Fix os family
