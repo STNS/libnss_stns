@@ -25,8 +25,8 @@ func TestRequestV2TimeOut(t *testing.T) {
 	r, _ := NewRequest(c, "user", "name", "example")
 	_, err := r.GetRawData()
 
-	if err.Error() != "Get http://10.1.1.1/v2/user/name/example: dial tcp 10.1.1.1:80: i/o timeout" {
-		t.Errorf("fetch timeout error %s", err.Error())
+	if err == nil {
+		t.Error("fetch timeout error")
 	}
 }
 
