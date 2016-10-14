@@ -57,7 +57,7 @@ func set(n *libstns.Nss, e libstns.NssEntry, column, value string) C.int {
 	}
 
 	if n == nil {
-		return C.int(libstns.NSS_STATUS_UNAVAIL)
+		return C.int(libstns.NSS_STATUS_NOTFOUND)
 	}
 
 	return C.int(n.Set(e, column, value))
@@ -70,7 +70,7 @@ func setByList(n *libstns.Nss, e libstns.NssEntry) C.int {
 	}
 
 	if n == nil {
-		return C.int(libstns.NSS_STATUS_UNAVAIL)
+		return C.int(libstns.NSS_STATUS_NOTFOUND)
 	}
 
 	return C.int(n.SetByList(e))
@@ -83,7 +83,7 @@ func initList(n *libstns.Nss, mode int) C.int {
 	}
 
 	if n == nil {
-		return C.int(libstns.NSS_STATUS_UNAVAIL)
+		return C.int(libstns.NSS_STATUS_NOTFOUND)
 	}
 
 	switch mode {
