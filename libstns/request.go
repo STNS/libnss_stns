@@ -49,7 +49,12 @@ func (r *Request) GetRawData() ([]byte, error) {
 		return nil, errors.New("endpoint not defined")
 	}
 
-	for i := 0; i < r.Config.RequestRetry; i++ {
+	retry := 1
+	if r.Config.RequestRetry != 0 {
+		retry = r.Config.RequestRetry
+	}
+
+	for i := 0; i < retry; i++ {
 		b, e = r.request()
 		if e == nil {
 			break
@@ -97,6 +102,7 @@ func (r *Request) request() ([]byte, error) {
 						ech <- err
 						return
 					}
+
 					defer res.Body.Close()
 					body, err := ioutil.ReadAll(res.Body)
 					switch res.StatusCode {
@@ -147,7 +153,6 @@ func (r *Request) httpDo(
 	req *http.Request,
 	f func(*http.Response, error),
 ) {
-
 	tc := r.TlsConfig()
 	tr := &http.Transport{
 		TLSClientConfig: tc,

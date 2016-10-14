@@ -21,10 +21,6 @@ func init() {
 
 //export pam_sm_authenticate
 func pam_sm_authenticate(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C.char) C.int {
-	if libstns.AfterOsBoot() != libstns.NSS_STATUS_SUCCESS {
-		return C.PAM_AUTHINFO_UNAVAIL
-	}
-
 	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err != nil {
 		log.Println(err)

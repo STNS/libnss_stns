@@ -10,4 +10,4 @@ before_install:
 script:
 - bundle exec rake test_pkg
 go:
-  - 1.6.2
+  - 1.7.1

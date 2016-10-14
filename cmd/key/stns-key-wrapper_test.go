@@ -39,8 +39,9 @@ func TestFetchKey(t *testing.T) {
 
 	c := &libstns.Config{ApiEndPoint: []string{successServer.URL}}
 
-	if "test key1\ntest key2\n" != Fetch(c, "example") {
-		t.Error("unmatch keys")
+	result := Fetch(c, "example")
+	if "test key1\ntest key2\n" != result {
+		t.Errorf("unmatch key value %s", result)
 	}
 
 	// no key

@@ -10,3 +10,4 @@ Gemfile.lock
 bin/*
 .bundle/config
 .rake_tasks
+.vagrant/*
