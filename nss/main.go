@@ -2,9 +2,11 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/libstns"
+	"github.com/shirou/gopsutil/host"
 )
 
 import "C"
@@ -33,10 +35,16 @@ func orgInit() int {
 			return libstns.NSS_STATUS_UNAVAIL
 		}
 
-		err := libstns.Setlog()
+		host, err := host.Info()
 		if err != nil {
+			return libstns.NSS_STATUS_UNAVAIL
+		}
+
+		if host.PlatformFamily == "debian" && (strings.HasSuffix(os.Args[0], "/sbin/init") || strings.HasSuffix(os.Args[0], "dbus-daemon")) {
 			return libstns.NSS_STATUS_NOTFOUND
 		}
+
+		libstns.Setlog()
 
 		config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 		if err != nil {
