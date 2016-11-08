@@ -7,9 +7,8 @@ import (
 
 func Setlog() error {
 	logger, err := syslog.New(syslog.LOG_ERR|syslog.LOG_USER, "libstns")
-	if err != nil {
-		return err
+	if err == nil {
+		log.SetOutput(logger)
 	}
-	log.SetOutput(logger)
 	return nil
 }
