@@ -1,3 +1,9 @@
+libnss-stns (0.2.4) STABLE; urgency=low
+
+  * Syslog output is not mandatory @pyama86
+
+ -- pyama86 <>  Tue, 8 Nov 2016 20:30:00 +0000
+
 libnss-stns (0.2.3) STABLE; urgency=low
 
   * Correct libpam-stns dependencies in debian package @hanazuki
