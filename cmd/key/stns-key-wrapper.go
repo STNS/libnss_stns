@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/libstns"
 )
 
@@ -25,7 +24,7 @@ func main() {
 }
 
 func Fetch(config *libstns.Config, name string) string {
-	var res stns.ResponseFormat
+	var res *libstns.ResponseFormat
 	var userKeys string
 
 	r, err := libstns.NewRequest(config, "user", "name", name)

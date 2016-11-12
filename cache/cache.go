@@ -44,7 +44,7 @@ func Write(path string, attr stns.Attributes, err error) {
 	attrStore.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
-func ReadMinId(resourceType string) int {
+func ReadMinID(resourceType string) int {
 	n, exist := attrStore.Get(resourceType + "_min_id")
 	if exist {
 		id := n.(int)
@@ -53,7 +53,7 @@ func ReadMinId(resourceType string) int {
 	return 0
 }
 
-func WriteMinId(resourceType string, id int) {
+func WriteMinID(resourceType string, id int) {
 	attrStore.Set(resourceType+"_min_id", id, _gocache.DefaultExpiration)
 }
 

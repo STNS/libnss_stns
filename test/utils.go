@@ -23,6 +23,7 @@ func GetHandler(t *testing.T, path string, responseBody string, responseCode int
 		}
 		// Send response.
 		w.Header().Set("Content-Type", response.contenttype)
+		w.Header().Set("STNS-MIN-ID", "2000")
 		w.WriteHeader(responseCode)
 		io.WriteString(w, response.body)
 	}
@@ -55,6 +56,7 @@ func GetV1Example() string {
 		}
 	}`
 }
+
 func GetV2Example() string {
 	return `{
 		"metadata": {
@@ -77,5 +79,52 @@ func GetV2Example() string {
 			}
 		}
 	}`
+}
 
+func GetV3UserExample() string {
+	return `{
+		"name": "example",
+		"id": 2000,
+		"group_id": 3000,
+		"directory": "/home/example",
+		"shell": "/bin/sh",
+		"keys": [
+			"test"
+		],
+		"password": "password"
+	}`
+}
+
+func GetV3UsersExample() string {
+	return `[{
+		"name": "example",
+		"id": 2000,
+		"group_id": 3000,
+		"directory": "/home/example",
+		"shell": "/bin/sh",
+		"keys": [
+			"test"
+		],
+		"password": "password"
+	}]`
+}
+
+func GetV3GroupExample() string {
+	return `{
+		"name": "example",
+		"id": 2000,
+		"users": [
+			"test"
+		]
+	}`
+}
+
+func GetV3GroupsExample() string {
+	return `[{
+		"name": "example",
+		"id": 2000,
+		"users": [
+			"test"
+		]
+	}]`
 }

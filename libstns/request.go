@@ -21,10 +21,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	stns_settings "github.com/STNS/STNS/settings"
-	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/cache"
-	"github.com/STNS/libnss_stns/settings"
 )
 
 type Request struct {
@@ -77,14 +74,13 @@ func (r *Request) request() ([]byte, error) {
 
 			u := strings.TrimRight(endPoint, "/") + "/" + strings.TrimLeft(r.ApiPath, "/")
 			req, err := http.NewRequest("GET", u, nil)
-
-			for k, v := range r.Config.RequestHeader {
-				req.Header.Add(k, v)
-			}
-
 			if err != nil {
 				ech <- err
 				return
+			}
+
+			for k, v := range r.Config.RequestHeader {
+				req.Header.Add(k, v)
 			}
 
 			if r.Config.User != "" && r.Config.Password != "" {
@@ -107,11 +103,21 @@ func (r *Request) request() ([]byte, error) {
 					body, err := ioutil.ReadAll(res.Body)
 					switch res.StatusCode {
 					case http.StatusOK, http.StatusNotFound:
-						reg := regexp.MustCompile(`/v2[/]?$`)
+						v2 := regexp.MustCompile(`/v2[/]?$`)
+						v3 := regexp.MustCompile(`/v3[/]?$`)
 						switch {
 						// version1
-						case !reg.MatchString(endPoint):
-							buffer, err := r.migrateV2Format(body)
+						case !v2.MatchString(endPoint) && !v3.MatchString(endPoint):
+							buffer, err := convertV1toV3Format(body)
+							if err != nil {
+								ech <- err
+								return
+							}
+							rch <- buffer
+							return
+						// version2
+						case v2.MatchString(endPoint):
+							buffer, err := convertV2toV3Format(body)
 							if err != nil {
 								ech <- err
 								return
@@ -119,9 +125,16 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						default:
-							rch <- body
+							buffer, err := convertV3Format(body, r.ApiPath, res.Header.Get("STNS-MIN-ID"))
+							if err != nil {
+								ech <- err
+								return
+							}
+							rch <- buffer
 							return
 						}
+						rch <- body
+						return
 					case http.StatusUnauthorized:
 						ech <- fmt.Errorf("authenticate error: %s", u)
 						return
@@ -224,36 +237,7 @@ func (r *Request) TlsKeysExists() bool {
 	return false
 }
 
-func (r *Request) migrateV2Format(body []byte) ([]byte, error) {
-	var attr stns.Attributes
-	err := json.Unmarshal(body, &attr)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if attr == nil {
-		return nil, errors.New(settings.V2_FORMAT_ERROR)
-	}
-
-	mig := stns.ResponseFormat{
-		&stns.MetaData{
-			1.0,
-			stns_settings.SUCCESS,
-			0,
-		},
-		attr,
-	}
-
-	j, err := json.Marshal(mig)
-	if err != nil {
-		return nil, err
-	}
-
-	return j, nil
-}
-
-func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
+func (r *Request) GetByWrapperCmd() (*ResponseFormat, error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
@@ -263,17 +247,17 @@ func (r *Request) GetByWrapperCmd() (stns.ResponseFormat, error) {
 	err := cmd.Run()
 
 	if err != nil {
-		return stns.ResponseFormat{}, err
+		return nil, err
 	}
 
 	if len(stderr.Bytes()) > 0 {
-		return stns.ResponseFormat{}, fmt.Errorf("command error:%s", stderr.String())
+		return nil, fmt.Errorf("command error:%s", stderr.String())
 	}
 
-	var res stns.ResponseFormat
+	var res *ResponseFormat
 	err = json.Unmarshal(stdout.Bytes(), &res)
 	if err != nil {
-		return stns.ResponseFormat{}, err
+		return nil, err
 	}
 	return res, nil
 }
