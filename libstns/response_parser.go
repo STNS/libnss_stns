@@ -3,7 +3,6 @@ package libstns
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -63,8 +62,6 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 		if sp[1] == "list" {
 			users := v3Users{}
 			err = json.Unmarshal(b, &users)
-
-			fmt.Println(users)
 
 			if err != nil {
 				return nil, err
