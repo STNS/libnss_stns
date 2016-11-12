@@ -22,8 +22,8 @@ type Group struct {
 
 func (s Group) Set(groups stns.Attributes) int {
 	for n, g := range groups {
-		if g.Id != 0 {
-			s.grp.gr_gid = C.__gid_t(g.Id)
+		if g.ID != 0 {
+			s.grp.gr_gid = C.__gid_t(g.ID)
 			s.grp.gr_name = C.CString(n)
 			s.grp.gr_passwd = C.CString("x")
 

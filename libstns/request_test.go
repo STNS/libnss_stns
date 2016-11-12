@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/cache"
 	"github.com/STNS/libnss_stns/test"
 )
@@ -18,7 +17,7 @@ type Response struct {
 	path, query, contenttype, body string
 }
 
-func TestRequestV2TimeOut(t *testing.T) {
+func TestRequestTimeOut(t *testing.T) {
 	c := &Config{}
 	c.ApiEndPoint = []string{"http://10.1.1.1/v2"}
 	c.RequestTimeOut = 1
@@ -42,7 +41,7 @@ func TestRequestProxyByEnv(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2.0)
+	checkResponse(t, r, 2000, checkUserAttribute)
 }
 
 func TestRequestV1ServerV1(t *testing.T) {
@@ -58,7 +57,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 1.0)
+	checkResponse(t, r, 0, checkUserAttribute)
 
 }
 
@@ -71,7 +70,67 @@ func TestRequestV2ServerV2(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2.0)
+	checkResponse(t, r, 2000, checkUserAttribute)
+}
+
+func TestRequestV3ServerV3User(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/user/name/example", test.GetV3UserExample(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	checkResponse(t, r, 2000, checkUserAttribute)
+}
+
+func TestRequestV3ServerV3Users(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/user/list", test.GetV3UsersExample(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "user", "list", "")
+	checkResponse(t, r, 2000, checkUserAttribute)
+}
+
+func TestRequestV3ServerV3Group(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/group/name/example", test.GetV3GroupExample(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "group", "name", "example")
+	checkResponse(t, r, 2000, checkGroupAttribute)
+}
+
+func TestRequestV3ServerV3Groups(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/group/list", test.GetV3GroupsExample(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "group", "list", "")
+	checkResponse(t, r, 2000, checkGroupAttribute)
+}
+
+func TestRequestV3ServerV3Sudo(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/sudo/name/example", test.GetV3UserExample(), 200)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "sudo", "name", "example")
+	checkResponse(t, r, 2000, checkSudoAttribute)
 }
 
 func TestRequestV2NotFound(t *testing.T) {
@@ -93,7 +152,24 @@ func TestRequestV2NotFound(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	var res stns.ResponseFormat
+	var res ResponseFormat
+	raw, err := r.GetRawData()
+	json.Unmarshal(raw, &res)
+	if err != nil {
+		t.Errorf("fetch error %s", err)
+	}
+}
+
+func TestRequestV3NotFound(t *testing.T) {
+	handler := test.GetHandler(t, "/v3/user/name/example", `{}`, 404)
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	c := &Config{}
+	c.ApiEndPoint = []string{server.URL + "/v3"}
+
+	r, _ := NewRequest(c, "user", "name", "example")
+	var res ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
 	if err != nil {
@@ -110,7 +186,7 @@ func TestFailOver(t *testing.T) {
 	c.ApiEndPoint = []string{"http://localhost:1000", server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2.0)
+	checkResponse(t, r, 2000, checkUserAttribute)
 }
 
 func TestRefused(t *testing.T) {
@@ -191,8 +267,9 @@ func TestGetByWrapperCmd(t *testing.T) {
 	c.WrapperCommand = "./fixtures/bin/command_response_01"
 	r, _ := NewRequest(c, "user", "name", "example")
 	res, _ := r.GetByWrapperCmd()
-	checkAttribute(t, res, 2.0)
+	checkUserAttribute(t, res, 2000)
 }
+
 func TestGetByWrapperCmd404(t *testing.T) {
 	c := &Config{}
 	c.ApiEndPoint = []string{"exmple"}
@@ -215,33 +292,22 @@ func TestRequestProxyByConfig(t *testing.T) {
 	c.ApiEndPoint = []string{"http://unservice_config/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2.0)
+	checkResponse(t, r, 2000, checkUserAttribute)
 }
 
-func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
-	// metadata
-	if res.MetaData.ApiVersion != apiVersion {
-		t.Error("unmatch api version")
-	}
-
-	if res.MetaData.Result != "success" {
-		t.Error("unmatch result")
-	}
-
-	if res.MetaData.ApiVersion == 2.0 {
-		if res.MetaData.MinId != 2000 {
-			t.Errorf("unmatch min id %d", res.MetaData.MinId)
-		}
+func checkUserAttribute(t *testing.T, res *ResponseFormat, minID int) {
+	if res.MinID != minID {
+		t.Errorf("unmatch min id %d", res.MinID)
 	}
 
 	for n, u := range res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
 		}
-		if u.Id != 2000 {
+		if u.ID != 2000 {
 			t.Error("unmatch id")
 		}
-		if u.GroupId != 3000 {
+		if u.GroupID != 3000 {
 			t.Error("unmatch group")
 		}
 		if u.Directory != "/home/example" {
@@ -259,18 +325,54 @@ func checkAttribute(t *testing.T, res stns.ResponseFormat, apiVersion float64) {
 	}
 }
 
-func checkResponse(t *testing.T, r *Request, apiVersion float64) {
+func checkGroupAttribute(t *testing.T, res *ResponseFormat, minID int) {
+	if res.MinID != minID {
+		t.Errorf("unmatch min id %d", res.MinID)
+	}
+
+	for n, g := range res.Items {
+		if n != "example" {
+			t.Error("unmatch name")
+		}
+		if g.ID != 2000 {
+			t.Error("unmatch id")
+		}
+		if g.Users[0] != "test" || len(g.Users) != 1 {
+			t.Error("unmatch users")
+		}
+	}
+}
+
+func checkSudoAttribute(t *testing.T, res *ResponseFormat, minID int) {
+	for n, u := range res.Items {
+		if n != "example" {
+			t.Error("unmatch name")
+		}
+		if u.Password != "password" {
+			t.Error("unmatch password")
+		}
+	}
+}
+
+func checkResponse(t *testing.T, r *Request, minID int, checkAttribute func(*testing.T, *ResponseFormat, int)) {
 	cache.Flush()
-	var res stns.ResponseFormat
+	var res ResponseFormat
 
 	raw, err := r.GetRawData()
-	json.Unmarshal(raw, &res)
-	if err != nil || res.Items == nil || 0 == len(res.Items) {
+	if err != nil {
 		t.Errorf("fetch error %s", err)
 	}
 
-	if err == nil {
-		checkAttribute(t, res, apiVersion)
+	err = json.Unmarshal(raw, &res)
+
+	if err != nil {
+		t.Errorf("fetch error %s", err)
+	}
+
+	if res.Items == nil || 0 == len(res.Items) {
+		t.Error("fetch error response is nil")
+	} else {
+		checkAttribute(t, &res, minID)
 	}
 }
 

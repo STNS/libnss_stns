@@ -22,7 +22,7 @@ type Passwd struct {
 func (s Passwd) Set(passwds stns.Attributes) int {
 	for n, p := range passwds {
 		if p.User != nil && !reflect.ValueOf(p.User).IsNil() {
-			s.pwd.pw_uid = C.__uid_t(p.Id)
+			s.pwd.pw_uid = C.__uid_t(p.ID)
 			s.pwd.pw_name = C.CString(n)
 
 			dir := "/home/" + n
@@ -35,7 +35,7 @@ func (s Passwd) Set(passwds stns.Attributes) int {
 			if p.Shell != "" {
 				shell = p.Shell
 			}
-			s.pwd.pw_gid = C.__gid_t(p.GroupId)
+			s.pwd.pw_gid = C.__gid_t(p.GroupID)
 			s.pwd.pw_passwd = C.CString("x")
 			s.pwd.pw_dir = C.CString(dir)
 			s.pwd.pw_shell = C.CString(shell)

@@ -65,20 +65,19 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 	}
 
 	if column == "id" {
-		cache.WriteMinId(n.rtype, res.MetaData.MinId)
+		cache.WriteMinID(n.rtype, res.MinID)
 	}
 
 	if res.Items == nil {
 		return nil, ne
 	}
-
 	cache.Write(req.ApiPath, res.Items, nil)
 	return res.Items, nil
 }
 
 func (n *Nss) Set(s NssEntry, column, value string) int {
 	id, _ := strconv.Atoi(value)
-	if column != "id" || (column == "id" && cache.ReadMinId(n.rtype) <= id) {
+	if column != "id" || (column == "id" && cache.ReadMinID(n.rtype) <= id) {
 		resource, err := n.Get(column, value)
 		if err != nil {
 			log.Print(err)

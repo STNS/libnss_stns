@@ -1,3 +1,3 @@
 #!/bin/sh
 
-echo '{"metadata":{"api_version":2,"salt_enable":false,"stretching_count":0,"result":"success", "min_id": 1000},"items": null}'
+echo '{"min_id": 1000,"items": null}'

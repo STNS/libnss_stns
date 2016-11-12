@@ -13,12 +13,12 @@ type Dummy struct {
 
 func (s Dummy) Set(a stns.Attributes) int {
 	for _, u := range a {
-		if u.Id != 2000 {
-			s.t.Errorf("get error id %d", u.Id)
+		if u.ID != 2000 {
+			s.t.Errorf("get error id %d", u.ID)
 		}
 
-		if u.GroupId != 3000 {
-			s.t.Errorf("get error id %d", u.Id)
+		if u.GroupID != 3000 {
+			s.t.Errorf("get error id %d", u.ID)
 		}
 		return NSS_STATUS_SUCCESS
 	}
@@ -42,13 +42,13 @@ func TestGetSuccess(t *testing.T) {
 	}
 
 	for _, u := range a {
-		if u.Id != 2000 {
-			t.Errorf("get error id %d", u.Id)
+		if u.ID != 2000 {
+			t.Errorf("get error id %d", u.ID)
 		}
 	}
 
-	if cache.ReadMinId("user") != 2000 {
-		t.Errorf("get error min_id %d", cache.ReadMinId("user"))
+	if cache.ReadMinID("user") != 2000 {
+		t.Errorf("get error min_id %d", cache.ReadMinID("user"))
 	}
 
 	ca, err := cache.Read("user/id/2000")
@@ -57,8 +57,8 @@ func TestGetSuccess(t *testing.T) {
 	}
 
 	for _, u := range ca {
-		if u.Id != 2000 {
-			t.Errorf("get error id %d", u.Id)
+		if u.ID != 2000 {
+			t.Errorf("get error id %d", u.ID)
 		}
 	}
 }
@@ -125,9 +125,9 @@ func TestSetByList(t *testing.T) {
 
 	list := stns.Attributes{
 		"example": &stns.Attribute{
-			Id: 2000,
+			ID: 2000,
 			User: &stns.User{
-				GroupId: 3000,
+				GroupID: 3000,
 			},
 		},
 	}
@@ -161,16 +161,16 @@ func TestPresetAndPurgeList(t *testing.T) {
 	{
 		n.PresetList()
 		for _, u := range list {
-			if u.Id != 2000 {
-				t.Errorf("get error id %d", u.Id)
+			if u.ID != 2000 {
+				t.Errorf("get error id %d", u.ID)
 			}
 		}
 
 		// cache test
 		attr := *cache.LastResultList("user")
 		for _, u := range attr {
-			if u.Id != 2000 {
-				t.Errorf("get error id %d", u.Id)
+			if u.ID != 2000 {
+				t.Errorf("get error id %d", u.ID)
 			}
 		}
 	}
@@ -187,8 +187,8 @@ func TestPresetAndPurgeList(t *testing.T) {
 		// rewrite list
 		n.PresetList()
 		for _, u := range list {
-			if u.Id != 2000 {
-				t.Errorf("get error id %d", u.Id)
+			if u.ID != 2000 {
+				t.Errorf("get error id %d", u.ID)
 			}
 		}
 	}
