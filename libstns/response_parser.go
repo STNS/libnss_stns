@@ -52,11 +52,12 @@ func convertV2toV3Format(body []byte) ([]byte, error) {
 func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 	var err error
 	attr := stns.Attributes{}
-	sp := strings.Split(path, "/")
+	sp := strings.Split(strings.TrimLeft(path, "/"), "/")
 
 	if len(sp) < 2 {
 		return nil, errors.New("parse error: path specification is insufficient")
 	}
+
 	switch sp[0] {
 	case "user":
 		if sp[1] == "list" {

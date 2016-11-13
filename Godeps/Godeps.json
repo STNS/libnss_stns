@@ -13,8 +13,8 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.2-2-10-gb0dd128",
-			"Rev": "b0dd12804dbd025a802a3fa2c78501f823cae87a"
+			"Comment": "v0.2-2-12-gf7dbeb0",
+			"Rev": "f7dbeb02f437969ee0baf086b0c8b1a1d70059c5"
 		},
 		{
 			"ImportPath": "github.com/StackExchange/wmi",

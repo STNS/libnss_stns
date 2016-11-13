@@ -2,6 +2,7 @@ package libstns
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -18,8 +19,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/STNS/libnss_stns/cache"
 )
@@ -63,6 +62,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 func (r *Request) request() ([]byte, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	rch := make(chan []byte, len(r.Config.ApiEndPoint))
 	ech := make(chan error, len(r.Config.ApiEndPoint))
 	for _, e := range r.Config.ApiEndPoint {

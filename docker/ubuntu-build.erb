@@ -1,7 +1,8 @@
 FROM pyama/stns:ubuntu-<%= arch %>
 ADD . /go/src/github.com/STNS/libnss_stns
 WORKDIR /go/src/github.com/STNS/libnss_stns
-RUN godep restore
+RUN cat /etc/hosts
+RUN echo "172.217.25.209 golang.org" >> /etc/hosts && godep restore
 CMD go build -o binary/libnss-stns.so -buildmode=c-shared nss/*go && \
 go build -o binary/libpam-stns.so -buildmode=c-shared pam/*go && \
 go build -o binary/stns-query-wrapper cmd/query/stns-query-wrapper.go && \
