@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/STNS/STNS/stns"
+	"github.com/STNS/libnss_stns/settings"
 )
 
 func convertV1toV3Format(body []byte) (*ResponseFormat, error) {
@@ -56,7 +57,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 			for _, u := range users {
-				if u.Name != "" && u.ID != 0 {
+				if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
 					attr[u.Name] = &stns.Attribute{
 						ID: u.ID + config.UIDShift,
 						User: &stns.User{
@@ -77,7 +78,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 
-			if user.Name != "" && user.ID != 0 {
+			if user.Name != "" && user.ID+config.UIDShift > settings.MIN_LIMIT_ID {
 				attr[user.Name] = &stns.Attribute{
 					ID: user.ID + config.UIDShift,
 					User: &stns.User{
@@ -99,7 +100,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 			for _, g := range groups {
-				if g.ID != 0 {
+				if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
 					attr[g.Name] = &stns.Attribute{
 						ID: g.ID + config.GIDShift,
 						Group: &stns.Group{
@@ -115,7 +116,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 
-			if group.ID != 0 {
+			if group.ID+config.GIDShift > settings.MIN_LIMIT_ID {
 				attr[group.Name] = &stns.Attribute{
 					ID: group.ID + config.GIDShift,
 					Group: &stns.Group{
