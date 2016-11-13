@@ -112,7 +112,7 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			}
 
 			for _, g := range groups {
-				if g.Users != nil && g.ID != 0 {
+				if g.ID != 0 {
 					attr[g.Name] = &stns.Attribute{
 						ID: g.ID,
 						Group: &stns.Group{
@@ -128,7 +128,7 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 				return nil, err
 			}
 
-			if group.Users != nil && group.ID != 0 {
+			if group.ID != 0 {
 				attr[group.Name] = &stns.Attribute{
 					ID: group.ID,
 					Group: &stns.Group{
