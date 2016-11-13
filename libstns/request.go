@@ -63,7 +63,7 @@ func (r *Request) request() ([]byte, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	rch := make(chan []byte, len(r.Config.ApiEndPoint))
+	rch := make(chan *ResponseFormat, len(r.Config.ApiEndPoint))
 	ech := make(chan error, len(r.Config.ApiEndPoint))
 	for _, e := range r.Config.ApiEndPoint {
 		go func(endPoint string) {
@@ -125,7 +125,7 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						default:
-							buffer, err := convertV3Format(body, r.ApiPath, res.Header.Get("STNS-MIN-ID"))
+							buffer, err := convertV3Format(body, r.ApiPath, res.Header.Get("STNS-MIN-ID"), r.Config)
 							if err != nil {
 								ech <- err
 								return
@@ -149,7 +149,11 @@ func (r *Request) request() ([]byte, error) {
 	for {
 		select {
 		case r := <-rch:
-			return r, nil
+			j, err := json.Marshal(r)
+			if err != nil {
+				return nil, err
+			}
+			return j, nil
 		case e := <-ech:
 			cnt++
 			if cnt == len(r.Config.ApiEndPoint) {

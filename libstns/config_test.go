@@ -16,4 +16,6 @@ func TestLoadConfig(t *testing.T) {
 	test.Assert(t, config.TlsCert == "tls.crt", "unmatch tls crt")
 	test.Assert(t, config.TlsKey == "tls.key", "unmatch tls key")
 	test.Assert(t, config.RequestRetry == 3, "ng request retry")
+	test.Assert(t, config.UIDShift == -1000, "unmatch uid shift")
+	test.Assert(t, config.GIDShift == -2000, "unmatch gid shift")
 }

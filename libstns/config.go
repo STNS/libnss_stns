@@ -19,6 +19,8 @@ type Config struct {
 	TlsCa           string            `toml:"tls_ca"`
 	TlsCert         string            `toml:"tls_cert"`
 	TlsKey          string            `toml:"tls_key"`
+	UIDShift        int               `toml:"uid_shift"`
+	GIDShift        int               `toml:"gid_shift"`
 }
 
 func LoadConfig(filePath string) (*Config, error) {
@@ -37,4 +39,6 @@ func defaultConfig(config *Config) {
 	config.RequestRetry = 1
 	config.WrapperCommand = "/usr/local/bin/stns-query-wrapper"
 	config.ApiEndPoint = []string{"http://localhost:1104"}
+	config.UIDShift = 0
+	config.GIDShift = 0
 }
