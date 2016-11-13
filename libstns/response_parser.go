@@ -110,7 +110,6 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			for _, g := range groups {
 				if g.ID != 0 {
 					attr[g.Name] = &stns.Attribute{
