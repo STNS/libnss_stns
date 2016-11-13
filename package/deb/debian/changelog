@@ -1,4 +1,4 @@
-stns (0.3.0) STABLE; urgency=low
+libnss-stns (0.3.0) STABLE; urgency=low
 
   * Add v3 api
 
