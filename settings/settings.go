@@ -6,6 +6,7 @@ const (
 	LOCK_TIME    = 10
 	LOCK_FILE    = "/tmp/.libstns_lock"
 	WORK_DIR     = "/var/lib/libnss_stns"
+	MIN_LIMIT_ID = 100
 )
 
 const (
