@@ -58,37 +58,47 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 			}
 			for _, u := range users {
 				if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
+					tmpUser := &stns.User{
+						Password:  u.Password,
+						Directory: u.Directory,
+						Shell:     u.Shell,
+						Gecos:     u.Gecos,
+						Keys:      u.Keys,
+					}
+
+					if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
+						tmpUser.GroupID = u.GroupID + config.GIDShift
+					}
+
 					attr[u.Name] = &stns.Attribute{
-						ID: u.ID + config.UIDShift,
-						User: &stns.User{
-							Password:  u.Password,
-							GroupID:   u.GroupID + config.GIDShift,
-							Directory: u.Directory,
-							Shell:     u.Shell,
-							Gecos:     u.Gecos,
-							Keys:      u.Keys,
-						},
+						ID:   u.ID + config.UIDShift,
+						User: tmpUser,
 					}
 				}
 			}
 		} else {
-			user := v3User{}
-			err = json.Unmarshal(b, &user)
+			u := v3User{}
+			err = json.Unmarshal(b, &u)
 			if err != nil {
 				return nil, err
 			}
 
-			if user.Name != "" && user.ID+config.UIDShift > settings.MIN_LIMIT_ID {
-				attr[user.Name] = &stns.Attribute{
-					ID: user.ID + config.UIDShift,
-					User: &stns.User{
-						Password:  user.Password,
-						GroupID:   user.GroupID + config.GIDShift,
-						Directory: user.Directory,
-						Shell:     user.Shell,
-						Gecos:     user.Gecos,
-						Keys:      user.Keys,
-					},
+			if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
+				tmpUser := &stns.User{
+					Password:  u.Password,
+					Directory: u.Directory,
+					Shell:     u.Shell,
+					Gecos:     u.Gecos,
+					Keys:      u.Keys,
+				}
+
+				if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
+					tmpUser.GroupID = u.GroupID + config.GIDShift
+				}
+
+				attr[u.Name] = &stns.Attribute{
+					ID:   u.ID + config.UIDShift,
+					User: tmpUser,
 				}
 			}
 		}
@@ -110,33 +120,33 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				}
 			}
 		} else {
-			group := v3Group{}
-			err = json.Unmarshal(b, &group)
+			g := v3Group{}
+			err = json.Unmarshal(b, &g)
 			if err != nil {
 				return nil, err
 			}
 
-			if group.ID+config.GIDShift > settings.MIN_LIMIT_ID {
-				attr[group.Name] = &stns.Attribute{
-					ID: group.ID + config.GIDShift,
+			if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
+				attr[g.Name] = &stns.Attribute{
+					ID: g.ID + config.GIDShift,
 					Group: &stns.Group{
-						Users: group.Users,
+						Users: g.Users,
 					},
 				}
 			}
 		}
 	case "sudo":
-		user := v3Sudo{}
-		err = json.Unmarshal(b, &user)
+		u := v3Sudo{}
+		err = json.Unmarshal(b, &u)
 		if err != nil {
 			return nil, err
 		}
 
-		if user.Name != "" && user.Password != "" {
-			attr[user.Name] = &stns.Attribute{
+		if u.Name != "" && u.Password != "" {
+			attr[u.Name] = &stns.Attribute{
 				ID: 0,
 				User: &stns.User{
-					Password: user.Password,
+					Password: u.Password,
 				},
 			}
 		}
