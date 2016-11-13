@@ -68,16 +68,18 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 				return nil, err
 			}
 			for _, u := range users {
-				attr[u.Name] = &stns.Attribute{
-					ID: u.ID,
-					User: &stns.User{
-						Password:  u.Password,
-						GroupID:   u.GroupID,
-						Directory: u.Directory,
-						Shell:     u.Shell,
-						Gecos:     u.Gecos,
-						Keys:      u.Keys,
-					},
+				if u.Name != "" && u.ID != 0 {
+					attr[u.Name] = &stns.Attribute{
+						ID: u.ID,
+						User: &stns.User{
+							Password:  u.Password,
+							GroupID:   u.GroupID,
+							Directory: u.Directory,
+							Shell:     u.Shell,
+							Gecos:     u.Gecos,
+							Keys:      u.Keys,
+						},
+					}
 				}
 			}
 		} else {
@@ -86,16 +88,19 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			attr[user.Name] = &stns.Attribute{
-				ID: user.ID,
-				User: &stns.User{
-					Password:  user.Password,
-					GroupID:   user.GroupID,
-					Directory: user.Directory,
-					Shell:     user.Shell,
-					Gecos:     user.Gecos,
-					Keys:      user.Keys,
-				},
+
+			if user.Name != "" && user.ID != 0 {
+				attr[user.Name] = &stns.Attribute{
+					ID: user.ID,
+					User: &stns.User{
+						Password:  user.Password,
+						GroupID:   user.GroupID,
+						Directory: user.Directory,
+						Shell:     user.Shell,
+						Gecos:     user.Gecos,
+						Keys:      user.Keys,
+					},
+				}
 			}
 		}
 	case "group":
@@ -105,12 +110,15 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			for _, g := range groups {
-				attr[g.Name] = &stns.Attribute{
-					ID: g.ID,
-					Group: &stns.Group{
-						Users: g.Users,
-					},
+				if g.Users != nil && g.ID != 0 {
+					attr[g.Name] = &stns.Attribute{
+						ID: g.ID,
+						Group: &stns.Group{
+							Users: g.Users,
+						},
+					}
 				}
 			}
 		} else {
@@ -119,11 +127,14 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			attr[group.Name] = &stns.Attribute{
-				ID: group.ID,
-				Group: &stns.Group{
-					Users: group.Users,
-				},
+
+			if group.Users != nil && group.ID != 0 {
+				attr[group.Name] = &stns.Attribute{
+					ID: group.ID,
+					Group: &stns.Group{
+						Users: group.Users,
+					},
+				}
 			}
 		}
 	case "sudo":
@@ -132,11 +143,14 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		attr[user.Name] = &stns.Attribute{
-			ID: 0,
-			User: &stns.User{
-				Password: user.Password,
-			},
+
+		if user.Name != "" && user.Password != "" {
+			attr[user.Name] = &stns.Attribute{
+				ID: 0,
+				User: &stns.User{
+					Password: user.Password,
+				},
+			}
 		}
 	}
 
