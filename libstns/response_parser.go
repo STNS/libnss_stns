@@ -9,7 +9,7 @@ import (
 	"github.com/STNS/STNS/stns"
 )
 
-func convertV1toV3Format(body []byte) ([]byte, error) {
+func convertV1toV3Format(body []byte) (*ResponseFormat, error) {
 	var attr stns.Attributes
 	err := json.Unmarshal(body, &attr)
 
@@ -17,39 +17,27 @@ func convertV1toV3Format(body []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	mig := ResponseFormat{
+	return &ResponseFormat{
 		0,
 		attr,
-	}
-
-	j, err := json.Marshal(mig)
-	if err != nil {
-		return nil, err
-	}
-
-	return j, nil
+	}, nil
 }
 
-func convertV2toV3Format(body []byte) ([]byte, error) {
+func convertV2toV3Format(body []byte) (*ResponseFormat, error) {
 	var res v2ResponseFormat
 	err := json.Unmarshal(body, &res)
 	if err != nil {
 		return nil, err
 	}
 
-	mig := ResponseFormat{
+	return &ResponseFormat{
 		res.MetaData.MinID,
 		res.Items,
-	}
+	}, nil
 
-	j, err := json.Marshal(mig)
-	if err != nil {
-		return nil, err
-	}
-	return j, nil
 }
 
-func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
+func convertV3Format(b []byte, path string, minID string, config *Config) (*ResponseFormat, error) {
 	var err error
 	attr := stns.Attributes{}
 	sp := strings.Split(strings.TrimLeft(path, "/"), "/")
@@ -70,10 +58,10 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			for _, u := range users {
 				if u.Name != "" && u.ID != 0 {
 					attr[u.Name] = &stns.Attribute{
-						ID: u.ID,
+						ID: u.ID + config.UIDShift,
 						User: &stns.User{
 							Password:  u.Password,
-							GroupID:   u.GroupID,
+							GroupID:   u.GroupID + config.GIDShift,
 							Directory: u.Directory,
 							Shell:     u.Shell,
 							Gecos:     u.Gecos,
@@ -91,10 +79,10 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 
 			if user.Name != "" && user.ID != 0 {
 				attr[user.Name] = &stns.Attribute{
-					ID: user.ID,
+					ID: user.ID + config.UIDShift,
 					User: &stns.User{
 						Password:  user.Password,
-						GroupID:   user.GroupID,
+						GroupID:   user.GroupID + config.GIDShift,
 						Directory: user.Directory,
 						Shell:     user.Shell,
 						Gecos:     user.Gecos,
@@ -113,7 +101,7 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 			for _, g := range groups {
 				if g.ID != 0 {
 					attr[g.Name] = &stns.Attribute{
-						ID: g.ID,
+						ID: g.ID + config.GIDShift,
 						Group: &stns.Group{
 							Users: g.Users,
 						},
@@ -129,7 +117,7 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 
 			if group.ID != 0 {
 				attr[group.Name] = &stns.Attribute{
-					ID: group.ID,
+					ID: group.ID + config.GIDShift,
 					Group: &stns.Group{
 						Users: group.Users,
 					},
@@ -154,16 +142,10 @@ func convertV3Format(b []byte, path string, minID string) ([]byte, error) {
 	}
 
 	m, _ := strconv.Atoi(minID)
-	mig := ResponseFormat{
+	return &ResponseFormat{
 		m,
 		attr,
-	}
-	j, err := json.Marshal(mig)
-	if err != nil {
-		return nil, err
-	}
-
-	return j, nil
+	}, nil
 }
 
 type ResponseFormat struct {
