@@ -133,8 +133,6 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						}
-						rch <- body
-						return
 					case http.StatusUnauthorized:
 						ech <- fmt.Errorf("authenticate error: %s", u)
 						return
