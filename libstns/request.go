@@ -102,7 +102,7 @@ func (r *Request) request() ([]byte, error) {
 					defer res.Body.Close()
 					body, err := ioutil.ReadAll(res.Body)
 					switch res.StatusCode {
-					case http.StatusOK, http.StatusNotFound:
+					case http.StatusOK:
 						v2 := regexp.MustCompile(`/v2[/]?$`)
 						v3 := regexp.MustCompile(`/v3[/]?$`)
 						switch {
@@ -133,6 +133,9 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						}
+					case http.StatusNotFound:
+						ech <- fmt.Errorf("resource not found: %s", u)
+						return
 					case http.StatusUnauthorized:
 						ech <- fmt.Errorf("authenticate error: %s", u)
 						return
@@ -257,9 +260,11 @@ func (r *Request) GetByWrapperCmd() (*ResponseFormat, error) {
 	}
 
 	var res *ResponseFormat
-	err = json.Unmarshal(stdout.Bytes(), &res)
-	if err != nil {
-		return nil, err
+	if len(stdout.Bytes()) > 0 {
+		err = json.Unmarshal(stdout.Bytes(), &res)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return res, nil
 }

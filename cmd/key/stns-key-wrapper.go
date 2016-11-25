@@ -43,19 +43,19 @@ func Fetch(config *libstns.Config, name string) string {
 		if err != nil {
 			log.Println(err)
 		}
-	}
 
-	if res.Items != nil {
-		for _, u := range res.Items {
-			if len(u.Keys) > 0 {
-				userKeys += strings.Join(u.Keys, "\n") + "\n"
+		if res.Items != nil {
+			for _, u := range res.Items {
+				if len(u.Keys) > 0 {
+					userKeys += strings.Join(u.Keys, "\n") + "\n"
+				}
 			}
+			defer func() {
+				if err := recover(); err != nil {
+					log.Print(err)
+				}
+			}()
 		}
-		defer func() {
-			if err := recover(); err != nil {
-				log.Print(err)
-			}
-		}()
 	}
 
 	rex := regexp.MustCompile(`stns-key-wrapper$`)
