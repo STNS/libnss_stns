@@ -155,8 +155,8 @@ func TestRequestV2NotFound(t *testing.T) {
 	var res ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
-	if err != nil {
-		t.Errorf("fetch error %s", err)
+	if err == nil {
+		t.Errorf("fetch error expect not found")
 	}
 }
 
@@ -172,8 +172,8 @@ func TestRequestV3NotFound(t *testing.T) {
 	var res ResponseFormat
 	raw, err := r.GetRawData()
 	json.Unmarshal(raw, &res)
-	if err != nil {
-		t.Errorf("fetch error %s", err)
+	if err == nil {
+		t.Errorf("fetch error expect not found")
 	}
 }
 
