@@ -29,7 +29,7 @@ type Request struct {
 }
 
 func NewRequest(config *Config, paths ...string) (*Request, error) {
-	if len(paths) == 3 {
+	if len(paths) == 3 && strings.Contains(paths[2], ".") {
 		paths[2] = urlencode(paths[2])
 	}
 
