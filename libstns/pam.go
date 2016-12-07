@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/STNS/STNS/stns"
-	"github.com/kless/osutil/user/crypt"
-	"github.com/kless/osutil/user/crypt/apr1_crypt"
-	"github.com/kless/osutil/user/crypt/md5_crypt"
-	"github.com/kless/osutil/user/crypt/sha256_crypt"
-	"github.com/kless/osutil/user/crypt/sha512_crypt"
+	"github.com/tredoe/osutil/user/crypt"
+	"github.com/tredoe/osutil/user/crypt/apr1_crypt"
+	"github.com/tredoe/osutil/user/crypt/md5_crypt"
+	"github.com/tredoe/osutil/user/crypt/sha256_crypt"
+	"github.com/tredoe/osutil/user/crypt/sha512_crypt"
 )
 
 const (

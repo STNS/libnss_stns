@@ -103,6 +103,30 @@
 			"Rev": "bb4de0191aa41b5507caa14b0650cdbddcd9280b"
 		},
 		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt/apr1_crypt",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt/common",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt/md5_crypt",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt/sha256_crypt",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
+			"ImportPath": "github.com/tredoe/osutil/user/crypt/sha512_crypt",
+			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
+		},
+		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "daba796358cd2742b75aae05761f1b898c9f6a5c"
 		}
