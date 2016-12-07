@@ -1,3 +1,8 @@
+libnss-stns (0.3.2) STABLE; urgency=low
+
+  * the client backward compatible
+
+ -- pyama86 <>  Wed, 7 Dec 2016 17:30:00 +0000
 libnss-stns (0.3.1) STABLE; urgency=low
 
   * Allow url to include period
