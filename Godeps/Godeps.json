@@ -41,30 +41,6 @@
 			"Rev": "7dfdcf409020452e29b4babcbb22f984d2aa308a"
 		},
 		{
-			"ImportPath": "github.com/kless/osutil/user/crypt",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
-			"ImportPath": "github.com/kless/osutil/user/crypt/apr1_crypt",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
-			"ImportPath": "github.com/kless/osutil/user/crypt/common",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
-			"ImportPath": "github.com/kless/osutil/user/crypt/md5_crypt",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
-			"ImportPath": "github.com/kless/osutil/user/crypt/sha256_crypt",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
-			"ImportPath": "github.com/kless/osutil/user/crypt/sha512_crypt",
-			"Rev": "3ac994847c4376a4b905fc0a19f450c5a4bec647"
-		},
-		{
 			"ImportPath": "github.com/pyama86/go-cache",
 			"Rev": "5c290c8c42f48aa529a18a6225382e1b1ee601a1"
 		},
@@ -125,10 +101,6 @@
 		{
 			"ImportPath": "github.com/tredoe/osutil/user/crypt/sha512_crypt",
 			"Rev": "7d3ee1afa71c90fd1514c8f557ae6c5f414208eb"
-		},
-		{
-			"ImportPath": "golang.org/x/net/context",
-			"Rev": "daba796358cd2742b75aae05761f1b898c9f6a5c"
 		}
 	]
 }
