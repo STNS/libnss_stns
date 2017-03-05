@@ -26,6 +26,7 @@ SimpleTomlNameService Nss Module
 rm -rf %{buildroot}
 install -d -m 755 %{buildroot}/%{_localbindir}
 install    -m 755 %{_builddir}/stns-query-wrapper %{buildroot}/%{_localbindir}
+install    -m 755 %{_builddir}/stns-setup  %{buildroot}/%{_localbindir}
 
 install -d -m 755 %{buildroot}/%{_stnslibdir}
 install    -m 755 %{_builddir}/stns-key-wrapper %{buildroot}/%{_stnslibdir}
@@ -55,6 +56,7 @@ rm -rf %{buildroot}
 %{_stnslibdir}/stns-key-wrapper
 %{_localbindir}/stns-key-wrapper
 %{_localbindir}/stns-query-wrapper
+%{_localbindir}/stns-setup
 /usr/%{_lib}/libnss_stns.so
 /usr/%{_lib}/libnss_stns.so.2
 %config(noreplace) %{_sysconfdir}/stns/libnss_stns.conf

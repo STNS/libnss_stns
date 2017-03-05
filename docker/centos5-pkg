@@ -12,6 +12,7 @@ echo '%_gpg_name stns-server' >> ~/.rpmmacros && \
 cp binary/libnss-stns.so  package/RPM/BUILD/libnss_stns.so && \
 cp binary/libpam-stns.so  package/RPM/BUILD/libpam_stns.so && \
 cp binary/stns-key-wrapper package/RPM/BUILD/stns-key-wrapper && \
+cp binary/stns-setup package/RPM/BUILD/stns-setup && \
 cp binary/stns-query-wrapper package/RPM/BUILD/stns-query-wrapper && \
 mkdir -p package/RPM/RPMS/x86_64 && \
 mkdir -p package/RPM/SRPMS

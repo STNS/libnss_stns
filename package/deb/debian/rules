@@ -19,6 +19,7 @@ override_dh_auto_install:
 	dh_auto_install
 	install -d -m 755 debian/${package}/usr/local/bin/
 	install    -m 755 debian/stns-query-wrapper debian/${package}/usr/local/bin/stns-query-wrapper
+	install    -m 755 debian/stns-setup  debian/${package}/usr/local/bin/stns-setup
 	install -d -m 700 debian/${package}/usr/lib/stns/
 	install    -m 755 debian/stns-key-wrapper debian/${package}/usr/lib/stns/stns-key-wrapper
 	install -d -m 755 debian/${package}/usr/lib/$(DEB_HOST_MULTIARCH)/

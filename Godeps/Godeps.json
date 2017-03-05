@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/STNS/libnss_stns",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v75",
+	"GodepVersion": "v77",
 	"Packages": [
 		"./..."
 	],
@@ -13,8 +13,8 @@
 		},
 		{
 			"ImportPath": "github.com/STNS/STNS/stns",
-			"Comment": "v0.3-1",
-			"Rev": "e13b56f83c1b0020e129b9ec82138ec556551d2d"
+			"Comment": "v0.3-2-2-g738941a",
+			"Rev": "738941afe1ecc7ec262e9608e88f58bab8cbc2f8"
 		},
 		{
 			"ImportPath": "github.com/StackExchange/wmi",
