@@ -11,10 +11,12 @@ License: MIT
 Source0:   libnss_stns.conf
 Packager:  libnss-stns
 BuildRoot: %{_tmppath}/libnss-stns-%{version}-%{release}-root
+Requires: glibc
 
 %package -n libpam-stns
 Summary: Simple Toml NameService Pam Module
 Group: SipmleTomlNameService
+Requires: pam
 
 %description -n libpam-stns
 SimpleTomlNameService Pam Module

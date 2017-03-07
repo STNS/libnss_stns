@@ -9,11 +9,11 @@ Homepage: https://github.com/pyama86/libnss_stns
 Package: libnss-stns
 Architecture: any
 Description: simple toml name service nss module
-Depends: ${misc:Depends}
+Depends: libc6
 Pre-Depends: ${misc:Pre-Depends}
 
 Package: libpam-stns
 Architecture: any
 Description: simple toml name service pam module
-Depends: ${misc:Depends}
+Depends: libc6, libpam0g
 Pre-Depends: ${misc:Pre-Depends}
