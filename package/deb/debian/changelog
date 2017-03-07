@@ -1,4 +1,4 @@
-stns (0.3.3) STABLE; urgency=low
+libnss-stns (0.3.3) STABLE; urgency=low
 
   * add setup commands
   * golang 1.8.0
