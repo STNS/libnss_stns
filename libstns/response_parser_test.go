@@ -51,6 +51,10 @@ func TestUserConvertV3Format(t *testing.T) {
 		if u.GroupID != 1000 {
 			t.Error("unmatch group")
 		}
+
+		if u.SetupCommands[0] != "command1" {
+			t.Error("unmatch command")
+		}
 	}
 }
 
@@ -72,6 +76,10 @@ func TestUsersConvertV3Format(t *testing.T) {
 
 		if u.GroupID != 3000 {
 			t.Error("unmatch group")
+		}
+
+		if u.SetupCommands[0] != "command1" {
+			t.Error("unmatch command")
 		}
 	}
 

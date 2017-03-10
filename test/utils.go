@@ -91,7 +91,10 @@ func GetV3UserExample() string {
 		"keys": [
 			"test"
 		],
-		"password": "password"
+		"password": "password",
+		"setup_commands": [
+			"command1"
+		]
 	}`
 }
 
@@ -105,7 +108,10 @@ func GetV3UsersExample() string {
 		"keys": [
 			"test"
 		],
-		"password": "password"
+		"password": "password",
+		"setup_commands": [
+			"command1"
+		]
 	}]`
 }
 

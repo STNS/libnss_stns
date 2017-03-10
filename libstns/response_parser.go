@@ -52,18 +52,18 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 		if sp[1] == "list" {
 			users := v3Users{}
 			err = json.Unmarshal(b, &users)
-
 			if err != nil {
 				return nil, err
 			}
 			for _, u := range users {
 				if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
 					tmpUser := &stns.User{
-						Password:  u.Password,
-						Directory: u.Directory,
-						Shell:     u.Shell,
-						Gecos:     u.Gecos,
-						Keys:      u.Keys,
+						Password:      u.Password,
+						Directory:     u.Directory,
+						Shell:         u.Shell,
+						Gecos:         u.Gecos,
+						Keys:          u.Keys,
+						SetupCommands: u.SetupCommands,
 					}
 
 					if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
@@ -85,11 +85,12 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 
 			if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
 				tmpUser := &stns.User{
-					Password:  u.Password,
-					Directory: u.Directory,
-					Shell:     u.Shell,
-					Gecos:     u.Gecos,
-					Keys:      u.Keys,
+					Password:      u.Password,
+					Directory:     u.Directory,
+					Shell:         u.Shell,
+					Gecos:         u.Gecos,
+					Keys:          u.Keys,
+					SetupCommands: u.SetupCommands,
 				}
 
 				if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
@@ -176,14 +177,15 @@ type v2ResponseFormat struct {
 }
 
 type v3User struct {
-	ID        int      `json:"id"`
-	Name      string   `json:"name"`
-	Password  string   `json:"password"`
-	GroupID   int      `json:"group_id"`
-	Directory string   `json:"directory"`
-	Shell     string   `json:"shell"`
-	Gecos     string   `json:"gecos"`
-	Keys      []string `json:"keys"`
+	ID            int      `json:"id"`
+	Name          string   `json:"name"`
+	Password      string   `json:"password"`
+	GroupID       int      `json:"group_id"`
+	Directory     string   `json:"directory"`
+	Shell         string   `json:"shell"`
+	Gecos         string   `json:"gecos"`
+	Keys          []string `json:"keys"`
+	SetupCommands []string `json:"setup_commands"`
 }
 
 type v3Group struct {
