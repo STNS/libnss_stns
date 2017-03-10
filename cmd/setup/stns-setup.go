@@ -13,7 +13,9 @@ import (
 func main() {
 	config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
 	if err == nil {
-		fmt.Println(Run(config, os.Getenv("USER")))
+		if err := Run(config, os.Getenv("USER")); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
