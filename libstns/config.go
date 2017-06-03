@@ -36,7 +36,7 @@ func LoadConfig(filePath string) (*Config, error) {
 
 func defaultConfig(config *Config) {
 	config.RequestTimeOut = settings.HTTP_TIMEOUT
-	config.RequestRetry = 1
+	config.RequestRetry = 3
 	config.WrapperCommand = "/usr/local/bin/stns-query-wrapper"
 	config.ApiEndPoint = []string{"http://localhost:1104"}
 	config.UIDShift = 0
