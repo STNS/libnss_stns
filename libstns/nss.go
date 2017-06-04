@@ -63,9 +63,9 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if column == "id" {
-		cache.WriteMinID(n.rtype, res.MinID)
+		cache.WritePrevID(n.rtype, res.First().PrevID)
+		cache.WriteNextID(n.rtype, res.First().NextID)
 	}
 
 	if res.Items == nil {
@@ -77,7 +77,12 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 
 func (n *Nss) Set(s NssEntry, column, value string) int {
 	id, _ := strconv.Atoi(value)
-	if column != "id" || (column == "id" && cache.ReadMinID(n.rtype) <= id) {
+	prevID := cache.ReadPrevID(n.rtype)
+	nextID := cache.ReadNextID(n.rtype)
+
+	if column != "id" ||
+		(prevID == 0 || (prevID >= id)) ||
+		(nextID == 0 || (nextID <= id)) {
 		resource, err := n.Get(column, value)
 		if err != nil {
 			log.Print(err)

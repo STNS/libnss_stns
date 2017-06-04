@@ -10,7 +10,7 @@ import (
 // 通常のレスポンステストはRequestにて包括的にテストしている
 func TestUserConvertV3Format(t *testing.T) {
 	c := &Config{}
-	r, err := convertV3Format([]byte(test.GetV3UserExample()), "/user/name/example", "1000", c)
+	r, err := convertV3Format([]byte(test.GetV3UserExample()), "/user/name/example", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -34,7 +34,7 @@ func TestUserConvertV3Format(t *testing.T) {
 		GIDShift: -2000,
 	}
 
-	r, err = convertV3Format([]byte(test.GetV3UserExample()), "/user/name/example", "1000", c)
+	r, err = convertV3Format([]byte(test.GetV3UserExample()), "/user/name/example", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -60,7 +60,7 @@ func TestUserConvertV3Format(t *testing.T) {
 
 func TestUsersConvertV3Format(t *testing.T) {
 	c := &Config{}
-	r, err := convertV3Format([]byte(test.GetV3UsersExample()), "/user/list", "1000", c)
+	r, err := convertV3Format([]byte(test.GetV3UsersExample()), "/user/list", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -88,7 +88,7 @@ func TestUsersConvertV3Format(t *testing.T) {
 		GIDShift: -2000,
 	}
 
-	r, err = convertV3Format([]byte(test.GetV3UsersExample()), "/user/list", "1000", c)
+	r, err = convertV3Format([]byte(test.GetV3UsersExample()), "/user/list", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -110,7 +110,7 @@ func TestUsersConvertV3Format(t *testing.T) {
 
 func TestGroupConvertV3Format(t *testing.T) {
 	c := &Config{}
-	r, err := convertV3Format([]byte(test.GetV3GroupExample()), "/group/name/example", "1000", c)
+	r, err := convertV3Format([]byte(test.GetV3GroupExample()), "/group/name/example", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -130,7 +130,7 @@ func TestGroupConvertV3Format(t *testing.T) {
 		GIDShift: -1000,
 	}
 
-	r, err = convertV3Format([]byte(test.GetV3GroupExample()), "/group/name/example", "1000", c)
+	r, err = convertV3Format([]byte(test.GetV3GroupExample()), "/group/name/example", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -148,7 +148,7 @@ func TestGroupConvertV3Format(t *testing.T) {
 
 func TestGroupsConvertV3Format(t *testing.T) {
 	c := &Config{}
-	r, err := convertV3Format([]byte(test.GetV3GroupsExample()), "/group/list", "1000", c)
+	r, err := convertV3Format([]byte(test.GetV3GroupsExample()), "/group/list", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}
@@ -168,7 +168,7 @@ func TestGroupsConvertV3Format(t *testing.T) {
 		GIDShift: -1000,
 	}
 
-	r, err = convertV3Format([]byte(test.GetV3GroupsExample()), "/group/list", "1000", c)
+	r, err = convertV3Format([]byte(test.GetV3GroupsExample()), "/group/list", c)
 	if err != nil {
 		t.Errorf("not assume an error but got %s", err)
 	}

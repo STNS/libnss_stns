@@ -3,7 +3,6 @@ package libstns
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 	"strings"
 
 	"github.com/STNS/STNS/stns"
@@ -19,7 +18,6 @@ func convertV1toV3Format(body []byte) (*ResponseFormat, error) {
 	}
 
 	return &ResponseFormat{
-		0,
 		attr,
 	}, nil
 }
@@ -32,13 +30,71 @@ func convertV2toV3Format(body []byte) (*ResponseFormat, error) {
 	}
 
 	return &ResponseFormat{
-		res.MetaData.MinID,
 		res.Items,
 	}, nil
 
 }
 
-func convertV3Format(b []byte, path string, minID string, config *Config) (*ResponseFormat, error) {
+func uidShift(attr stns.Attributes, u *v3User, config *Config) {
+	if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
+		prevID := 0
+		nextID := 0
+
+		tmpUser := &stns.User{
+			Password:      u.Password,
+			Directory:     u.Directory,
+			Shell:         u.Shell,
+			Gecos:         u.Gecos,
+			Keys:          u.Keys,
+			SetupCommands: u.SetupCommands,
+		}
+
+		if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
+			tmpUser.GroupID = u.GroupID + config.GIDShift
+		}
+
+		if u.PrevID+config.UIDShift > settings.MIN_LIMIT_ID {
+			prevID = u.PrevID + config.UIDShift
+		}
+
+		if u.NextID+config.UIDShift > settings.MIN_LIMIT_ID {
+			nextID = u.NextID + config.UIDShift
+		}
+		attr[u.Name] = &stns.Attribute{
+			ID:     u.ID + config.UIDShift,
+			PrevID: prevID,
+			NextID: nextID,
+			User:   tmpUser,
+		}
+	}
+}
+
+func gidShift(attr stns.Attributes, g *v3Group, config *Config) {
+	if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
+		prevID := 0
+		nextID := 0
+		tmpGroup := &stns.Group{
+			Users: g.Users,
+		}
+
+		if g.PrevID+config.GIDShift > settings.MIN_LIMIT_ID {
+			prevID = g.PrevID + config.GIDShift
+		}
+
+		if g.NextID+config.GIDShift > settings.MIN_LIMIT_ID {
+			nextID = g.NextID + config.GIDShift
+		}
+
+		attr[g.Name] = &stns.Attribute{
+			ID:     g.ID + config.GIDShift,
+			PrevID: prevID,
+			NextID: nextID,
+			Group:  tmpGroup,
+		}
+	}
+}
+
+func convertV3Format(b []byte, path string, config *Config) (*ResponseFormat, error) {
 	var err error
 	attr := stns.Attributes{}
 	sp := strings.Split(strings.TrimLeft(path, "/"), "/")
@@ -56,25 +112,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 			for _, u := range users {
-				if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
-					tmpUser := &stns.User{
-						Password:      u.Password,
-						Directory:     u.Directory,
-						Shell:         u.Shell,
-						Gecos:         u.Gecos,
-						Keys:          u.Keys,
-						SetupCommands: u.SetupCommands,
-					}
-
-					if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
-						tmpUser.GroupID = u.GroupID + config.GIDShift
-					}
-
-					attr[u.Name] = &stns.Attribute{
-						ID:   u.ID + config.UIDShift,
-						User: tmpUser,
-					}
-				}
+				uidShift(attr, &u, config)
 			}
 		} else {
 			u := v3User{}
@@ -82,26 +120,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 			if err != nil {
 				return nil, err
 			}
-
-			if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
-				tmpUser := &stns.User{
-					Password:      u.Password,
-					Directory:     u.Directory,
-					Shell:         u.Shell,
-					Gecos:         u.Gecos,
-					Keys:          u.Keys,
-					SetupCommands: u.SetupCommands,
-				}
-
-				if u.GroupID+config.GIDShift > settings.MIN_LIMIT_ID {
-					tmpUser.GroupID = u.GroupID + config.GIDShift
-				}
-
-				attr[u.Name] = &stns.Attribute{
-					ID:   u.ID + config.UIDShift,
-					User: tmpUser,
-				}
-			}
+			uidShift(attr, &u, config)
 		}
 	case "group":
 		if sp[1] == "list" {
@@ -111,14 +130,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 			for _, g := range groups {
-				if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
-					attr[g.Name] = &stns.Attribute{
-						ID: g.ID + config.GIDShift,
-						Group: &stns.Group{
-							Users: g.Users,
-						},
-					}
-				}
+				gidShift(attr, &g, config)
 			}
 		} else {
 			g := v3Group{}
@@ -127,14 +139,7 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 				return nil, err
 			}
 
-			if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
-				attr[g.Name] = &stns.Attribute{
-					ID: g.ID + config.GIDShift,
-					Group: &stns.Group{
-						Users: g.Users,
-					},
-				}
-			}
+			gidShift(attr, &g, config)
 		}
 	case "sudo":
 		u := v3Sudo{}
@@ -153,16 +158,20 @@ func convertV3Format(b []byte, path string, minID string, config *Config) (*Resp
 		}
 	}
 
-	m, _ := strconv.Atoi(minID)
 	return &ResponseFormat{
-		m,
 		attr,
 	}, nil
 }
 
 type ResponseFormat struct {
-	MinID int             `json:"min_id"`
 	Items stns.Attributes `json:"items"`
+}
+
+func (r ResponseFormat) First() *stns.Attribute {
+	for _, v := range r.Items {
+		return v
+	}
+	return &stns.Attribute{}
 }
 
 type v2MetaData struct {
@@ -178,6 +187,8 @@ type v2ResponseFormat struct {
 
 type v3User struct {
 	ID            int      `json:"id"`
+	PrevID        int      `json:"prev_id"`
+	NextID        int      `json:"next_id"`
 	Name          string   `json:"name"`
 	Password      string   `json:"password"`
 	GroupID       int      `json:"group_id"`
@@ -189,9 +200,11 @@ type v3User struct {
 }
 
 type v3Group struct {
-	ID    int      `json:"id"`
-	Name  string   `json:"name"`
-	Users []string `json:"users"`
+	ID     int      `json:"id"`
+	PrevID int      `json:"prev_id"`
+	NextID int      `json:"next_id"`
+	Name   string   `json:"name"`
+	Users  []string `json:"users"`
 }
 
 type v3Sudo struct {

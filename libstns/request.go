@@ -49,7 +49,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 		return nil, errors.New("endpoint not defined")
 	}
 
-	retry := 1
+	retry := 3
 	if r.Config.RequestRetry != 0 {
 		retry = r.Config.RequestRetry
 	}
@@ -129,7 +129,7 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						default:
-							buffer, err := convertV3Format(body, r.ApiPath, res.Header.Get("STNS-MIN-ID"), r.Config)
+							buffer, err := convertV3Format(body, r.ApiPath, r.Config)
 							if err != nil {
 								ech <- err
 								return

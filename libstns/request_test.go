@@ -41,7 +41,7 @@ func TestRequestProxyByEnv(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 0, 0, checkUserAttribute)
 }
 
 func TestRequestV1ServerV1(t *testing.T) {
@@ -57,7 +57,7 @@ func TestRequestV1ServerV1(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 0, checkUserAttribute)
+	checkResponse(t, r, 0, 0, checkUserAttribute)
 
 }
 
@@ -70,7 +70,7 @@ func TestRequestV2ServerV2(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 0, 0, checkUserAttribute)
 }
 
 func TestRequestV3ServerV3User(t *testing.T) {
@@ -82,7 +82,7 @@ func TestRequestV3ServerV3User(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v3"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 1000, 3000, checkUserAttribute)
 }
 
 func TestRequestV3ServerV3Users(t *testing.T) {
@@ -94,7 +94,7 @@ func TestRequestV3ServerV3Users(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v3"}
 
 	r, _ := NewRequest(c, "user", "list", "")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 1000, 3000, checkUserAttribute)
 }
 
 func TestRequestV3ServerV3Group(t *testing.T) {
@@ -106,7 +106,7 @@ func TestRequestV3ServerV3Group(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v3"}
 
 	r, _ := NewRequest(c, "group", "name", "example")
-	checkResponse(t, r, 2000, checkGroupAttribute)
+	checkResponse(t, r, 1000, 3000, checkGroupAttribute)
 }
 
 func TestRequestV3ServerV3Groups(t *testing.T) {
@@ -118,7 +118,7 @@ func TestRequestV3ServerV3Groups(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v3"}
 
 	r, _ := NewRequest(c, "group", "list", "")
-	checkResponse(t, r, 2000, checkGroupAttribute)
+	checkResponse(t, r, 1000, 3000, checkGroupAttribute)
 }
 
 func TestRequestV3ServerV3Sudo(t *testing.T) {
@@ -130,7 +130,7 @@ func TestRequestV3ServerV3Sudo(t *testing.T) {
 	c.ApiEndPoint = []string{server.URL + "/v3"}
 
 	r, _ := NewRequest(c, "sudo", "name", "example")
-	checkResponse(t, r, 2000, checkSudoAttribute)
+	checkResponse(t, r, 1000, 3000, checkSudoAttribute)
 }
 
 func TestRequestV2NotFound(t *testing.T) {
@@ -186,7 +186,7 @@ func TestFailOver(t *testing.T) {
 	c.ApiEndPoint = []string{"http://localhost:1000", server.URL + "/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 0, 0, checkUserAttribute)
 }
 
 func TestRefused(t *testing.T) {
@@ -267,7 +267,7 @@ func TestGetByWrapperCmd(t *testing.T) {
 	c.WrapperCommand = "./fixtures/bin/command_response_01"
 	r, _ := NewRequest(c, "user", "name", "example")
 	res, _ := r.GetByWrapperCmd()
-	checkUserAttribute(t, res, 2000)
+	checkUserAttribute(t, res, 1900, 2100)
 }
 
 func TestGetByWrapperCmd404(t *testing.T) {
@@ -292,12 +292,16 @@ func TestRequestProxyByConfig(t *testing.T) {
 	c.ApiEndPoint = []string{"http://unservice_config/v2"}
 
 	r, _ := NewRequest(c, "user", "name", "example")
-	checkResponse(t, r, 2000, checkUserAttribute)
+	checkResponse(t, r, 0, 0, checkUserAttribute)
 }
 
-func checkUserAttribute(t *testing.T, res *ResponseFormat, minID int) {
-	if res.MinID != minID {
-		t.Errorf("unmatch min id %d", res.MinID)
+func checkUserAttribute(t *testing.T, res *ResponseFormat, prevID, nextID int) {
+	if res.First().PrevID != prevID {
+		t.Errorf("unmatch prevID got %d expected: %d", res.First().PrevID, prevID)
+	}
+
+	if res.First().NextID != nextID {
+		t.Errorf("unmatch next got %d expected: %d", res.First().NextID, nextID)
 	}
 
 	for n, u := range res.Items {
@@ -325,9 +329,13 @@ func checkUserAttribute(t *testing.T, res *ResponseFormat, minID int) {
 	}
 }
 
-func checkGroupAttribute(t *testing.T, res *ResponseFormat, minID int) {
-	if res.MinID != minID {
-		t.Errorf("unmatch min id %d", res.MinID)
+func checkGroupAttribute(t *testing.T, res *ResponseFormat, prevID, nextID int) {
+	if res.First().PrevID != prevID {
+		t.Errorf("unmatch prev id %d", res.First().PrevID)
+	}
+
+	if res.First().NextID != nextID {
+		t.Errorf("unmatch next id %d", res.First().NextID)
 	}
 
 	for n, g := range res.Items {
@@ -343,7 +351,7 @@ func checkGroupAttribute(t *testing.T, res *ResponseFormat, minID int) {
 	}
 }
 
-func checkSudoAttribute(t *testing.T, res *ResponseFormat, minID int) {
+func checkSudoAttribute(t *testing.T, res *ResponseFormat, dummyA, dummyB int) {
 	for n, u := range res.Items {
 		if n != "example" {
 			t.Error("unmatch name")
@@ -354,7 +362,7 @@ func checkSudoAttribute(t *testing.T, res *ResponseFormat, minID int) {
 	}
 }
 
-func checkResponse(t *testing.T, r *Request, minID int, checkAttribute func(*testing.T, *ResponseFormat, int)) {
+func checkResponse(t *testing.T, r *Request, prevID, nextID int, checkAttribute func(*testing.T, *ResponseFormat, int, int)) {
 	cache.Flush()
 	var res ResponseFormat
 
@@ -372,7 +380,7 @@ func checkResponse(t *testing.T, r *Request, minID int, checkAttribute func(*tes
 	if res.Items == nil || 0 == len(res.Items) {
 		t.Error("fetch error response is nil")
 	} else {
-		checkAttribute(t, &res, minID)
+		checkAttribute(t, &res, prevID, nextID)
 	}
 }
 
