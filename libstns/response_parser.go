@@ -177,7 +177,6 @@ func (r ResponseFormat) First() *stns.Attribute {
 type v2MetaData struct {
 	APIVersion float64 `json:"api_version"`
 	Result     string  `json:"result"`
-	MinID      int     `json:"min_id"`
 }
 
 type v2ResponseFormat struct {

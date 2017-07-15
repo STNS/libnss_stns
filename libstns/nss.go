@@ -63,10 +63,6 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 	if err != nil {
 		return nil, err
 	}
-	if column == "id" {
-		cache.WritePrevID(n.rtype, res.First().PrevID)
-		cache.WriteNextID(n.rtype, res.First().NextID)
-	}
 
 	if res.Items == nil {
 		return nil, ne

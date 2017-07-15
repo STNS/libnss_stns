@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,8 +25,9 @@ import (
 )
 
 type Request struct {
-	ApiPath string
-	Config  *Config
+	ApiPath      string
+	Config       *Config
+	ResourceType string
 }
 
 func NewRequest(config *Config, paths ...string) (*Request, error) {
@@ -34,8 +36,9 @@ func NewRequest(config *Config, paths ...string) (*Request, error) {
 	}
 
 	r := Request{
-		ApiPath: path.Clean(strings.Join(paths, "/")),
-		Config:  config,
+		ApiPath:      path.Clean(strings.Join(paths, "/")),
+		Config:       config,
+		ResourceType: paths[0],
 	}
 	return &r, nil
 }
@@ -105,6 +108,19 @@ func (r *Request) request() ([]byte, error) {
 
 					defer res.Body.Close()
 					body, err := ioutil.ReadAll(res.Body)
+
+					for _, t := range []string{"prev", "next"} {
+						id := req.Header.Get(fmt.Sprintf("STNS-%s-ID", strings.ToUpper(t)))
+						if id != "" {
+							i, err := strconv.Atoi(id)
+							if err != nil {
+								ech <- err
+								return
+							}
+							cache.WriteID(r.ResourceType, t, i)
+						}
+					}
+
 					switch res.StatusCode {
 					case http.StatusOK:
 						v2 := regexp.MustCompile(`/v2[/]?$`)

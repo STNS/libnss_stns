@@ -49,14 +49,14 @@ func TestSaveLoad(t *testing.T) {
 }
 
 func TestWriteReadPrevID(t *testing.T) {
-	WritePrevID("test", 100)
+	WriteID("test", "prev", 100)
 	if ReadPrevID("test") != 100 {
 		t.Error("prev id error1")
 	}
 }
 
 func TestWriteReadNextID(t *testing.T) {
-	WriteNextID("test", 100)
+	WriteID("test", "next", 100)
 	if ReadNextID("test") != 100 {
 		t.Error("next id error1")
 	}

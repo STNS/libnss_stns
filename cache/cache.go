@@ -52,14 +52,6 @@ func ReadNextID(resourceType string) int {
 	return readID(resourceType, "next")
 }
 
-func WritePrevID(resourceType string, id int) {
-	writeID(resourceType, "prev", id)
-}
-
-func WriteNextID(resourceType string, id int) {
-	writeID(resourceType, "next", id)
-}
-
 func readID(resourceType, prevNext string) int {
 	n, exist := attrStore.Get(resourceType + "_" + prevNext + "_id")
 	if exist {
@@ -69,7 +61,7 @@ func readID(resourceType, prevNext string) int {
 	return 0
 }
 
-func writeID(resourceType, prevNext string, id int) {
+func WriteID(resourceType, prevNext string, id int) {
 	attrStore.Set(resourceType+"_"+prevNext+"_id", id, _gocache.DefaultExpiration)
 }
 
