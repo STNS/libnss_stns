@@ -47,10 +47,6 @@ func TestGetSuccess(t *testing.T) {
 		}
 	}
 
-	if cache.ReadMinID("user") != 2000 {
-		t.Errorf("get error min_id %d", cache.ReadMinID("user"))
-	}
-
 	ca, err := cache.Read("user/id/2000")
 	if err != nil {
 		t.Errorf("get error %s", err)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/STNS/STNS/stns"
 	"github.com/STNS/libnss_stns/cache"
+	"github.com/STNS/libnss_stns/settings"
 )
 
 // http://www.gnu.org/software/libc/manual/html_node/NSS-Modules-Interface.html
@@ -64,10 +65,6 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 		return nil, err
 	}
 
-	if column == "id" {
-		cache.WriteMinID(n.rtype, res.MinID)
-	}
-
 	if res.Items == nil {
 		return nil, ne
 	}
@@ -77,7 +74,27 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 
 func (n *Nss) Set(s NssEntry, column, value string) int {
 	id, _ := strconv.Atoi(value)
-	if column != "id" || (column == "id" && cache.ReadMinID(n.rtype) <= id) {
+	prevID := cache.ReadPrevID(n.rtype)
+	nextID := cache.ReadNextID(n.rtype)
+
+	if n.rtype == "user" {
+		if prevID+n.config.UIDShift > settings.MIN_LIMIT_ID {
+			prevID += n.config.UIDShift
+		}
+
+		if nextID+n.config.UIDShift > settings.MIN_LIMIT_ID {
+			nextID += n.config.UIDShift
+		}
+	} else if n.rtype == "group" {
+		if prevID+n.config.GIDShift > settings.MIN_LIMIT_ID {
+			prevID += n.config.GIDShift
+		}
+
+		if nextID+n.config.GIDShift > settings.MIN_LIMIT_ID {
+			nextID += n.config.GIDShift
+		}
+	}
+	if column != "id" || (nextID == 0 || prevID == 0 || (prevID <= id && nextID >= id)) {
 		resource, err := n.Get(column, value)
 		if err != nil {
 			log.Print(err)

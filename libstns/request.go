@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,8 +25,9 @@ import (
 )
 
 type Request struct {
-	ApiPath string
-	Config  *Config
+	ApiPath      string
+	Config       *Config
+	ResourceType string
 }
 
 func NewRequest(config *Config, paths ...string) (*Request, error) {
@@ -34,8 +36,9 @@ func NewRequest(config *Config, paths ...string) (*Request, error) {
 	}
 
 	r := Request{
-		ApiPath: path.Clean(strings.Join(paths, "/")),
-		Config:  config,
+		ApiPath:      path.Clean(strings.Join(paths, "/")),
+		Config:       config,
+		ResourceType: paths[0],
 	}
 	return &r, nil
 }
@@ -49,7 +52,7 @@ func (r *Request) GetRawData() ([]byte, error) {
 		return nil, errors.New("endpoint not defined")
 	}
 
-	retry := 1
+	retry := 3
 	if r.Config.RequestRetry != 0 {
 		retry = r.Config.RequestRetry
 	}
@@ -105,6 +108,7 @@ func (r *Request) request() ([]byte, error) {
 
 					defer res.Body.Close()
 					body, err := ioutil.ReadAll(res.Body)
+
 					switch res.StatusCode {
 					case http.StatusOK:
 						v2 := regexp.MustCompile(`/v2[/]?$`)
@@ -129,7 +133,7 @@ func (r *Request) request() ([]byte, error) {
 							rch <- buffer
 							return
 						default:
-							buffer, err := convertV3Format(body, r.ApiPath, res.Header.Get("STNS-MIN-ID"), r.Config)
+							buffer, err := convertV3Format(body, r.ApiPath, r.Config)
 							if err != nil {
 								ech <- err
 								return
@@ -138,7 +142,24 @@ func (r *Request) request() ([]byte, error) {
 							return
 						}
 					case http.StatusNotFound:
-						ech <- fmt.Errorf("resource not found: %s", u)
+						ids := map[string]int{}
+						for _, t := range []string{"Prev", "Next"} {
+							id := res.Header.Get(fmt.Sprintf("Stns-%s-Id", t))
+							if id != "" {
+								i, err := strconv.Atoi(id)
+								if err != nil {
+									ech <- err
+									return
+								}
+								ids[t] = i
+							}
+						}
+
+						if len(ids) > 0 {
+							ech <- fmt.Errorf("resource not found prev_id: %v next_id %v url: %s", ids["Prev"], ids["Next"], u)
+						} else {
+							ech <- fmt.Errorf("resource not found url: %s", u)
+						}
 						return
 					case http.StatusUnauthorized:
 						ech <- fmt.Errorf("authenticate error: %s", u)
@@ -260,6 +281,18 @@ func (r *Request) GetByWrapperCmd() (*ResponseFormat, error) {
 	}
 
 	if len(stderr.Bytes()) > 0 {
+		reg := regexp.MustCompile(`resource not found prev_id: ([\d]+) next_id ([\d]+) url: .*`)
+		if result := reg.FindStringSubmatch(stderr.String()); result != nil {
+			for index, t := range []string{"prev", "next"} {
+				i, err := strconv.Atoi(string(result[index+1]))
+				if err != nil {
+					return nil, fmt.Errorf("command error:%s", err)
+				}
+				cache.WriteID(r.ResourceType, t, i)
+			}
+		} else {
+
+		}
 		return nil, fmt.Errorf("command error:%s", stderr.String())
 	}
 
