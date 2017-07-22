@@ -37,9 +37,6 @@ func convertV2toV3Format(body []byte) (*ResponseFormat, error) {
 
 func uidShift(attr stns.Attributes, u *v3User, config *Config) {
 	if u.Name != "" && u.ID+config.UIDShift > settings.MIN_LIMIT_ID {
-		prevID := 0
-		nextID := 0
-
 		tmpUser := &stns.User{
 			Password:      u.Password,
 			Directory:     u.Directory,
@@ -53,43 +50,22 @@ func uidShift(attr stns.Attributes, u *v3User, config *Config) {
 			tmpUser.GroupID = u.GroupID + config.GIDShift
 		}
 
-		if u.PrevID+config.UIDShift > settings.MIN_LIMIT_ID {
-			prevID = u.PrevID + config.UIDShift
-		}
-
-		if u.NextID+config.UIDShift > settings.MIN_LIMIT_ID {
-			nextID = u.NextID + config.UIDShift
-		}
 		attr[u.Name] = &stns.Attribute{
-			ID:     u.ID + config.UIDShift,
-			PrevID: prevID,
-			NextID: nextID,
-			User:   tmpUser,
+			ID:   u.ID + config.UIDShift,
+			User: tmpUser,
 		}
 	}
 }
 
 func gidShift(attr stns.Attributes, g *v3Group, config *Config) {
 	if g.ID+config.GIDShift > settings.MIN_LIMIT_ID {
-		prevID := 0
-		nextID := 0
 		tmpGroup := &stns.Group{
 			Users: g.Users,
 		}
 
-		if g.PrevID+config.GIDShift > settings.MIN_LIMIT_ID {
-			prevID = g.PrevID + config.GIDShift
-		}
-
-		if g.NextID+config.GIDShift > settings.MIN_LIMIT_ID {
-			nextID = g.NextID + config.GIDShift
-		}
-
 		attr[g.Name] = &stns.Attribute{
-			ID:     g.ID + config.GIDShift,
-			PrevID: prevID,
-			NextID: nextID,
-			Group:  tmpGroup,
+			ID:    g.ID + config.GIDShift,
+			Group: tmpGroup,
 		}
 	}
 }
@@ -186,8 +162,6 @@ type v2ResponseFormat struct {
 
 type v3User struct {
 	ID            int      `json:"id"`
-	PrevID        int      `json:"prev_id"`
-	NextID        int      `json:"next_id"`
 	Name          string   `json:"name"`
 	Password      string   `json:"password"`
 	GroupID       int      `json:"group_id"`
@@ -199,11 +173,9 @@ type v3User struct {
 }
 
 type v3Group struct {
-	ID     int      `json:"id"`
-	PrevID int      `json:"prev_id"`
-	NextID int      `json:"next_id"`
-	Name   string   `json:"name"`
-	Users  []string `json:"users"`
+	ID    int      `json:"id"`
+	Name  string   `json:"name"`
+	Users []string `json:"users"`
 }
 
 type v3Sudo struct {
