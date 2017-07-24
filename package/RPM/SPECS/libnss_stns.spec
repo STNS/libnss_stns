@@ -5,8 +5,8 @@ Summary: Simple Toml NameService Library
 Name: libnss-stns
 Group: SipmleTomlNameService
 URL: https://github.com/STNS/libnss_stns
-Version: 0.3
-Release: 3
+Version: 0.4
+Release: 0
 License: MIT
 Source0:   libnss_stns.conf
 Packager:  libnss-stns
