@@ -48,16 +48,16 @@ func TestSaveLoad(t *testing.T) {
 	}
 }
 
-func TestWriteReadPrevID(t *testing.T) {
-	WriteID("test", "prev", 100)
-	if ReadPrevID("test") != 100 {
-		t.Error("prev id error1")
+func TestWriteReadMinID(t *testing.T) {
+	WriteID("test", "min", 100)
+	if ReadMinID("test") != 100 {
+		t.Error("minid error1")
 	}
 }
 
-func TestWriteReadNextID(t *testing.T) {
-	WriteID("test", "next", 100)
-	if ReadNextID("test") != 100 {
-		t.Error("next id error1")
+func TestWriteReadMaxID(t *testing.T) {
+	WriteID("test", "max", 100)
+	if ReadMaxID("test") != 100 {
+		t.Error("max id error1")
 	}
 }

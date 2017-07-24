@@ -74,27 +74,27 @@ func (n *Nss) Get(column, value string) (stns.Attributes, error) {
 
 func (n *Nss) Set(s NssEntry, column, value string) int {
 	id, _ := strconv.Atoi(value)
-	prevID := cache.ReadPrevID(n.rtype)
-	nextID := cache.ReadNextID(n.rtype)
+	minID := cache.ReadMinID(n.rtype)
+	maxID := cache.ReadMaxID(n.rtype)
 
 	if n.rtype == "user" {
-		if prevID+n.config.UIDShift > settings.MIN_LIMIT_ID {
-			prevID += n.config.UIDShift
+		if minID+n.config.UIDShift > settings.MIN_LIMIT_ID {
+			minID += n.config.UIDShift
 		}
 
-		if nextID+n.config.UIDShift > settings.MIN_LIMIT_ID {
-			nextID += n.config.UIDShift
+		if maxID+n.config.UIDShift > settings.MIN_LIMIT_ID {
+			maxID += n.config.UIDShift
 		}
 	} else if n.rtype == "group" {
-		if prevID+n.config.GIDShift > settings.MIN_LIMIT_ID {
-			prevID += n.config.GIDShift
+		if minID+n.config.GIDShift > settings.MIN_LIMIT_ID {
+			minID += n.config.GIDShift
 		}
 
-		if nextID+n.config.GIDShift > settings.MIN_LIMIT_ID {
-			nextID += n.config.GIDShift
+		if maxID+n.config.GIDShift > settings.MIN_LIMIT_ID {
+			maxID += n.config.GIDShift
 		}
 	}
-	if column != "id" || (nextID == 0 || prevID == 0 || (prevID <= id && nextID >= id)) {
+	if column != "id" || (maxID == 0 || minID == 0 || (minID <= id && maxID >= id)) {
 		resource, err := n.Get(column, value)
 		if err != nil {
 			log.Print(err)

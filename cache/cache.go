@@ -44,16 +44,16 @@ func Write(path string, attr stns.Attributes, err error) {
 	attrStore.Set(path, &cacheObject{&attr, time.Now(), err}, _gocache.DefaultExpiration)
 }
 
-func ReadPrevID(resourceType string) int {
-	return readID(resourceType, "prev")
+func ReadMinID(resourceType string) int {
+	return readID(resourceType, "min")
 }
 
-func ReadNextID(resourceType string) int {
-	return readID(resourceType, "next")
+func ReadMaxID(resourceType string) int {
+	return readID(resourceType, "max")
 }
 
-func readID(resourceType, prevNext string) int {
-	n, exist := attrStore.Get(resourceType + "_" + prevNext + "_id")
+func readID(resourceType, minMax string) int {
+	n, exist := attrStore.Get(resourceType + "_" + minMax + "_id")
 	if exist {
 		id := n.(int)
 		return id
@@ -61,8 +61,8 @@ func readID(resourceType, prevNext string) int {
 	return 0
 }
 
-func WriteID(resourceType, prevNext string, id int) {
-	attrStore.Set(resourceType+"_"+prevNext+"_id", id, _gocache.DefaultExpiration)
+func WriteID(resourceType, minMax string, id int) {
+	attrStore.Set(resourceType+"_"+minMax+"_id", id, _gocache.DefaultExpiration)
 }
 
 func SaveResultList(resourceType string, list stns.Attributes) {

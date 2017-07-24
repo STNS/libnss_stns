@@ -143,7 +143,7 @@ func (r *Request) request() ([]byte, error) {
 						}
 					case http.StatusNotFound:
 						ids := map[string]int{}
-						for _, t := range []string{"Prev", "Next"} {
+						for _, t := range []string{"Min", "Max"} {
 							id := res.Header.Get(fmt.Sprintf("Stns-%s-Id", t))
 							if id != "" {
 								i, err := strconv.Atoi(id)
@@ -156,7 +156,7 @@ func (r *Request) request() ([]byte, error) {
 						}
 
 						if len(ids) > 0 {
-							ech <- fmt.Errorf("resource not found prev_id: %v next_id %v url: %s", ids["Prev"], ids["Next"], u)
+							ech <- fmt.Errorf("resource not found min_id: %v max_id %v url: %s", ids["Min"], ids["Max"], u)
 						} else {
 							ech <- fmt.Errorf("resource not found url: %s", u)
 						}
@@ -281,9 +281,9 @@ func (r *Request) GetByWrapperCmd() (*ResponseFormat, error) {
 	}
 
 	if len(stderr.Bytes()) > 0 {
-		reg := regexp.MustCompile(`resource not found prev_id: ([\d]+) next_id ([\d]+) url: .*`)
+		reg := regexp.MustCompile(`resource not found min_id: ([\d]+) max_id ([\d]+) url: .*`)
 		if result := reg.FindStringSubmatch(stderr.String()); result != nil {
-			for index, t := range []string{"prev", "next"} {
+			for index, t := range []string{"min", "max"} {
 				i, err := strconv.Atoi(string(result[index+1]))
 				if err != nil {
 					return nil, fmt.Errorf("command error:%s", err)

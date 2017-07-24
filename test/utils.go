@@ -85,8 +85,8 @@ func GetV3UserExample() string {
 	return `{
 		"name": "example",
 		"id": 2000,
-		"prev_id": 1000,
-		"next_id": 3000,
+		"min_id": 1000,
+		"max_id": 3000,
 		"group_id": 3000,
 		"directory": "/home/example",
 		"shell": "/bin/sh",
@@ -104,8 +104,8 @@ func GetV3UsersExample() string {
 	return `[{
 		"name": "example",
 		"id": 2000,
-		"prev_id": 1000,
-		"next_id": 3000,
+		"min_id": 1000,
+		"max_id": 3000,
 		"group_id": 3000,
 		"directory": "/home/example",
 		"shell": "/bin/sh",
@@ -123,8 +123,8 @@ func GetV3GroupExample() string {
 	return `{
 		"name": "example",
 		"id": 2000,
-		"prev_id": 1000,
-		"next_id": 3000,
+		"min_id": 1000,
+		"max_id": 3000,
 		"users": [
 			"test"
 		]
@@ -135,8 +135,8 @@ func GetV3GroupsExample() string {
 	return `[{
 		"name": "example",
 		"id": 2000,
-		"prev_id": 1000,
-		"next_id": 3000,
+		"min_id": 1000,
+		"max_id": 3000,
 		"users": [
 			"test"
 		]
