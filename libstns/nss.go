@@ -3,6 +3,7 @@ package libstns
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 	"strconv"
 
@@ -97,7 +98,10 @@ func (n *Nss) Set(s NssEntry, column, value string) int {
 	if column != "id" || (maxID == 0 || minID == 0 || (minID <= id && maxID >= id)) {
 		resource, err := n.Get(column, value)
 		if err != nil {
-			log.Print(err)
+			reg := regexp.MustCompile(`.*resource not found.*`)
+			if result := reg.FindStringSubmatch(err.Error()); result == nil {
+				log.Print(err)
+			}
 			return NSS_STATUS_UNAVAIL
 		}
 
@@ -139,7 +143,10 @@ func (n *Nss) PresetList() int {
 	attr, err = n.Get("list", "")
 
 	if err != nil {
-		log.Print(err)
+		reg := regexp.MustCompile(`.*resource not found.*`)
+		if result := reg.FindStringSubmatch(err.Error()); result == nil {
+			log.Print(err)
+		}
 		// When the error refers to the last result.
 		// This is supposed to when the server is restarted
 		attr = *cache.LastResultList(n.rtype)
