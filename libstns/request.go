@@ -290,8 +290,6 @@ func (r *Request) GetByWrapperCmd() (*ResponseFormat, error) {
 				}
 				cache.WriteID(r.ResourceType, t, i)
 			}
-		} else {
-
 		}
 		return nil, fmt.Errorf("command error:%s", stderr.String())
 	}
