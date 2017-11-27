@@ -62,6 +62,10 @@ func (r *Request) GetRawData() ([]byte, error) {
 		if e == nil {
 			break
 		}
+
+		if strings.Index(e.Error(), "resource not found") >= 0 {
+			return nil, e
+		}
 	}
 	return b, e
 }
