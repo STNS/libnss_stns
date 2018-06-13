@@ -29,6 +29,22 @@ func init() {
 	orgInit()
 }
 
+func ignoreProcess(process string) bool {
+	ignore := []string{
+		"/sbin/init",
+		"dbus-daemon",
+		"(resolved)",
+		"(systemd)",
+	}
+
+	for _, i := range ignore {
+		if strings.HasSuffix(process, i) {
+			return true
+		}
+	}
+	return false
+}
+
 func orgInit() int {
 	if pwdNss == nil || grpNss == nil || spwdNss == nil {
 		if _, err := os.FindProcess(1); err != nil {
@@ -40,10 +56,9 @@ func orgInit() int {
 			return libstns.NSS_STATUS_UNAVAIL
 		}
 
-		if host.PlatformFamily == "debian" && (strings.HasSuffix(os.Args[0], "/sbin/init") || strings.HasSuffix(os.Args[0], "dbus-daemon") || strings.HasSuffix(os.Args[0], "systemd-resolved")) {
+		if host.PlatformFamily == "debian" && ignoreProcess(os.Args[0]) {
 			return libstns.NSS_STATUS_NOTFOUND
 		}
-
 		libstns.Setlog()
 
 		config, err := libstns.LoadConfig("/etc/stns/libnss_stns.conf")
