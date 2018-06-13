@@ -1,3 +1,7 @@
+libnss-stns (0.4.3) STABLE; urgency=low
+
+  * #58 Ignore queries from systemd
+
 libnss-stns (0.4.2) STABLE; urgency=low
 
   * #57 Ignore queries from systemd-resolved
