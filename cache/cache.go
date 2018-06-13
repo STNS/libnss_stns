@@ -12,8 +12,8 @@ import (
 	_gocache "github.com/pyama86/go-cache"
 )
 
-var attrStore = _gocache.New(time.Second*settings.CACHE_TIME, 60*time.Second)
-var lockStore = _gocache.New(time.Second*settings.LOCK_TIME, 60*time.Second)
+var attrStore = _gocache.New(time.Second*settings.CACHE_TIME, 0*time.Second)
+var lockStore = _gocache.New(time.Second*settings.LOCK_TIME, 0*time.Second)
 
 var workDir = settings.WORK_DIR
 
