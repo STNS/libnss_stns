@@ -1,3 +1,7 @@
+libnss-stns (0.4.2) STABLE; urgency=low
+
+  * #57 Ignore queries from systemd-resolved
+
 libnss-stns (0.4.1) STABLE; urgency=low
 
   * #56 Do not retry at 404 response
