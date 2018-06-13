@@ -40,7 +40,7 @@ func orgInit() int {
 			return libstns.NSS_STATUS_UNAVAIL
 		}
 
-		if host.PlatformFamily == "debian" && (strings.HasSuffix(os.Args[0], "/sbin/init") || strings.HasSuffix(os.Args[0], "dbus-daemon")) {
+		if host.PlatformFamily == "debian" && (strings.HasSuffix(os.Args[0], "/sbin/init") || strings.HasSuffix(os.Args[0], "dbus-daemon") || strings.HasSuffix(os.Args[0], "systemd-resolved")) {
 			return libstns.NSS_STATUS_NOTFOUND
 		}
 
