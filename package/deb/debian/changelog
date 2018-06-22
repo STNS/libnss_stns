@@ -1,3 +1,7 @@
+libnss-stns (0.4.4) STABLE; urgency=low
+
+  * #59 Fix cache file's permission to erace wazuh warning
+
 libnss-stns (0.4.3) STABLE; urgency=low
 
   * #58 Ignore queries from systemd
