@@ -88,17 +88,18 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 	n, err := user.LookupGroup("nscd")
 	if err != nil {
 		log.Println(err)
-		return
-	}
-	gid, err := strconv.Atoi(n.Gid)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	err = os.Chown(f, 0, gid)
-	if err != nil {
-		log.Println(err)
-		return
+		log.Println("NOTICE: Skip to set owner to nscd")
+	} else {
+		gid, err := strconv.Atoi(n.Gid)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = os.Chown(f, 0, gid)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	err = os.Chmod(f, 0640)
 	if err != nil {
