@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
+	"strconv"
 	"time"
 
 	"github.com/STNS/STNS/stns"
@@ -72,7 +74,7 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		return
 	}
 
-	if err := os.MkdirAll(workDir, 0777); err != nil {
+	if err := os.MkdirAll(workDir, 0770); err != nil {
 		log.Println(err)
 		return
 	}
@@ -83,7 +85,27 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		return
 	}
 
-	os.Chmod(f, 0777)
+	n, err := user.LookupGroup("nscd")
+	if err != nil {
+		log.Println(err)
+		log.Println("NOTICE: Skip to set owner to nscd")
+	} else {
+		gid, err := strconv.Atoi(n.Gid)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = os.Chown(f, 0, gid)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	err = os.Chmod(f, 0640)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 func LastResultList(resourceType string) *stns.Attributes {

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/STNS/STNS/stns"
@@ -32,6 +33,26 @@ func TestWriteRead(t *testing.T) {
 	if attrs != nil || err.Error() != "test error" {
 		t.Error("rw error2")
 	}
+}
+
+func TestSaveResultList(t *testing.T) {
+	SetWorkDir("/tmp")
+
+	SaveResultList("test", stns.Attributes{"test": &stns.Attribute{
+		ID: 1,
+	}},
+	)
+
+	cachePath := "/tmp/.libnss_stns_test_cache"
+	stat, err := os.Stat(cachePath)
+
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+	if mode := stat.Mode(); mode != 0640 {
+		t.Errorf("Expect 0640, got %v", mode)
+	}
+
 }
 
 func TestSaveLoad(t *testing.T) {
