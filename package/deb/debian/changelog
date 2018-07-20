@@ -1,3 +1,7 @@
+libnss-stns (0.4.5) STABLE; urgency=low
+
+  * #61 Fix Group also needs write authority
+
 libnss-stns (0.4.4) STABLE; urgency=low
 
   * #59 Fix cache file's permission to erace wazuh warning
