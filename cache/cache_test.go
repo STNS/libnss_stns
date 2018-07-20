@@ -49,8 +49,8 @@ func TestSaveResultList(t *testing.T) {
 	if err != nil {
 		t.Errorf("Got error %v", err)
 	}
-	if mode := stat.Mode(); mode != 0640 {
-		t.Errorf("Expect 0640, got %v", mode)
+	if mode := stat.Mode(); mode != 0660 {
+		t.Errorf("Expect 0660, got %v", mode)
 	}
 
 }
