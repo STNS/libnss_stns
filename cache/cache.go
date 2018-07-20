@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/STNS/STNS/stns"
@@ -85,6 +86,17 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 		return
 	}
 
+	u, err := user.Current()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// not root user
+	if u.Uid != "0" {
+		return
+	}
+
 	n, err := user.LookupGroup("nscd")
 	if err != nil {
 		log.Println(err)
@@ -95,13 +107,31 @@ func SaveResultList(resourceType string, list stns.Attributes) {
 			log.Println(err)
 			return
 		}
+
+		file, err := os.Open(f)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		fs, err := file.Stat()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		if fs.Sys().(*syscall.Stat_t).Gid == uint32(gid) {
+			return
+		}
+
 		err = os.Chown(f, 0, gid)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 	}
-	err = os.Chmod(f, 0640)
+
+	err = os.Chmod(f, 0660)
 	if err != nil {
 		log.Println(err)
 		return
